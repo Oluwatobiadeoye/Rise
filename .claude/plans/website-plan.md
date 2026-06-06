@@ -9,7 +9,10 @@ professional lives. The board needs a public marketing website live by
 **end of June 2026** (build owner: Tobi, Director of Technology).
 
 We already have:
-- A finished **content draft** (6 source pages) — expanded into the routes in the sitemap below.
+- A finished **content draft** (6 source pages) — expanded into the routes in the
+  sitemap below. **Source:** [Google Doc](https://docs.google.com/document/d/1oyXhmnr6nsm-hMxmmlApM8VmDhz5IWVQ/)
+  (the canonical copy for all page content). *Agents:* read it with the Google Drive
+  tools using file id `1oyXhmnr6nsm-hMxmmlApM8VmDhz5IWVQ`.
 - A vendored **design system** at `design-system/` — "Evergreen & Gold" palette,
   Sora + Plus Jakarta Sans fonts, design tokens, the **RISE logo** (mark + mono +
   lockups), and a website UI kit (nav, hero, cards, stat band, mentor CTA, footer,
