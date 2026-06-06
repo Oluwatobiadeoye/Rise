@@ -184,11 +184,19 @@ a lightweight pipeline:
 
 ## Milestones (to end of June)
 
-- [ ] **1. Foundation** — Next.js + Tailwind themed to the design system; fonts via
+- [x] **1. Foundation** — Next.js + Tailwind themed to the design system; fonts via
    `next/font/google`; nav, footer, shared UI. **Deploy a near-empty site to Vercel
    early** to de-risk hosting/config (on a Vercel/temporary URL — real domain later).
+   - [x] Next.js (App Router) + TypeScript + Tailwind v4, themed from the design-system tokens
+   - [x] Sora + Plus Jakarta Sans self-hosted via `next/font/google`
+   - [x] Shared UI: Nav (sticky/blur, mobile menu), Footer, Button, Container, Eyebrow, Logo, ImagePlaceholder
+   - [x] Unit tests (Vitest + RTL) and a GitHub Actions CI (lint · typecheck · test · build)
+   - [x] Deployed to Vercel — live at https://rise-ruby-three.vercel.app/ (production)
 - [ ] **2. Core pages** — Home, About, Team, Projects, Get Involved, Contact, FAQ with
    real content, **SEO baked in** (per-page metadata, OG, `sitemap.xml`, `robots.txt`).
+   - [x] **Home** — real content, per-page metadata + OpenGraph, on-brand 404, real hero photo
+   - [ ] About · Team · Projects · Get Involved · Contact · FAQ
+   - [ ] `sitemap.xml` + `robots.txt`
 - [ ] **3. Media** — Sanity-powered Blog and Gallery (with designed empty states).
 - [ ] **4. Forms** — native forms → Supabase (server-side + RLS), spam protection, cycle
    open/close, notifications to Tobi's email. (Provision Supabase / Resend / Sanity /
