@@ -37,8 +37,8 @@ export const routes = {
 export const navLinks: ReadonlyArray<{ label: string; href: string }> = [
   { label: "Home", href: routes.home },
   { label: "About", href: routes.about },
+  { label: "Team", href: routes.team },
   { label: "Projects", href: routes.projects },
-  { label: "Media", href: routes.media },
   { label: "Get Involved", href: routes.getInvolved },
   { label: "Contact", href: routes.contact },
 ];
