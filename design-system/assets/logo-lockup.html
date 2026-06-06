@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RISE — Logo Lockups</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body { margin:0; background:var(--rise-paper); font-family:var(--font-body); color:var(--text); }
+  .wrap { display:grid; grid-template-columns:1fr 1fr; }
+  .cell { padding:56px; display:flex; align-items:center; justify-content:center; min-height:200px; border:1px solid var(--border); }
+  .cell.dark { background:var(--rise-charcoal-900); }
+  /* Horizontal lockup */
+  .lockup { display:flex; align-items:center; gap:18px; }
+  .lockup .mark { width:58px; height:58px; display:block; }
+  .wordmark { font-family:var(--font-display); font-weight:800; font-size:42px; letter-spacing:-0.03em; line-height:1; color:var(--rise-ink); display:flex; align-items:flex-start; gap:7px; }
+  .wordmark .stack { display:flex; flex-direction:column; }
+  .wordmark .sub { display:block; font-family:var(--font-body); font-weight:600; font-size:12px; letter-spacing:0.34em; text-transform:uppercase; color:var(--rise-slate); margin-top:6px; }
+  .on-dark .wordmark { color:var(--rise-white); }
+  .on-dark .wordmark .sub { color:var(--rise-emerald); }
+  /* Stacked lockup */
+  .stacked { display:flex; flex-direction:column; align-items:center; gap:16px; text-align:center; }
+  .stacked .mark { width:72px; height:72px; }
+  .stacked .wordmark { justify-content:center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="cell">
+    <div class="lockup">
+      <img class="mark" src="logo-mark.svg" alt="RISE mark">
+      <div class="wordmark">
+        <span class="stack">RISE<span class="sub">Initiative</span></span>
+        
+      </div>
+    </div>
+  </div>
+  <div class="cell dark on-dark">
+    <div class="lockup">
+      <img class="mark" src="logo-mark.svg" alt="RISE mark">
+      <div class="wordmark">
+        <span class="stack">RISE<span class="sub">Initiative</span></span>
+        
+      </div>
+    </div>
+  </div>
+  <div class="cell">
+    <div class="stacked">
+      <img class="mark" src="logo-mark.svg" alt="RISE mark">
+      <div class="wordmark"><span class="stack" style="align-items:center;">RISE<span class="sub">Initiative</span></span></div>
+    </div>
+  </div>
+  <div class="cell dark on-dark">
+    <div class="stacked">
+      <div style="width:72px;height:72px;color:var(--rise-white);"><img class="mark" src="logo-mark-mono.svg" alt="RISE mark" style="width:72px;height:72px;"></div>
+      <div class="wordmark"><span class="stack" style="align-items:center;">RISE<span class="sub">Initiative</span></span></div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

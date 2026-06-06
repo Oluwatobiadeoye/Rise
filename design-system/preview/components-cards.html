@@ -1,0 +1,33 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;background:var(--rise-paper);font-family:var(--font-body);padding:26px 30px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}
+  .card{background:var(--rise-white);border-radius:var(--radius-lg);box-shadow:var(--shadow-md);padding:24px;}
+  .ic{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+  .ic i{width:24px;height:24px;}
+  .c-evergreen{background:var(--rise-evergreen-50);color:var(--rise-evergreen);}
+  .c-emerald{background:var(--rise-emerald-50);color:var(--rise-emerald-600);}
+  h3{font-family:var(--font-display);font-weight:700;font-size:20px;margin:0 0 8px;color:var(--rise-ink);}
+  p{font-size:14px;line-height:1.55;color:var(--rise-slate);margin:0;}
+  .lnk{display:inline-flex;align-items:center;gap:6px;margin-top:14px;font-weight:600;font-size:14px;color:var(--primary);}
+  .lnk i{width:15px;height:15px;}
+</style></head>
+<body>
+<div class="grid">
+  <div class="card">
+    <div class="ic c-evergreen"><i data-lucide="compass"></i></div>
+    <h3>Leadership program</h3>
+    <p>A 12-week cohort that builds real leadership skills through workshops and projects.</p>
+    <span class="lnk">Explore <i data-lucide="arrow-right"></i></span>
+  </div>
+  <div class="card">
+    <div class="ic c-emerald"><i data-lucide="users-round"></i></div>
+    <h3>Mentorship network</h3>
+    <p>Get matched with a professional who's been where you want to go.</p>
+    <span class="lnk">Explore <i data-lucide="arrow-right"></i></span>
+  </div>
+</div>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body></html>

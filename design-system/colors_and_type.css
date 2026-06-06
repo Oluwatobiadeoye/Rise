@@ -1,0 +1,237 @@
+/* ============================================================
+   RISE — Colors & Type
+   Foundational + semantic design tokens.
+   Link this file in any RISE artifact:
+     <link rel="stylesheet" href="colors_and_type.css">
+
+   PALETTE: "Evergreen & Gold" — deep evergreen primary, warm gold
+   accent, charcoal anchor, warm paper. This is the BASE system
+   (not a theme). Built from the brand colors:
+     primary #0F5B4F · accent #C9A86A · bg #F7F5F0 · text #1F2933
+   ============================================================ */
+
+/* --- Webfonts (geometric sans, self-hosted in /fonts) --- */
+@font-face{font-family:'Sora';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/Sora-400-normal.woff2') format('woff2');}
+@font-face{font-family:'Sora';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/Sora-600-normal.woff2') format('woff2');}
+@font-face{font-family:'Sora';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/Sora-700-normal.woff2') format('woff2');}
+@font-face{font-family:'Sora';font-style:normal;font-weight:800;font-display:swap;src:url('fonts/Sora-800-normal.woff2') format('woff2');}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:400;font-display:swap;src:url('fonts/PlusJakartaSans-400-normal.woff2') format('woff2');}
+@font-face{font-family:'Plus Jakarta Sans';font-style:italic;font-weight:400;font-display:swap;src:url('fonts/PlusJakartaSans-400-italic.woff2') format('woff2');}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:500;font-display:swap;src:url('fonts/PlusJakartaSans-500-normal.woff2') format('woff2');}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:600;font-display:swap;src:url('fonts/PlusJakartaSans-600-normal.woff2') format('woff2');}
+@font-face{font-family:'Plus Jakarta Sans';font-style:normal;font-weight:700;font-display:swap;src:url('fonts/PlusJakartaSans-700-normal.woff2') format('woff2');}
+
+:root {
+  /* ========== BRAND PALETTE ========== */
+  /* Evergreen — primary. Growth, steadiness, the climb. */
+  --rise-evergreen-50:  #E6F0ED;
+  --rise-evergreen-100: #C2DBD5;
+  --rise-evergreen-300: #5E9489;
+  --rise-evergreen:     #0F5B4F;   /* primary brand */
+  --rise-evergreen-600: #0C4A40;
+  --rise-evergreen-700: #093931;
+
+  /* Charcoal — deep anchor. Credibility, ground, the dark before dawn. */
+  --rise-charcoal-50:  #ECEEF0;
+  --rise-charcoal-100: #CDD2D7;
+  --rise-charcoal-400: #586471;
+  --rise-charcoal:     #1F2933;  /* dark sections / anchor text */
+  --rise-charcoal-700: #161D25;
+  --rise-charcoal-900: #0A2620;  /* deepest — forest green-black (footers) */
+
+  /* Emerald — growth & connection (lighter green, derived). */
+  --rise-emerald-50:  #E4F4F0;
+  --rise-emerald-100: #BEE6DD;
+  --rise-emerald:     #2E9E89;
+  --rise-emerald-600: #237E6D;
+
+  /* Gold — warmth & possibility (accent, used sparingly). */
+  --rise-gold-50:  #F8F3E8;
+  --rise-gold-100: #EFE3C9;
+  --rise-gold:     #C9A86A;
+  --rise-gold-600: #A8884B;
+
+  /* ========== NEUTRALS (warm, charcoal text) ========== */
+  --rise-ink:    #1F2933;  /* primary text — charcoal */
+  --rise-slate:  #4B5563;  /* secondary text */
+  --rise-mist:   #8A929E;  /* tertiary / muted text, icons */
+  --rise-line:   #E5E1D8;  /* borders, dividers */
+  --rise-cloud:  #EFEBE2;  /* subtle fills, hover */
+  --rise-paper:  #F7F5F0;  /* warm off-white page background */
+  --rise-white:  #FFFFFF;
+
+  /* ========== SEMANTIC ========== */
+  --bg:            var(--rise-paper);
+  --surface:       var(--rise-white);
+  --surface-sunk:  var(--rise-cloud);
+  --text:          var(--rise-ink);
+  --text-muted:    var(--rise-slate);
+  --text-subtle:   var(--rise-mist);
+  --text-on-dark:  #F3F1EC;
+  --border:        var(--rise-line);
+
+  --primary:       var(--rise-evergreen);
+  --primary-hover: var(--rise-evergreen-600);
+  --primary-press: var(--rise-evergreen-700);
+  --primary-fg:    var(--rise-white);
+  --primary-tint:  var(--rise-evergreen-50);
+
+  --secondary:     var(--rise-charcoal);
+  --secondary-fg:  var(--rise-white);
+
+  --accent:        var(--rise-gold);
+  --success:       var(--rise-emerald);
+  --success-tint:  var(--rise-emerald-50);
+  --warning:       var(--rise-gold-600);
+  --warning-tint:  var(--rise-gold-50);
+  --danger:        #C0392B;   /* true red, kept distinct from the greens */
+  --info:          var(--rise-charcoal-400);
+
+  /* Focus ring (evergreen glow) */
+  --ring: 0 0 0 3px rgba(15, 91, 79, 0.30);
+
+  /* ========== TYPE FAMILIES ========== */
+  --font-display: 'Sora', system-ui, -apple-system, sans-serif;
+  --font-body:    'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+  /* ========== TYPE SCALE (1.250 major-third-ish, tuned) ========== */
+  --text-xs:   0.75rem;   /* 12 */
+  --text-sm:   0.875rem;  /* 14 */
+  --text-base: 1rem;      /* 16 */
+  --text-lg:   1.125rem;  /* 18 */
+  --text-xl:   1.375rem;  /* 22 */
+  --text-2xl:  1.75rem;   /* 28 */
+  --text-3xl:  2.25rem;   /* 36 */
+  --text-4xl:  3rem;      /* 48 */
+  --text-5xl:  3.75rem;   /* 60 */
+  --text-6xl:  4.75rem;   /* 76 */
+
+  /* Weights */
+  --fw-regular: 400;
+  --fw-medium:  500;
+  --fw-semibold:600;
+  --fw-bold:    700;
+  --fw-extra:   800;
+
+  /* Line heights */
+  --leading-tight:  1.08;
+  --leading-snug:   1.25;
+  --leading-normal: 1.55;
+
+  /* Letter spacing */
+  --tracking-tight: -0.02em;
+  --tracking-snug:  -0.01em;
+  --tracking-wide:  0.08em;  /* eyebrows / labels */
+
+  /* ========== SPACING (4px base) ========== */
+  --space-1: 0.25rem;  --space-2: 0.5rem;  --space-3: 0.75rem;
+  --space-4: 1rem;     --space-5: 1.5rem;  --space-6: 2rem;
+  --space-8: 3rem;     --space-10: 4rem;   --space-12: 6rem;
+  --space-16: 8rem;
+
+  /* ========== RADII ========== */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-pill: 999px;
+
+  /* ========== SHADOWS (warm-tinted, soft) ========== */
+  --shadow-sm: 0 1px 2px rgba(31, 41, 51, 0.06), 0 1px 3px rgba(31, 41, 51, 0.05);
+  --shadow-md: 0 4px 12px rgba(31, 41, 51, 0.08), 0 2px 4px rgba(31, 41, 51, 0.05);
+  --shadow-lg: 0 12px 32px rgba(31, 41, 51, 0.12), 0 4px 8px rgba(31, 41, 51, 0.06);
+  --shadow-evergreen: 0 8px 24px rgba(15, 91, 79, 0.26);
+
+  /* ========== MOTION ========== */
+  --ease-out: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 120ms;
+  --dur: 200ms;
+  --dur-slow: 360ms;
+}
+
+/* ============================================================
+   SEMANTIC TYPE STYLES
+   Apply via element selectors or .rise-* utility classes.
+   ============================================================ */
+
+.rise-eyebrow {
+  font-family: var(--font-body);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-sm);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+  color: var(--primary);
+}
+
+.rise-display {
+  font-family: var(--font-display);
+  font-weight: var(--fw-extra);
+  font-size: var(--text-6xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text);
+}
+
+h1, .rise-h1 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-4xl);
+  line-height: var(--leading-tight);
+  letter-spacing: var(--tracking-tight);
+  color: var(--text);
+}
+
+h2, .rise-h2 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-bold);
+  font-size: var(--text-3xl);
+  line-height: var(--leading-snug);
+  letter-spacing: var(--tracking-snug);
+  color: var(--text);
+}
+
+h3, .rise-h3 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  font-size: var(--text-2xl);
+  line-height: var(--leading-snug);
+  color: var(--text);
+}
+
+h4, .rise-h4 {
+  font-family: var(--font-display);
+  font-weight: var(--fw-semibold);
+  font-size: var(--text-xl);
+  line-height: var(--leading-snug);
+  color: var(--text);
+}
+
+p, .rise-body {
+  font-family: var(--font-body);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--text);
+}
+
+.rise-lead {
+  font-family: var(--font-body);
+  font-weight: var(--fw-regular);
+  font-size: var(--text-xl);
+  line-height: var(--leading-normal);
+  color: var(--text-muted);
+}
+
+.rise-small {
+  font-family: var(--font-body);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  color: var(--text-muted);
+}
+
+code, .rise-mono {
+  font-family: 'Sora', ui-monospace, monospace;
+  font-size: 0.9em;
+  letter-spacing: 0;
+}

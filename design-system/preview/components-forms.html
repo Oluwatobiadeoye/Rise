@@ -1,0 +1,26 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;background:var(--rise-white);font-family:var(--font-body);padding:28px 34px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  label{display:block;font-size:13px;font-weight:600;color:var(--rise-ink);margin-bottom:7px;}
+  .field{width:100%;box-sizing:border-box;font-family:var(--font-body);font-size:15px;color:var(--rise-ink);padding:12px 14px;border:1px solid var(--border);border-radius:var(--radius-md);background:var(--rise-white);box-shadow:var(--shadow-sm);}
+  .field::placeholder{color:var(--rise-mist);}
+  .field.focus{border-color:var(--primary);box-shadow:var(--ring);outline:none;}
+  .sel{display:flex;gap:8px;margin-top:7px;}
+  .chip{font-size:13px;font-weight:600;padding:9px 15px;border-radius:var(--radius-pill);border:1px solid var(--border);color:var(--rise-slate);background:#fff;}
+  .chip.on{background:var(--primary-tint);border-color:var(--primary);color:var(--primary-press);}
+</style></head>
+<body>
+<div class="grid">
+  <div><label>Full name</label><input class="field" placeholder="Your name"></div>
+  <div><label>Email</label><input class="field focus" value="amara@rise.org"></div>
+  <div style="grid-column:1/3"><label>I'm interested in</label>
+    <div class="sel">
+      <span class="chip on">Joining a cohort</span>
+      <span class="chip">Mentoring</span>
+      <span class="chip">Partnering</span>
+    </div>
+  </div>
+</div>
+</body></html>

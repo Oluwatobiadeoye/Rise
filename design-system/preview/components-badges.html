@@ -1,0 +1,32 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;background:var(--rise-white);font-family:var(--font-body);padding:30px 34px;display:flex;flex-direction:column;gap:18px;}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .badge{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:600;padding:5px 12px;border-radius:var(--radius-pill);}
+  .badge i{width:14px;height:14px;}
+  .b-evergreen{background:var(--primary-tint);color:var(--primary-press);}
+  .b-emerald{background:var(--rise-emerald-50);color:var(--rise-emerald-600);}
+  .b-charcoal{background:var(--rise-charcoal-50);color:var(--rise-charcoal);}
+  .b-sun{background:var(--rise-gold-50);color:var(--rise-gold-600);}
+  .b-solid{background:var(--primary);color:#fff;}
+  .dot{width:7px;height:7px;border-radius:50%;background:currentColor;}
+  .lab{font-size:11px;color:var(--rise-mist);font-family:'Sora',monospace;}
+</style></head>
+<body>
+  <span class="lab">TAGS / CHIPS</span>
+  <div class="row">
+    <span class="badge b-evergreen">Cohort 2026</span>
+    <span class="badge b-emerald"><i data-lucide="check"></i> Matched</span>
+    <span class="badge b-charcoal">Mentor</span>
+    <span class="badge b-sun">New</span>
+  </div>
+  <span class="lab">STATUS</span>
+  <div class="row">
+    <span class="badge b-emerald"><span class="dot"></span> Applications open</span>
+    <span class="badge b-sun"><span class="dot"></span> Closing soon</span>
+    <span class="badge b-solid">12 spots left</span>
+  </div>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body></html>

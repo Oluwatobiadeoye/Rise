@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RISE — Design System</title>
+<link rel="stylesheet" href="colors_and_type.css">
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--rise-paper);color:var(--text);font-family:var(--font-body);}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 32px;}
+  a{color:inherit;}
+
+  /* Hero */
+  .hero{position:relative;overflow:hidden;padding:72px 0 60px;}
+  .hero::before{content:"";position:absolute;top:-240px;right:-160px;width:620px;height:620px;border-radius:50%;
+    background:radial-gradient(circle,rgba(201,168,106,.34),rgba(15,91,79,.14) 46%,transparent 70%);pointer-events:none;}
+  .brandrow{display:flex;align-items:center;gap:18px;position:relative;}
+  .brandrow img{width:64px;height:64px;}
+  .wordmark{font-family:var(--font-display);font-weight:800;font-size:46px;letter-spacing:-.03em;line-height:1;display:flex;align-items:flex-start;gap:8px;}
+  .wordmark .sub{display:block;font-family:var(--font-body);font-weight:600;font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--rise-slate);margin-top:7px;}
+  .hero h1{font-family:var(--font-display);font-weight:800;font-size:clamp(38px,5.4vw,68px);line-height:1.02;letter-spacing:-.03em;margin:34px 0 18px;max-width:14ch;}
+  .hero h1 em{font-style:normal;color:var(--primary);}
+  .hero .lead{font-size:20px;line-height:1.55;color:var(--text-muted);max-width:56ch;margin:0 0 30px;}
+  .cta{display:flex;gap:14px;flex-wrap:wrap;position:relative;}
+  .btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--font-body);font-weight:600;font-size:16px;
+    padding:14px 26px;border-radius:var(--radius-pill);border:none;cursor:pointer;text-decoration:none;transition:all var(--dur) var(--ease-out);}
+  .btn-primary{background:var(--primary);color:var(--primary-fg);box-shadow:var(--shadow-evergreen);}
+  .btn-primary:hover{background:var(--primary-hover);transform:translateY(-2px);}
+  .btn-outline{background:transparent;color:var(--secondary);border:1.5px solid var(--border);}
+  .btn-outline:hover{border-color:var(--secondary);background:var(--surface);}
+
+  section{padding:54px 0;}
+  .kicker{font-family:var(--font-body);font-weight:700;font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--primary);margin:0 0 10px;}
+  .sec-head h2{font-family:var(--font-display);font-weight:700;font-size:34px;letter-spacing:-.02em;margin:0 0 8px;}
+  .sec-head p{color:var(--text-muted);margin:0 0 30px;font-size:16px;}
+  .hr{height:1px;background:var(--border);border:0;margin:0;}
+
+  /* Palette */
+  .swatches{display:grid;grid-template-columns:repeat(5,1fr);gap:16px;}
+  @media(max-width:820px){.swatches{grid-template-columns:repeat(2,1fr);}}
+  .sw{border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border);background:var(--surface);box-shadow:var(--shadow-sm);}
+  .sw .chip{height:96px;}
+  .sw .meta{padding:13px 15px;}
+  .sw .meta b{display:block;font-size:15px;font-weight:600;}
+  .sw .meta span{display:block;font-size:12.5px;color:var(--text-subtle);font-family:'Sora',monospace;margin-top:3px;letter-spacing:0;}
+  .ramp{display:flex;height:14px;border-radius:var(--radius-pill);overflow:hidden;margin-top:22px;border:1px solid var(--border);}
+  .ramp span{flex:1;}
+
+  /* Type specimen */
+  .type-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:38px 40px;box-shadow:var(--shadow-sm);}
+  .type-card .eyebrow{font-family:var(--font-body);font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:var(--primary);}
+  .type-card .disp{font-family:var(--font-display);font-weight:800;font-size:60px;line-height:1.04;letter-spacing:-.03em;margin:14px 0 6px;}
+  .type-card .disp em{font-style:normal;color:var(--primary);}
+  .type-card .h3{font-family:var(--font-display);font-weight:600;font-size:26px;margin:26px 0 8px;}
+  .type-card .body{font-size:17px;line-height:1.6;color:var(--text-muted);max-width:62ch;margin:0;}
+  .type-meta{display:flex;gap:40px;flex-wrap:wrap;margin-top:28px;padding-top:24px;border-top:1px solid var(--border);}
+  .type-meta div b{font-family:var(--font-display);font-size:20px;font-weight:700;}
+  .type-meta div span{display:block;font-size:13px;color:var(--text-subtle);margin-top:2px;}
+
+  /* Components */
+  .comp-grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  @media(max-width:820px){.comp-grid{grid-template-columns:1fr;}}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;box-shadow:var(--shadow-sm);}
+  .panel h4{font-family:var(--font-display);font-weight:600;font-size:15px;margin:0 0 18px;color:var(--text-subtle);text-transform:uppercase;letter-spacing:.06em;}
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;}
+  .tag{display:inline-flex;align-items:center;font-size:13px;font-weight:600;padding:6px 14px;border-radius:var(--radius-pill);}
+  .tag.green{background:var(--rise-evergreen-50);color:var(--rise-evergreen);}
+  .tag.emer{background:var(--rise-emerald-50);color:var(--rise-emerald-600);}
+  .tag.gold{background:var(--rise-gold-50);color:var(--rise-gold-600);}
+  .feat{display:flex;align-items:center;gap:14px;}
+  .feat .ic{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;}
+  .feat .ic.g{background:var(--rise-evergreen-50);color:var(--rise-evergreen);}
+  .feat .ic.e{background:var(--rise-emerald-50);color:var(--rise-emerald-600);}
+  .feat b{font-family:var(--font-display);font-size:17px;}
+  .feat span{display:block;font-size:13.5px;color:var(--text-muted);margin-top:2px;}
+  .feat i{width:24px;height:24px;}
+
+  /* Inside grid */
+  .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+  @media(max-width:820px){.cards{grid-template-columns:1fr;}}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:26px;text-decoration:none;color:inherit;
+    box-shadow:var(--shadow-sm);transition:all var(--dur) var(--ease-out);display:block;}
+  .card:hover{box-shadow:var(--shadow-lg);transform:translateY(-3px);border-color:var(--rise-evergreen-100);}
+  .card .ic{width:44px;height:44px;border-radius:12px;background:var(--rise-evergreen-50);color:var(--rise-evergreen);display:flex;align-items:center;justify-content:center;margin-bottom:16px;}
+  .card .ic i{width:22px;height:22px;}
+  .card h3{font-family:var(--font-display);font-weight:600;font-size:19px;margin:0 0 6px;}
+  .card p{margin:0;font-size:14.5px;color:var(--text-muted);line-height:1.5;}
+  .card .go{margin-top:14px;font-size:14px;font-weight:600;color:var(--primary);display:flex;align-items:center;gap:6px;}
+  .card .go i{width:16px;height:16px;}
+
+  /* Footer */
+  footer{background:var(--rise-charcoal-900);color:var(--text-on-dark);padding:46px 0;margin-top:30px;}
+  footer .wrap{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  footer .fmark{display:flex;align-items:center;gap:13px;}
+  footer .fmark img{width:38px;height:38px;}
+  footer .fmark b{font-family:var(--font-display);font-weight:800;font-size:22px;letter-spacing:-.03em;color:#fff;}
+  footer p{margin:0;font-size:13.5px;color:rgba(243,241,236,.6);max-width:42ch;}
+</style>
+</head>
+<body>
+
+  <header class="hero">
+    <div class="wrap">
+      <div class="brandrow">
+        <img src="assets/logo-mark.svg" alt="RISE mark">
+        <div class="wordmark"><span>RISE<span class="sub">Initiative</span></span></div>
+      </div>
+      <h1>The <em>Evergreen &amp; Gold</em> design system.</h1>
+      <p class="lead">The RISE Initiative brand, re-grounded in deep evergreen, warm gold and charcoal. One token set, every artifact — website, decks, social and print — natively on-brand.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="ui_kits/website/index.html">View the website kit</a>
+        <a class="btn btn-outline" href="assets/logo-lockup.html">Logo &amp; lockups</a>
+      </div>
+    </div>
+  </header>
+
+  <hr class="hr">
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="kicker">Palette</p>
+        <h2>Evergreen &amp; Gold</h2>
+        <p>Deep evergreen leads; gold accents sparingly; charcoal anchors; warm paper grounds it all.</p>
+      </div>
+      <div class="swatches">
+        <div class="sw"><div class="chip" style="background:var(--rise-evergreen)"></div><div class="meta"><b>Evergreen</b><span>#0F5B4F · primary</span></div></div>
+        <div class="sw"><div class="chip" style="background:var(--rise-gold)"></div><div class="meta"><b>Gold</b><span>#C9A86A · accent</span></div></div>
+        <div class="sw"><div class="chip" style="background:var(--rise-emerald)"></div><div class="meta"><b>Emerald</b><span>#2E9E89 · growth</span></div></div>
+        <div class="sw"><div class="chip" style="background:var(--rise-charcoal)"></div><div class="meta"><b>Charcoal</b><span>#1F2933 · anchor</span></div></div>
+        <div class="sw"><div class="chip" style="background:var(--rise-paper);box-shadow:inset 0 0 0 1px var(--border)"></div><div class="meta"><b>Paper</b><span>#F7F5F0 · bg</span></div></div>
+      </div>
+      <div class="ramp">
+        <span style="background:var(--rise-evergreen-50)"></span><span style="background:var(--rise-evergreen-100)"></span><span style="background:var(--rise-evergreen-300)"></span><span style="background:var(--rise-evergreen)"></span><span style="background:var(--rise-evergreen-600)"></span><span style="background:var(--rise-evergreen-700)"></span>
+        <span style="background:var(--rise-gold-100)"></span><span style="background:var(--rise-gold)"></span><span style="background:var(--rise-gold-600)"></span>
+        <span style="background:var(--rise-charcoal)"></span><span style="background:var(--rise-charcoal-900)"></span>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:8px;">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="kicker">Typography</p>
+        <h2>Sora &amp; Plus Jakarta Sans</h2>
+      </div>
+      <div class="type-card">
+        <span class="eyebrow">Youth leadership</span>
+        <div class="disp">Rise into your <em>potential.</em></div>
+        <div class="h3">Confident geometric display, warm humanist body.</div>
+        <p class="body">Every young person in RISE moves through the same journey — identify, develop, connect — supported the whole way. The type pairing keeps headlines bold and optimistic while body copy stays exceptionally readable across web, decks and print.</p>
+        <div class="type-meta">
+          <div><b>Sora</b><span>Display · 400–800</span></div>
+          <div><b>Plus Jakarta Sans</b><span>Body / UI · 400–700</span></div>
+          <div><b>4px base</b><span>Spacing &amp; rhythm</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section style="padding-top:8px;">
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="kicker">Components</p>
+        <h2>Buttons, tags &amp; feature tiles</h2>
+      </div>
+      <div class="comp-grid">
+        <div class="panel">
+          <h4>Buttons</h4>
+          <div class="row" style="margin-bottom:16px;">
+            <button class="btn btn-primary">Join a cohort</button>
+            <button class="btn btn-outline">Become a mentor</button>
+          </div>
+          <div class="row">
+            <span class="tag green">Cohort 2026</span>
+            <span class="tag emer">Matched</span>
+            <span class="tag gold">New</span>
+          </div>
+        </div>
+        <div class="panel">
+          <h4>Feature tiles</h4>
+          <div class="feat" style="margin-bottom:18px;">
+            <div class="ic g"><i data-lucide="compass"></i></div>
+            <div><b>Identify</b><span>Spot promise early and invite it in.</span></div>
+          </div>
+          <div class="feat">
+            <div class="ic e"><i data-lucide="sprout"></i></div>
+            <div><b>Develop</b><span>Workshops, projects and mentorship.</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="hr">
+
+  <section>
+    <div class="wrap">
+      <div class="sec-head">
+        <p class="kicker">What's inside</p>
+        <h2>The full system</h2>
+        <p>Everything is token-driven from <code>colors_and_type.css</code> — swap nothing to stay on-brand.</p>
+      </div>
+      <div class="cards">
+        <a class="card" href="ui_kits/website/index.html">
+          <div class="ic"><i data-lucide="monitor"></i></div>
+          <h3>Website kit</h3>
+          <p>Interactive marketing site — hero, pillars, impact band, mentor CTA, footer.</p>
+          <div class="go">Open <i data-lucide="arrow-right"></i></div>
+        </a>
+        <a class="card" href="slides/index.html">
+          <div class="ic"><i data-lucide="presentation"></i></div>
+          <h3>Slide deck</h3>
+          <p>Title, section, content, stat, quote and closing templates as a runnable deck.</p>
+          <div class="go">Open <i data-lucide="arrow-right"></i></div>
+        </a>
+        <a class="card" href="ui_kits/social/index.html">
+          <div class="ic"><i data-lucide="instagram"></i></div>
+          <h3>Social &amp; flyer</h3>
+          <p>Square post, story, quote and event flyer/poster templates.</p>
+          <div class="go">Open <i data-lucide="arrow-right"></i></div>
+        </a>
+        <a class="card" href="assets/logo-lockup.html">
+          <div class="ic"><i data-lucide="shapes"></i></div>
+          <h3>Logo &amp; lockups</h3>
+          <p>The ascending-chevron mark, mono version, and horizontal / stacked lockups.</p>
+          <div class="go">Open <i data-lucide="arrow-right"></i></div>
+        </a>
+        <a class="card" href="preview/colors-semantic.html">
+          <div class="ic"><i data-lucide="palette"></i></div>
+          <h3>Color reference</h3>
+          <p>Brand ramps, neutrals, gradients and semantic role tokens.</p>
+          <div class="go">Open <i data-lucide="arrow-right"></i></div>
+        </a>
+        <a class="card" href="README.md">
+          <div class="ic"><i data-lucide="book-open"></i></div>
+          <h3>Brand guide</h3>
+          <p>Voice, content rules, visual foundations, iconography and the full index.</p>
+          <div class="go">Open <i data-lucide="arrow-right"></i></div>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="wrap">
+      <div class="fmark">
+        <img src="assets/logo-mark-mono.svg" alt="RISE mark" style="color:#fff;">
+        <b>RISE</b>
+      </div>
+      <p>Identify, develop and connect young people through leadership, mentorship and access to opportunities.</p>
+    </div>
+  </footer>
+
+  <script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+  <script>lucide.createIcons();</script>
+</body>
+</html>

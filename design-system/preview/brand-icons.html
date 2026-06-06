@@ -1,0 +1,34 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;background:var(--rise-white);font-family:var(--font-body);padding:26px 30px;}
+  .lab{font-size:11px;color:var(--rise-mist);font-family:'Sora',monospace;margin:0 0 16px;}
+  .grid{display:grid;grid-template-columns:repeat(8,1fr);gap:18px 10px;}
+  .ic{display:flex;flex-direction:column;align-items:center;gap:7px;color:var(--rise-ink);}
+  .ic i{width:26px;height:26px;}
+  .ic span{font-size:10px;color:var(--rise-slate);}
+  .ic.active{color:var(--primary);}
+</style></head>
+<body>
+<p class="lab">LUCIDE · 2px stroke · currentColor · 24px box</p>
+<div class="grid">
+  <div class="ic active"><i data-lucide="sunrise"></i><span>sunrise</span></div>
+  <div class="ic"><i data-lucide="compass"></i><span>compass</span></div>
+  <div class="ic"><i data-lucide="users-round"></i><span>mentor</span></div>
+  <div class="ic"><i data-lucide="graduation-cap"></i><span>learn</span></div>
+  <div class="ic"><i data-lucide="handshake"></i><span>partner</span></div>
+  <div class="ic"><i data-lucide="sprout"></i><span>grow</span></div>
+  <div class="ic"><i data-lucide="heart-handshake"></i><span>impact</span></div>
+  <div class="ic"><i data-lucide="target"></i><span>goals</span></div>
+  <div class="ic"><i data-lucide="calendar-days"></i><span>events</span></div>
+  <div class="ic"><i data-lucide="map-pin"></i><span>place</span></div>
+  <div class="ic"><i data-lucide="arrow-up-right"></i><span>link</span></div>
+  <div class="ic"><i data-lucide="lightbulb"></i><span>idea</span></div>
+  <div class="ic"><i data-lucide="award"></i><span>award</span></div>
+  <div class="ic"><i data-lucide="message-circle"></i><span>connect</span></div>
+  <div class="ic"><i data-lucide="briefcase"></i><span>career</span></div>
+  <div class="ic"><i data-lucide="globe"></i><span>community</span></div>
+</div>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body></html>

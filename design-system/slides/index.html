@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RISE — Deck Templates</title>
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  deck-stage:not(:defined){visibility:hidden;}
+  body{margin:0;background:#0d1426;}
+  section{font-family:var(--font-body);color:var(--rise-ink);overflow:hidden;}
+  .slide{width:100%;height:100%;display:flex;flex-direction:column;position:relative;}
+  .pad{padding:110px 130px;}
+
+  .eyebrow{font-weight:700;font-size:24px;letter-spacing:.22em;text-transform:uppercase;color:var(--primary);margin:0 0 28px;}
+  .mark{display:flex;align-items:center;gap:16px;}
+  .mark img{width:62px;height:62px;}
+  .mark .wm{font-family:var(--font-display);font-weight:800;font-size:38px;letter-spacing:-.03em;line-height:1;color:var(--rise-ink);}
+
+  /* TITLE */
+  .s-title{background:linear-gradient(150deg,var(--rise-charcoal) 0%,var(--rise-evergreen-700) 115%);color:#fff;justify-content:space-between;}
+  .s-title::before{content:"";position:absolute;top:-260px;right:-180px;width:760px;height:760px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,106,.34),rgba(15,91,79,.18) 50%,transparent 72%);}
+  .s-title .mark .wm{color:#fff;}
+  .s-title .eyebrow{color:var(--rise-gold);}
+  .s-title h1{font-family:var(--font-display);font-weight:800;font-size:118px;line-height:.98;letter-spacing:-.035em;margin:0;position:relative;max-width:1400px;color:#fff;}
+  .s-title h1 em{font-style:normal;color:var(--rise-gold);}
+  .s-title .sub{font-size:32px;line-height:1.45;color:rgba(255,255,255,.82);max-width:1050px;margin:36px 0 0;position:relative;}
+  .s-title .foot{display:flex;justify-content:space-between;align-items:flex-end;position:relative;}
+  .s-title .foot span{font-size:22px;color:rgba(255,255,255,.7);}
+
+  /* SECTION DIVIDER */
+  .s-section{background:var(--rise-charcoal-900);color:#fff;justify-content:center;}
+  .s-section .num{font-family:var(--font-display);font-weight:800;font-size:40px;color:var(--primary);letter-spacing:.04em;}
+  .s-section h2{font-family:var(--font-display);font-weight:800;font-size:96px;line-height:1.02;letter-spacing:-.03em;margin:18px 0 0;max-width:1400px;color:#fff;}
+  .s-section .rule{width:120px;height:8px;background:var(--rise-evergreen);border-radius:99px;margin-top:40px;}
+
+  /* CONTENT — pillars */
+  .s-content{background:var(--rise-paper);}
+  .s-content h2{font-family:var(--font-display);font-weight:700;font-size:72px;line-height:1.05;letter-spacing:-.02em;margin:0 0 64px;color:var(--rise-ink);max-width:1300px;}
+  .cols{display:grid;grid-template-columns:repeat(3,1fr);gap:48px;}
+  .col .ic{width:104px;height:104px;border-radius:30px;display:flex;align-items:center;justify-content:center;margin-bottom:34px;}
+  .col .ic svg{width:52px;height:52px;}
+  .col h3{font-family:var(--font-display);font-weight:700;font-size:42px;margin:0 0 16px;color:var(--rise-ink);}
+  .col p{font-size:26px;line-height:1.5;color:var(--rise-slate);margin:0;}
+  .c-evergreen{background:var(--rise-evergreen-50);color:var(--rise-evergreen);}
+  .c-emerald{background:var(--rise-emerald-50);color:var(--rise-emerald-600);}
+  .c-charcoal{background:var(--rise-charcoal-50);color:var(--rise-charcoal);}
+
+  /* STAT / IMPACT */
+  .s-stat{background:var(--rise-white);justify-content:center;}
+  .s-stat h2{font-family:var(--font-display);font-weight:700;font-size:60px;letter-spacing:-.02em;margin:0 0 70px;color:var(--rise-ink);max-width:1300px;}
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:50px;}
+  .stat .n{font-family:var(--font-display);font-weight:800;font-size:120px;line-height:.9;letter-spacing:-.03em;color:var(--rise-evergreen);}
+  .stat .n em{font-style:normal;color:var(--rise-charcoal);}
+  .stat .l{font-size:26px;color:var(--rise-slate);margin-top:18px;line-height:1.35;}
+
+  /* QUOTE */
+  .s-quote{background:var(--rise-charcoal);color:#fff;justify-content:center;}
+  .s-quote .qm{font-family:var(--font-display);font-weight:800;font-size:200px;line-height:.5;color:var(--rise-evergreen);height:110px;}
+  .s-quote blockquote{font-family:var(--font-display);font-weight:600;font-size:68px;line-height:1.22;letter-spacing:-.02em;margin:0 0 56px;max-width:1500px;}
+  .s-quote .who{display:flex;align-items:center;gap:26px;}
+  .s-quote .av{width:92px;height:92px;border-radius:50%;background:var(--rise-evergreen-100);}
+  .s-quote .who b{display:block;font-family:var(--font-display);font-size:30px;}
+  .s-quote .who span{font-size:24px;color:rgba(255,255,255,.7);}
+
+  /* CLOSING */
+  .s-close{background:linear-gradient(150deg,var(--rise-charcoal) 0%,var(--rise-evergreen-700) 115%);color:#fff;justify-content:space-between;}
+  .s-close::before{content:"";position:absolute;bottom:-280px;left:-180px;width:720px;height:720px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,106,.32),transparent 70%);}
+  .s-close .mark .wm{color:#fff;}
+  .s-close h2{font-family:var(--font-display);font-weight:800;font-size:104px;line-height:1;letter-spacing:-.03em;margin:0;position:relative;color:#fff;}
+  .s-close h2 em{font-style:normal;color:var(--rise-gold);}
+  .s-close .contact{display:flex;gap:56px;position:relative;margin-top:44px;}
+  .s-close .contact div{display:flex;align-items:center;gap:14px;font-size:28px;color:rgba(255,255,255,.9);}
+  .s-close .contact svg{width:30px;height:30px;color:var(--rise-gold);}
+
+  @media (prefers-reduced-motion:no-preference){
+    [data-deck-active] .anim{animation:rise .6s var(--ease-out) both;}
+    [data-deck-active] .anim2{animation:rise .6s var(--ease-out) .12s both;}
+    [data-deck-active] .anim3{animation:rise .6s var(--ease-out) .24s both;}
+    @keyframes rise{from{transform:translateY(26px);}to{transform:none;}}
+  }
+</style>
+</head>
+<body>
+<deck-stage width="1920" height="1080">
+
+  <!-- TITLE -->
+  <section data-label="Title">
+    <div class="slide pad s-title">
+      <div class="mark"><img src="../assets/logo-mark.svg" alt=""><span class="wm">RISE</span></div>
+      <div>
+        <p class="eyebrow anim">Youth leadership initiative</p>
+        <h1 class="anim2">Rise into your <em>potential.</em></h1>
+        <p class="sub anim3">Identify, develop and connect young people through leadership, mentorship and access to opportunities.</p>
+      </div>
+      <div class="foot">
+        <span>Cohort 2026 · Investor &amp; partner briefing</span>
+        <span>rise-initiative.org</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION DIVIDER -->
+  <section data-label="Section">
+    <div class="slide pad s-section">
+      <div class="num anim">01</div>
+      <h2 class="anim2">What we do</h2>
+      <div class="rule anim3"></div>
+    </div>
+  </section>
+
+  <!-- CONTENT — pillars -->
+  <section data-label="Content">
+    <div class="slide pad s-content">
+      <h2 class="anim">Three steps to lead.</h2>
+      <div class="cols">
+        <div class="col anim"><div class="ic c-evergreen"><i data-lucide="compass"></i></div><h3>Identify</h3><p>We find ambitious young people with the drive to lead — wherever they start.</p></div>
+        <div class="col anim2"><div class="ic c-emerald"><i data-lucide="sprout"></i></div><h3>Develop</h3><p>Workshops, real projects and one-to-one mentorship over a 12-week cohort.</p></div>
+        <div class="col anim3"><div class="ic c-charcoal"><i data-lucide="users-round"></i></div><h3>Connect</h3><p>Access to professionals, opportunities and a community that has their back.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STAT -->
+  <section data-label="Impact">
+    <div class="slide pad s-stat">
+      <h2 class="anim">Since 2024, our impact has compounded.</h2>
+      <div class="stats">
+        <div class="stat anim"><div class="n">1,200</div><div class="l">young people developed</div></div>
+        <div class="stat anim2"><div class="n">180</div><div class="l">professional mentors</div></div>
+        <div class="stat anim3"><div class="n">40<em>+</em></div><div class="l">partner organisations</div></div>
+        <div class="stat anim3"><div class="n">92<em>%</em></div><div class="l">report new opportunities</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- QUOTE -->
+  <section data-label="Quote">
+    <div class="slide pad s-quote">
+      <div class="qm">&ldquo;</div>
+      <blockquote class="anim">RISE gave me a mentor, a project, and the belief that I could lead.</blockquote>
+      <div class="who anim2">
+        <div class="av"></div>
+        <div><b>Amara O.</b><span>Cohort 2025 · now a youth programme lead</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CLOSING -->
+  <section data-label="Closing">
+    <div class="slide pad s-close">
+      <div class="mark"><img src="../assets/logo-mark.svg" alt=""><span class="wm">RISE</span></div>
+      <div>
+        <h2 class="anim">Back a young<br>leader. <em>Join us.</em></h2>
+        <div class="contact anim2">
+          <div><i data-lucide="mail"></i> hello@rise-initiative.org</div>
+          <div><i data-lucide="globe"></i> rise-initiative.org</div>
+        </div>
+      </div>
+      <div style="position:relative;font-size:22px;color:rgba(255,255,255,.7);">© 2026 RISE Initiative</div>
+    </div>
+  </section>
+
+</deck-stage>
+<script src="deck-stage.js"></script>
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script>
+  lucide.createIcons();
+  document.querySelector('deck-stage').addEventListener('slidechange', () => lucide.createIcons());
+</script>
+</body>
+</html>

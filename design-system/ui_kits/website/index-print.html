@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RISE Initiative — Website Kit (print)</title>
+<link rel="stylesheet" href="../../colors_and_type.css">
+<link rel="stylesheet" href="styles.css">
+<style>
+@media print {
+  @page { size: A4 portrait; margin: 12mm; }
+  html, body { background: #fff !important; }
+  *, *::before, *::after {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  /* Nav: don't let sticky float; keep it as a static header */
+  .nav { position: static !important; box-shadow: none !important; background: #fff !important; }
+  /* Keep small units intact across page breaks */
+  .pillar, .step, .stat, .section-head, .hero .copy, .mentor .list li { break-inside: avoid; }
+  .impact, .mentor { break-inside: avoid; }
+  /* A little breathing room between major bands on paper */
+  .section { padding-top: 36px !important; padding-bottom: 36px !important; }
+  .hero { padding-top: 24px !important; }
+  /* Freeze any animation/transition at its end state */
+  *, *::before, *::after {
+    animation-delay: -99s !important;
+    animation-duration: .001s !important;
+    animation-iteration-count: 1 !important;
+    animation-fill-mode: both !important;
+    animation-play-state: running !important;
+    transition-duration: 0s !important;
+  }
+}
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail">
+<svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100" height="100" rx="18" fill="#1F2933"/>
+  <g transform="translate(20,18) scale(0.62)">
+    <path d="M18 86 L50 60 L82 86" stroke="#0F5B4F" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M28 66 L50 44 L72 66" stroke="#2E9E89" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    <path d="M38 44 L50 28 L62 44" stroke="#C9A86A" stroke-width="11" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  </g>
+</svg>
+</template>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script src="image-slot.js"></script>
+<script src="assets-inline.js"></script>
+<script type="text/babel" src="shared.jsx"></script>
+<script type="text/babel" src="Nav.jsx"></script>
+<script type="text/babel" src="Hero.jsx"></script>
+<script type="text/babel" src="Pillars.jsx"></script>
+<script type="text/babel" src="Impact.jsx"></script>
+<script type="text/babel" src="Mentor.jsx"></script>
+<script type="text/babel" src="Steps.jsx"></script>
+<script type="text/babel" src="Footer.jsx"></script>
+<script type="text/babel" src="JoinModal.jsx"></script>
+<script type="text/babel" src="App.jsx"></script>
+<script type="text/babel">
+  // Auto-print once the app, icons and fonts are ready.
+  (function () {
+    function go() {
+      if (window.lucide) window.lucide.createIcons();
+      Promise.resolve(document.fonts ? document.fonts.ready : null).then(function () {
+        setTimeout(function () { window.print(); }, 600);
+      });
+    }
+    // Wait for React render + a frame, then print.
+    requestAnimationFrame(function () { requestAnimationFrame(go); });
+  })();
+</script>
+</body>
+</html>

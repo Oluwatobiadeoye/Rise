@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RISE — Social & Flyer Templates</title>
+<link rel="stylesheet" href="../../colors_and_type.css">
+<style>
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--rise-cloud);font-family:var(--font-body);color:var(--text);padding:40px 28px 64px;}
+  .page-head{max-width:1100px;margin:0 auto 36px;}
+  .page-head h1{font-family:var(--font-display);font-weight:800;font-size:30px;letter-spacing:-.02em;margin:0 0 6px;color:var(--rise-ink);}
+  .page-head p{margin:0;color:var(--rise-slate);font-size:15px;}
+  .gallery{max-width:1100px;margin:0 auto;display:flex;flex-wrap:wrap;gap:40px;align-items:flex-start;}
+  .tpl{display:flex;flex-direction:column;gap:12px;}
+  .tpl .meta{font-size:12px;font-weight:600;color:var(--rise-slate);letter-spacing:.04em;text-transform:uppercase;}
+  .canvas{border-radius:18px;overflow:hidden;box-shadow:var(--shadow-lg);position:relative;color:#fff;}
+  .eyebrow{font-weight:700;letter-spacing:.16em;text-transform:uppercase;}
+  .mark{display:flex;align-items:center;gap:9px;}
+  .mark img{width:30px;height:30px;}
+  .mark .wm{font-family:var(--font-display);font-weight:800;font-size:19px;letter-spacing:-.03em;line-height:1;}
+  .ph{position:relative;background:linear-gradient(135deg,#E9E3D7,#Ccc);display:flex;align-items:center;justify-content:center;}
+  .ph i{width:30px;height:30px;color:var(--rise-slate);opacity:.5;}
+  .ph::after{content:attr(data-label);position:absolute;bottom:10px;left:10px;font-size:10px;font-weight:600;text-transform:uppercase;color:var(--rise-slate);background:rgba(255,255,255,.7);padding:3px 7px;border-radius:5px;}
+  .pill{display:inline-flex;align-items:center;gap:7px;font-weight:600;font-size:14px;padding:10px 18px;border-radius:999px;}
+  .pill i{width:15px;height:15px;}
+
+  /* SQUARE — announcement */
+  .sq{width:440px;height:440px;background:var(--rise-paper);padding:38px;display:flex;flex-direction:column;color:var(--rise-ink);}
+  .sq .sun{position:absolute;top:-90px;right:-70px;width:300px;height:300px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,106,.5),rgba(15,91,79,.25) 50%,transparent 72%);}
+  .sq .eyebrow{color:var(--primary);font-size:13px;position:relative;}
+  .sq h2{font-family:var(--font-display);font-weight:800;font-size:46px;line-height:1.02;letter-spacing:-.03em;margin:auto 0 18px;position:relative;}
+  .sq h2 em{font-style:normal;color:var(--primary);}
+  .sq .foot{display:flex;align-items:center;justify-content:space-between;position:relative;}
+  .sq .mark .wm{color:var(--rise-ink);}
+
+  /* STORY 9:16 — full ascent */
+  .story{width:340px;height:604px;padding:34px;display:flex;flex-direction:column;background:linear-gradient(160deg,var(--rise-charcoal) 0%,var(--rise-evergreen-600) 100%);}
+  .story .sun{position:absolute;bottom:-120px;left:-80px;width:340px;height:340px;border-radius:50%;background:radial-gradient(circle,rgba(201,168,106,.4),transparent 70%);}
+  .story .eyebrow{color:var(--rise-gold);font-size:12px;position:relative;}
+  .story h2{font-family:var(--font-display);font-weight:800;font-size:42px;line-height:1.03;letter-spacing:-.03em;margin:24px 0 0;position:relative;color:#fff;}
+  .story .spacer{flex:1;}
+  .story .pill{background:#fff;color:var(--rise-charcoal);align-self:flex-start;position:relative;}
+  .story .date{margin-top:18px;font-size:14px;color:rgba(255,255,255,.85);position:relative;}
+
+  /* QUOTE square — charcoal */
+  .quote{width:440px;height:440px;padding:40px;background:var(--rise-charcoal-900);display:flex;flex-direction:column;}
+  .quote .qm{font-family:var(--font-display);font-size:80px;line-height:.6;color:var(--rise-evergreen);height:46px;}
+  .quote blockquote{font-family:var(--font-display);font-weight:600;font-size:27px;line-height:1.28;letter-spacing:-.01em;margin:14px 0 auto;color:#fff;}
+  .quote .who{display:flex;align-items:center;gap:12px;}
+  .quote .av{width:46px;height:46px;border-radius:50%;background:var(--rise-evergreen-100);}
+  .quote .who b{display:block;font-size:15px;color:#fff;}
+  .quote .who span{font-size:13px;color:rgba(255,255,255,.65);}
+
+  /* FLYER 4:5 — event */
+  .flyer{width:460px;height:575px;background:var(--rise-white);display:flex;flex-direction:column;}
+  .flyer .photo{height:228px;}
+  .flyer .body{padding:30px 32px;display:flex;flex-direction:column;flex:1;color:var(--rise-ink);}
+  .flyer .eyebrow{color:var(--primary);font-size:12px;}
+  .flyer h2{font-family:var(--font-display);font-weight:800;font-size:34px;line-height:1.04;letter-spacing:-.02em;margin:12px 0 16px;}
+  .flyer .det{display:flex;flex-direction:column;gap:10px;margin-bottom:auto;}
+  .flyer .det div{display:flex;align-items:center;gap:11px;font-size:15px;color:var(--rise-slate);}
+  .flyer .det i{width:19px;height:19px;color:var(--rise-emerald);}
+  .flyer .foot{display:flex;align-items:center;justify-content:space-between;padding-top:20px;margin-top:20px;border-top:1px solid var(--border);}
+  .flyer .mark .wm{color:var(--rise-ink);}
+  .flyer .pill{background:var(--primary);color:#fff;}
+</style>
+</head>
+<body>
+<div class="page-head">
+  <h1>Social &amp; flyer templates</h1>
+  <p>Ready-to-adapt layouts. Export squares at 1080×1080, stories at 1080×1920, flyers at 4:5 / A-series. Drop in real photos and update copy.</p>
+</div>
+
+<div class="gallery">
+
+  <!-- SQUARE announcement -->
+  <div class="tpl">
+    <span class="meta">Instagram post · 1:1</span>
+    <div class="canvas sq">
+      <div class="sun"></div>
+      <span class="eyebrow">Applications open</span>
+      <h2>Rise into your <em>2026.</em></h2>
+      <div class="foot">
+        <div class="mark"><img src="../../assets/logo-mark.svg" alt=""><span class="wm">RISE</span></div>
+        <span class="pill" style="background:var(--primary);color:#fff;">Join a cohort</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STORY -->
+  <div class="tpl">
+    <span class="meta">Story · 9:16</span>
+    <div class="canvas story">
+      <div class="sun"></div>
+      <div class="mark" style="position:relative;"><img src="../../assets/logo-mark.svg" alt=""><span class="wm">RISE</span></div>
+      <span class="eyebrow" style="margin-top:30px;">Cohort 2026</span>
+      <h2>Find your people. Build your future.</h2>
+      <div class="spacer"></div>
+      <span class="pill">Swipe up to apply <i data-lucide="arrow-up"></i></span>
+      <div class="date">Applications close 14 March</div>
+    </div>
+  </div>
+
+  <!-- QUOTE -->
+  <div class="tpl">
+    <span class="meta">Quote post · 1:1</span>
+    <div class="canvas quote">
+      <div class="qm">&ldquo;</div>
+      <blockquote>RISE gave me a mentor, a project, and the belief that I could lead.</blockquote>
+      <div class="who">
+        <div class="av"></div>
+        <div><b>Amara O.</b><span>Cohort 2025 · now a youth lead</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FLYER -->
+  <div class="tpl">
+    <span class="meta">Event flyer / poster · 4:5</span>
+    <div class="canvas flyer">
+      <div class="photo ph" data-label="Workshop photo"><i data-lucide="image"></i></div>
+      <div class="body">
+        <span class="eyebrow">Free workshop</span>
+        <h2>Leadership Lab: lead with confidence</h2>
+        <div class="det">
+          <div><i data-lucide="calendar-days"></i> Saturday 22 March · 10am–1pm</div>
+          <div><i data-lucide="map-pin"></i> Community Hub, Downtown</div>
+          <div><i data-lucide="users-round"></i> Open to ages 16–24 · free</div>
+        </div>
+        <div class="foot">
+          <div class="mark"><img src="../../assets/logo-mark.svg" alt=""><span class="wm">RISE</span></div>
+          <span class="pill">Register free</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+<script src="https://unpkg.com/lucide@0.460.0/dist/umd/lucide.min.js"></script>
+<script>lucide.createIcons();</script>
+</body>
+</html>

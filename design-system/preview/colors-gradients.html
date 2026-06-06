@@ -1,0 +1,18 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;background:var(--rise-white);font-family:var(--font-body);padding:26px 32px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+  .g{height:120px;border-radius:var(--radius-lg);display:flex;align-items:flex-end;padding:12px 14px;box-shadow:var(--shadow-sm);}
+  .g b{font-size:12px;font-weight:700;color:#fff;background:rgba(0,0,0,.18);padding:3px 8px;border-radius:6px;backdrop-filter:blur(2px);}
+  .ascent{background:linear-gradient(135deg,var(--rise-charcoal) 0%,var(--rise-evergreen-600) 100%);}
+  .glow{background:radial-gradient(120% 90% at 30% 20%, var(--rise-gold) 0%, var(--rise-evergreen) 45%, var(--rise-charcoal) 100%);}
+  .scrim{background:linear-gradient(to top,#0A2620 0%, rgba(10,38,32,.4) 45%, rgba(10,38,32,0) 100%), var(--rise-mist);}
+</style></head>
+<body>
+<div class="grid">
+  <div class="g ascent"><b>Ascent — charcoal → evergreen</b></div>
+  <div class="g glow"><b>Gold glow (hero accent)</b></div>
+  <div class="g scrim"><b>Photo scrim (charcoal)</b></div>
+</div>
+</body></html>

@@ -1,0 +1,17 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8">
+<link rel="stylesheet" href="../colors_and_type.css">
+<style>
+  body{margin:0;font-family:var(--font-body);}
+  .grid{display:grid;grid-template-columns:1fr 1fr 1fr;}
+  .cell{padding:30px;display:flex;flex-direction:column;align-items:center;gap:14px;justify-content:center;min-height:150px;}
+  .cell img{width:62px;height:62px;}
+  .lab{font-size:12px;letter-spacing:0.08em;text-transform:uppercase;font-weight:700;}
+  .paper{background:var(--rise-paper);} .paper .lab{color:var(--rise-slate);}
+  .evergreen{background:var(--rise-evergreen);} .evergreen .lab{color:#fff;}
+  .charcoal{background:var(--rise-charcoal-900);} .charcoal .lab{color:var(--rise-evergreen-300);}
+</style></head>
+<body><div class="grid">
+  <div class="cell paper"><img src="../assets/logo-mark.svg" alt=""><span class="lab">On paper</span></div>
+  <div class="cell evergreen" style="color:#fff"><img src="../assets/logo-mark-mono.svg" alt="" style="color:#fff"><span class="lab">Mono / evergreen</span></div>
+  <div class="cell charcoal" style="color:#F7F5F0"><img src="../assets/logo-mark-mono.svg" alt="" style="color:#F7F5F0"><span class="lab">Mono / dark</span></div>
+</div></body></html>
