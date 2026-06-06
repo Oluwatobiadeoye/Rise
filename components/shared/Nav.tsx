@@ -37,7 +37,9 @@ export function Nav() {
       ? pathname === "/"
       : pathname === href || pathname.startsWith(`${href}/`);
 
-  const elevated = scrolled || open;
+  // Transparent float-over-hero only on the home page; interior pages (no hero)
+  // start with a solid nav so content never scrolls under a see-through header.
+  const elevated = scrolled || open || pathname !== "/";
 
   return (
     <header
