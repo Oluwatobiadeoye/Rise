@@ -14,22 +14,20 @@ not data-fetched).
 - **Missing bios (Kunle Oguntoye, Ayo Salaudeen):** render their cards with name +
   role + photo placeholder and a short "Full bio coming soon" line. Bios drop in
   later by editing data only — no structural change.
-- **Photos:** all team members use `ImagePlaceholder` (no real photos yet), per the
-  project's placeholder-photography stance. **Bio photos are circular.** The circle
-  is owned by the **card's media slot**, not the placeholder: `TeamMemberCard`
-  renders a fixed-size circular wrapper —
-  `relative size-28 shrink-0 overflow-hidden rounded-full` — and drops the
-  placeholder (or, later, the photo) inside it to fill. Two notes from review:
-  - `ImagePlaceholder` currently hardcodes `rounded-lg`; appending `rounded-full`
-    via className is a same-property collision resolved by stylesheet order, not
-    class order. To make it deterministic, add a small **`rounded?: string` (or
-    `shape`) prop** to `ImagePlaceholder` (default keeps today's `rounded-lg`), and
-    pass `rounded-full` for team photos. `overflow-hidden` on the wrapper is the real
-    guarantee the circle clips regardless.
-  - The eventual real-photo swap is **not data-only** — it's a small markup change in
-    `TeamMemberCard` (`next/image` with `fill` + `object-cover` inside the same
-    circular wrapper, mirroring `Hero.tsx`). Build the wrapper now so the swap is one
-    component, one line.
+- **Layout (revised during build):** the original 3-up circular-avatar card grid was
+  dropped in favour of a **vertical stack of full-width rows, one member per row**:
+  photo on the left (rectangular portrait, `aspect-[4/5]`, `rounded-xl`), content on
+  the right (name, role, meta, bio, school). A divider sits **in the content column
+  only** (an `<hr>` after the text), so it never reaches under the photo; the last row
+  omits it. `TeamGrid` orders **members with bios first** (stable sort on `hasBio`),
+  pushing "coming soon" rows to the bottom, while `lib/team.ts` keeps the canonical
+  draft order.
+- **Photos:** members fall back to `ImagePlaceholder` until a real photo is supplied.
+  The real-photo swap is **data-only**: a `photo?: StaticImageData` field on
+  `TeamMember` (a static import from `public/team/<slug>.<ext>`), rendered via
+  `next/image` (`fill` + `object-cover`) when present. `ImagePlaceholder` gained a
+  deterministic **`rounded?: string` prop** (default `rounded-lg`) so its corner
+  radius is explicit rather than relying on className ordering.
 - **Team data** lives in one source of truth, `lib/team.ts`, consumed by the Team
   page. (About does **not** repeat the team — see below. The Team page is reached via
   the primary nav and the footer's "Our team" link.)
@@ -79,14 +77,14 @@ tests colocated in `__tests__/`, shared pieces in `components/shared/`.
 5. **Values** — all six values, **each with its own descriptive Lucide icon** + the
    draft's description, in cards styled like `WhatWeDo` (icon in a tinted rounded
    square). Icon + tint per value:
-   - **Resilience** → `Sprout`, `bg-evergreen-50 text-evergreen`
-   - **Integrity** → `ShieldCheck`, `bg-emerald-50 text-emerald-600`
-   - **Service** → `HeartHandshake`, `bg-gold-50 text-gold-600`
-   - **Excellence** → `Award`, `bg-evergreen-50 text-evergreen`
+   - **Resilience** → `Sprout`, `bg-emerald-50 text-emerald-600`
+   - **Integrity** → `ShieldCheck`, `bg-gold-50 text-gold-600`
+   - **Service** → `HeartHandshake`, `bg-emerald-50 text-emerald-600`
+   - **Excellence** → `Award`, `bg-gold-50 text-gold-600`
    - **Collaboration** → `Users`, `bg-emerald-50 text-emerald-600`
    - **Impact** → `Target`, `bg-gold-50 text-gold-600`
 
-   (Tints cycle the three `WhatWeDo` pairs; gold is icon-only, never body text.)
+   (Tints alternate emerald / gold across the six; gold is icon-only, never body text.)
 
    **All six cards share one identical design** — no special treatment for the four
    that spell RISE. Order them R-I-S-E first (Resilience, Integrity, Service,
@@ -128,15 +126,15 @@ tests colocated in `__tests__/`, shared pieces in `components/shared/`.
 
 1. **Page header** — shared `PageHeader` (eyebrow "Our team", title, the
    operational-team intro lede as the supporting line).
-2. **Team grid** — `TeamGrid` renders one `TeamMemberCard` per member from
-   `lib/team.ts`:
-   - **Full bio members** (Fareedah, Dara, Tobi): circular photo placeholder, name,
-     role, one-line meta (profession · location), bio paragraphs. **School
+2. **Team rows** — `TeamGrid` renders one full-width `TeamMemberCard` row per member
+   from `lib/team.ts` (photo left, content right; see Layout above):
+   - **Full bio members** (Fareedah, Dara, Tobi): portrait photo (or placeholder),
+     name, role, one-line meta (profession · location), bio paragraphs. **School
      affiliation is woven in subtly** (team note: not a labelled "School
-     Affiliation:" heading) — e.g. a quiet footer line on the card or a closing
-     sentence, low visual weight.
-   - **Coming-soon members** (Kunle, Ayo): circular photo placeholder, name, role,
-     and a muted "Full bio coming soon" line. Same card shell, conditional body.
+     Affiliation:" heading) — a quiet, low-weight closing line.
+   - **Coming-soon members** (Kunle, Ayo): portrait placeholder, name, role, and a
+     muted "Full bio coming soon" line. Same row shell, conditional body. These sort
+     to the bottom.
 
 ## Data model — `lib/team.ts`
 
@@ -149,14 +147,18 @@ export type TeamMember = {
   location?: string;     // e.g. "London, United Kingdom"
   bio?: string[];        // paragraphs; absent → "coming soon" card
   school?: string;       // school affiliation line
+  photo?: StaticImageData; // static import from public/team/; absent → placeholder
 };
 ```
 
-Order as in the draft: Fareedah → Kunle → Ayo → Dara → Tobi. A `hasBio` derived
-flag (`!!member.bio?.length`) drives the two `TeamMemberCard` variants. `lib/team.ts`
-is consumed only by the Team page (the About page does not list the team).
+Data order follows the draft: Fareedah → Kunle → Ayo → Dara → Tobi. A `hasBio`
+helper (`!!member.bio?.length`) drives the two `TeamMemberCard` variants and the
+display sort (bios first). `lib/team.ts` is consumed only by the Team page (the
+About page does not list the team).
 
-Grid: `grid gap-8 sm:grid-cols-2 lg:grid-cols-3`, single column on mobile.
+Layout: a vertical stack (`flex flex-col gap-12 sm:gap-16`) of full-width rows,
+single column on mobile, two columns (`md:grid-cols-[minmax(0,2fr)_minmax(0,3fr)]`)
+from `md` up.
 
 **Acronyms expanded on first use** in bio copy: United Nations Sustainable
 Development Solutions Network, Public Relations Officer, Society of Electrical and

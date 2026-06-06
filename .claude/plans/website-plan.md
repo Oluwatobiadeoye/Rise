@@ -195,7 +195,9 @@ a lightweight pipeline:
 - [ ] **2. Core pages** — Home, About, Team, Projects, Get Involved, Contact, FAQ with
    real content, **SEO baked in** (per-page metadata, OG, `sitemap.xml`, `robots.txt`).
    - [x] **Home** — real content, per-page metadata + OpenGraph, on-brand 404, real hero photo
-   - [ ] About · Team · Projects · Get Involved · Contact · FAQ
+   - [x] **About** — real content, per-page metadata (story, vision, objectives, values, name & identity)
+   - [x] **Team** — bios from `lib/team.ts`, per-page metadata (Kunle & Ayo "coming soon")
+   - [ ] Projects · Get Involved · Contact · FAQ
    - [ ] `sitemap.xml` + `robots.txt`
 - [ ] **3. Media** — Sanity-powered Blog and Gallery (with designed empty states).
 - [ ] **4. Forms** — native forms → Supabase (server-side + RLS), spam protection, cycle
