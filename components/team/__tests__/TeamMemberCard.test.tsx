@@ -23,9 +23,13 @@ describe("TeamMemberCard", () => {
   });
 
   it("renders a coming-soon shell with no bio prose", () => {
-    render(<TeamMemberCard member={bySlug("kunle-oguntoye")} />);
+    render(
+      <TeamMemberCard
+        member={{ slug: "pending", name: "Pending Member", role: "Director" }}
+      />,
+    );
     expect(
-      screen.getByRole("heading", { name: "Kunle Oguntoye" }),
+      screen.getByRole("heading", { name: "Pending Member" }),
     ).toBeInTheDocument();
     expect(screen.getByText(/Full bio coming soon/i)).toBeInTheDocument();
     expect(screen.queryByText(/Access Bank/i)).not.toBeInTheDocument();

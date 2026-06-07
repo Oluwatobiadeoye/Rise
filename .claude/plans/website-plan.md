@@ -196,7 +196,7 @@ a lightweight pipeline:
    real content, **SEO baked in** (per-page metadata, OG, `sitemap.xml`, `robots.txt`).
    - [x] **Home** — real content, per-page metadata + OpenGraph, on-brand 404, real hero photo
    - [x] **About** — real content, per-page metadata (story, vision, objectives, values, name & identity)
-   - [x] **Team** — bios from `lib/team.ts`, per-page metadata (Kunle & Ayo "coming soon")
+   - [x] **Team** — full bios for all six members from `lib/team.ts`, per-page metadata
    - [x] **Projects** — index + `[slug]` detail from `lib/projects.ts` (The Oyo Project tiers; Foundations of Impact with the curated 2019 gallery + lightbox); Home/Footer deep-link to tier anchors
    - [ ] Get Involved · Contact · FAQ
    - [ ] `sitemap.xml` + `robots.txt`
@@ -231,7 +231,6 @@ a lightweight pipeline:
 - Real domain + branded inbox addresses — **non-blocking**; using Tobi's personal
   email for notifications until we're ready to fully launch.
 - Real photography (placeholders until supplied).
-- A few outstanding team bios (Kunle, Ayo).
 - CTA wording resolved: homepage is **learn-first** (Explore our programmes / Get
   involved); nav = "Join the Movement"; cohort-specific CTAs ("Apply for mentorship",
   "Join the next cohort") live at the apply points on Projects / Get Involved.

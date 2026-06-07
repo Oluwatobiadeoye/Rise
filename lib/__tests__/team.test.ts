@@ -20,9 +20,9 @@ describe("team roster", () => {
     }
   });
 
-  it("flags bio-less members as coming soon", () => {
+  it("has a bio for every member", () => {
     const withoutBio = team.filter((m) => !hasBio(m)).map((m) => m.slug);
-    expect(withoutBio).toEqual(["kunle-oguntoye"]);
+    expect(withoutBio).toEqual([]);
   });
 
   it("gives full-bio members a school affiliation", () => {
