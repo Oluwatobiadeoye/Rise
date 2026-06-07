@@ -1,6 +1,5 @@
 import { Check } from "lucide-react";
 import { Container } from "@/components/shared/Container";
-import { Eyebrow } from "@/components/shared/Eyebrow";
 import { Button } from "@/components/shared/Button";
 import type { Tier } from "@/lib/projects";
 
@@ -24,7 +23,6 @@ export function TierSection({ tier, tinted = false }: TierSectionProps) {
       <Container>
         <div className="grid gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-16">
           <div>
-            <Eyebrow>{tier.subtitle}</Eyebrow>
             <h3
               id={headingId}
               className="mt-3 font-display text-3xl font-bold text-ink sm:text-4xl"
