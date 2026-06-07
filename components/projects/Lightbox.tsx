@@ -137,7 +137,7 @@ export function Lightbox({ photos, label }: LightboxProps) {
             // Click outside the image (on the backdrop) dismisses.
             if (event.target === event.currentTarget) close();
           }}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-charcoal-900/90 p-4 sm:p-8"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 p-4 backdrop-blur-sm sm:p-8"
         >
           <button
             ref={closeButtonRef}
