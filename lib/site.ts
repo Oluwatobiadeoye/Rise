@@ -66,20 +66,20 @@ export const socials: ReadonlyArray<{
   {
     key: "instagram",
     label: "Instagram",
-    handle: "@riseinitiativeoyo",
-    href: "https://www.instagram.com/riseinitiativeoyo",
+    handle: "@rise_initiative",
+    href: "https://www.instagram.com/rise_initiative/",
   },
   {
     key: "facebook",
     label: "Facebook",
-    handle: "RISE Initiative Oyo",
-    href: "https://www.facebook.com/riseinitiativeoyo",
+    handle: "RISE Initiative",
+    href: "https://www.facebook.com/RISEDevelopmentInitiative",
   },
   {
     key: "linkedin",
     label: "LinkedIn",
     handle: "RISE Initiative",
-    href: "https://www.linkedin.com/company/rise-initiative-oyo",
+    href: "https://www.linkedin.com/company/rise-initiative/",
   },
 ];
 
