@@ -11,9 +11,9 @@ const columns: ReadonlyArray<{
   {
     title: "Programmes",
     links: [
-      { label: "RISE Foundations", href: routes.projects },
-      { label: "RISE Horizons", href: routes.projects },
-      { label: "RISE Impact Network", href: routes.projects },
+      { label: "RISE Foundations", href: routes.riseFoundations },
+      { label: "RISE Horizons", href: routes.riseHorizons },
+      { label: "RISE Impact Network", href: routes.riseImpactNetwork },
     ],
   },
   {

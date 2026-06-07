@@ -197,7 +197,8 @@ a lightweight pipeline:
    - [x] **Home** — real content, per-page metadata + OpenGraph, on-brand 404, real hero photo
    - [x] **About** — real content, per-page metadata (story, vision, objectives, values, name & identity)
    - [x] **Team** — bios from `lib/team.ts`, per-page metadata (Kunle & Ayo "coming soon")
-   - [ ] Projects · Get Involved · Contact · FAQ
+   - [x] **Projects** — index + `[slug]` detail from `lib/projects.ts` (The Oyo Project tiers; Foundations of Impact with the curated 2019 gallery + lightbox); Home/Footer deep-link to tier anchors
+   - [ ] Get Involved · Contact · FAQ
    - [ ] `sitemap.xml` + `robots.txt`
 - [ ] **3. Media** — Sanity-powered Blog and Gallery (with designed empty states).
 - [ ] **4. Forms** — native forms → Supabase (server-side + RLS), spam protection, cycle

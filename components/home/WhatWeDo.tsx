@@ -16,24 +16,28 @@ const cards: ReadonlyArray<{
   tint: string;
   title: string;
   body: string;
+  href: string;
 }> = [
   {
     icon: GraduationCap,
     tint: "bg-evergreen-50 text-evergreen",
     title: "Secondary schools",
     body: "Leadership clubs, an annual bootcamp, and West African Examinations Council (WAEC) and Joint Admissions and Matriculation Board (JAMB) exam support for promising students who need it.",
+    href: routes.riseFoundations,
   },
   {
     icon: Compass,
     tint: "bg-emerald-50 text-emerald-600",
     title: "Tertiary students",
     body: "Career webinars, scholarship guidance, and a structured mentorship programme that pairs students with experienced professionals.",
+    href: routes.riseHorizons,
   },
   {
     icon: Briefcase,
     tint: "bg-gold-50 text-gold-600",
     title: "Early-career professionals",
     body: "Curriculum Vitae (CV) and LinkedIn support, a professional community, mentorship, and networking across industries.",
+    href: routes.riseImpactNetwork,
   },
 ];
 
@@ -74,10 +78,11 @@ export function WhatWeDo() {
                 </h3>
                 <p className="mt-2.5 leading-relaxed text-slate">{card.body}</p>
                 <Link
-                  href={routes.projects}
+                  href={card.href}
                   className="mt-auto inline-flex items-center gap-1.5 self-start pt-5 font-semibold text-primary transition-colors hover:text-primary-press"
                 >
                   Find out more
+                  <span className="sr-only"> about {card.title}</span>
                   <ArrowRight
                     className="size-[15px] transition-transform duration-200 group-hover:translate-x-1"
                     aria-hidden="true"
