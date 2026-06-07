@@ -22,7 +22,7 @@ describe("team roster", () => {
 
   it("flags bio-less members as coming soon", () => {
     const withoutBio = team.filter((m) => !hasBio(m)).map((m) => m.slug);
-    expect(withoutBio).toEqual([]);
+    expect(withoutBio).toEqual(["kunle-oguntoye"]);
   });
 
   it("gives full-bio members a school affiliation", () => {

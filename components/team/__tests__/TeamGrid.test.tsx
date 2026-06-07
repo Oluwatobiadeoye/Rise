@@ -8,8 +8,8 @@ describe("TeamGrid", () => {
     expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(6);
   });
 
-  it("shows no coming-soon cards when all members have bios", () => {
+  it("shows a coming-soon card for the one member without a bio", () => {
     render(<TeamGrid />);
-    expect(screen.queryAllByText(/Full bio coming soon/i)).toHaveLength(0);
+    expect(screen.getAllByText(/Full bio coming soon/i)).toHaveLength(1);
   });
 });
