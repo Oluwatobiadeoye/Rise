@@ -2,7 +2,6 @@ import { Container } from "@/components/shared/Container";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 
 const statements: ReadonlyArray<string> = [
-  "To build a thriving, empowered, and connected community where young people drive sustainable development through education, leadership, and service.",
   "To build thriving communities where potential is connected to opportunity, leaders of character and competence emerge, and success becomes a catalyst for collective progress.",
 ];
 
