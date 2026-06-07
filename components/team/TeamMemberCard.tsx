@@ -1,5 +1,7 @@
 import Image from "next/image";
+import Link from "next/link";
 import { ImagePlaceholder } from "@/components/shared/ImagePlaceholder";
+import { LinkedinIcon } from "@/components/shared/icons";
 import { hasBio, type TeamMember } from "@/lib/team";
 
 type TeamMemberCardProps = {
@@ -35,9 +37,22 @@ export function TeamMemberCard({ member, divider = true }: TeamMemberCardProps) 
 
       {/* The divider lives in the content column, so it never reaches the photo. */}
       <div className="flex flex-col">
-        <h3 className="font-display text-2xl font-bold text-ink sm:text-3xl">
-          {member.name}
-        </h3>
+        <div className="flex items-center gap-2">
+          <h3 className="font-display text-2xl font-bold text-ink sm:text-3xl">
+            {member.name}
+          </h3>
+          {member.linkedin && (
+            <Link
+              href={member.linkedin}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`${member.name} on LinkedIn`}
+              className="text-[#0A66C2] transition-opacity hover:opacity-80"
+            >
+              <LinkedinIcon className="size-5" />
+            </Link>
+          )}
+        </div>
         <p className="mt-2 font-semibold text-primary">{member.role}</p>
         {meta ? <p className="mt-1 text-slate">{meta}</p> : null}
 

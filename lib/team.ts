@@ -26,6 +26,8 @@ export type TeamMember = {
   school?: string;
   /** Headshot; falls back to a placeholder when absent. */
   photo?: StaticImageData;
+  /** LinkedIn profile URL. */
+  linkedin?: string;
 };
 
 export const team: ReadonlyArray<TeamMember> = [
@@ -40,6 +42,7 @@ export const team: ReadonlyArray<TeamMember> = [
       "A former Global Schools Advocate with the United Nations Sustainable Development Solutions Network, Fareedah advances youth leadership and capacity-building initiatives across diverse communities. Her work through RISE Initiative is anchored in the conviction that sustainable societal progress depends on empowering young people with the confidence, skills, and support systems needed to lead and drive positive change.",
     ],
     school: "Federal Government Girls College Owinni, Oyo, class of 2013.",
+    linkedin: "https://www.linkedin.com/in/fareedahadedeji/",
   },
   {
     slug: "kunle-oguntoye",
@@ -53,6 +56,7 @@ export const team: ReadonlyArray<TeamMember> = [
       "Kunle is passionate about data science, politics, and community development.",
     ],
     school: "EACOED Model High School, Isokun, Oyo, class of 2013.",
+    linkedin: "https://www.linkedin.com/in/kunleoguntoye/",
   },
   {
     slug: "ayo-salaudeen",
@@ -66,6 +70,7 @@ export const team: ReadonlyArray<TeamMember> = [
       "Through her academic and mentoring experiences as a student tutor at the University of Helsinki, she has developed a strong passion for youth development and is committed to helping young people maximize their potential and make meaningful contributions to their communities.",
     ],
     school: "SPED International Secondary School, Oyo, class of 2013.",
+    linkedin: "https://www.linkedin.com/in/ayo-salaudeen-4626511a4/",
   },
   {
     slug: "quadri-oseni",
@@ -79,6 +84,7 @@ export const team: ReadonlyArray<TeamMember> = [
       "Having held several leadership positions, including Chairman of the O3 Spell Quest Competition and Convention Chairman at the Junior Chamber International Federal School of Surveying , Oyo,  he has developed strong skills in team coordination, stakeholder engagement, and project execution. He believes in using knowledge, leadership, and service to inspire others to pursue excellence, embrace continuous learning, and contribute meaningfully to society. Through his work and volunteer engagements, he hopes to empower young people with the skills, confidence, and opportunities needed to create positive change in their communities and beyond.",
     ],
     school: "SPED International Secondary School, Oyo, class of 2013.",
+    linkedin: "https://www.linkedin.com/in/abdul-quadri-oseni-a72b74197/",
   },
   {
     slug: "tobi-adeoye",
@@ -92,6 +98,7 @@ export const team: ReadonlyArray<TeamMember> = [
       "Tobi believes deeply in technology as a driver of economic empowerment, particularly across African communities. This drives his passion for mentoring students and early-career professionals as they transition into and grow within the technology industry, empowering the next generation of technology leaders.",
     ],
     school: "Nesto College, Erelu, Oyo, class of 2013.",
+    linkedin: "https://www.linkedin.com/in/oluwatobi-adeoye/",
   },
   {
     slug: "oluwadara-adedeji",
@@ -105,6 +112,7 @@ export const team: ReadonlyArray<TeamMember> = [
       "A recipient of multiple awards and scholarships, including the Mastercard Foundation Scholarship, he is committed to empowering young leaders to access global opportunities and drive positive change in their communities. He is passionate about community development, STEM education, and mental health.",
     ],
     school: "SPED International Secondary School, Oyo, class of 2013.",
+    linkedin: "https://www.linkedin.com/in/oluwadara-adedeji/",
   },
 ];
 
