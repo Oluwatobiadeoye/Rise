@@ -12,11 +12,11 @@ export function NameIdentity() {
             id="name-identity-heading"
             className="text-section-title mt-3 text-ink"
           >
-            Rooted in Oyo, rising above limitations.
+            Rooted in Oyo, ...above limitations.
           </h2>
 
           <p className="mt-6 text-lg leading-relaxed text-slate">
-            RISE Initiative stands for rising above limitations. Our flagship
+            RISE Initiative stands for ...above limitations. Our flagship
             programme, The Oyo Project (TOP), carries a Yoruba identity:{" "}
             <span lang="yo" className="font-semibold text-ink">
               Agboole

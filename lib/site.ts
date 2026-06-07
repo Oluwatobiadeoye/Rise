@@ -8,7 +8,7 @@
 export const siteConfig = {
   name: "RISE Initiative",
   shortName: "RISE",
-  tagline: "Rising Above Limitations",
+  tagline: "...above limitations",
   description:
     "Empowering the next generation of leaders. Leadership development, mentorship, and real opportunities for young people.",
   // Temporary; replaced with the real domain at full launch.
