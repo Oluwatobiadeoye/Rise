@@ -1,6 +1,8 @@
+import Image from "next/image";
 import { Container } from "@/components/shared/Container";
 import { Eyebrow } from "@/components/shared/Eyebrow";
-import { ImagePlaceholder } from "@/components/shared/ImagePlaceholder";
+import { Reveal } from "@/components/shared/Reveal";
+import bootcampPhoto from "@/public/projects/foundations-2019/sped/sped-10.jpg";
 
 /** About — the 2017 founding and the 2019 bootcamps. */
 export function OurStory() {
@@ -28,10 +30,16 @@ export function OurStory() {
             </p>
           </div>
 
-          <ImagePlaceholder
-            label="2019 leadership bootcamp, Oyo"
-            className="aspect-[4/3] w-full shadow-md"
-          />
+          <Reveal className="relative aspect-[4/3] w-full overflow-hidden rounded-lg shadow-md">
+            <Image
+              src={bootcampPhoto}
+              alt="Students gathered at the 2019 leadership bootcamp in Oyo town."
+              fill
+              sizes="(min-width: 1024px) 50vw, 100vw"
+              placeholder="blur"
+              className="object-cover"
+            />
+          </Reveal>
         </div>
       </Container>
     </section>

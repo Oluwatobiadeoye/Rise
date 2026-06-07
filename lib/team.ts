@@ -45,11 +45,11 @@ export const team: ReadonlyArray<TeamMember> = [
     slug: "kunle-oguntoye",
     name: "Kunle Oguntoye",
     role: "General Secretary and Director, Partnerships and Collaborations",
-    profession: "Data Scientist",
+    profession: "Researcher, Data Scientist",
     location: "Iowa, United States of America",
     photo: kunlePhoto,
     bio: [
-      "Kunle Oguntoye is a data scientist and researcher with over six years of experience spanning academic research, engineering, technology transfer, and asset infrastructure management. He is currently a PhD Candidate at Iowa State University, working within the Program for Sustainable Pavement Engineering Research. His work focuses on applying data driven approaches to infrastructure systems, with particular interest in pavement performance, infrastructure sustainability, and long term asset optimization.",
+      "Kunle is a data scientist and researcher with over six years of experience spanning academic research, engineering, technology transfer, and asset infrastructure management. He is currently a PhD candidate at Iowa State University, working within the Program for Sustainable Pavement Engineering Research. His work focuses on applying data-driven approaches to infrastructure systems, with particular interest in pavement performance, infrastructure sustainability, and long-term asset optimization.",
       "Kunle is passionate about data science, politics, and community development.",
     ],
     school: "EACOED Model High School, Isokun, Oyo, class of 2013.",

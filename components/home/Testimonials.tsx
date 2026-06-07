@@ -38,10 +38,7 @@ export function Testimonials() {
             id="testimonials-heading"
             className="text-section-title mt-3 text-ink"
           >
-            Seeds planted early.{" "}
-            <em className="font-display font-normal italic text-mist">
-              testimonials from our 2019 Bootcamp
-            </em>
+            Testimonials from previous bootcamps
           </h2>
         </div>
 

@@ -59,7 +59,7 @@ export function Objectives() {
           ))}
         </ol>
 
-        <p className="mt-8 max-w-3xl leading-relaxed text-slate">
+        <p className="mx-auto mt-10 max-w-3xl text-center leading-relaxed text-slate">
           Alongside these, we celebrate and preserve the cultural heritage,
           achievements, and identity of the Oyo community, and we advance the
           United Nations Sustainable Development Goals, particularly Goals 4

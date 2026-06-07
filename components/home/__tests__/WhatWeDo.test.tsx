@@ -27,12 +27,13 @@ describe("WhatWeDo", () => {
     expect(screen.getByText(/Curriculum Vitae \(CV\)/)).toBeInTheDocument();
   });
 
-  it("links each card to the projects page", () => {
+  it("deep-links each card to its programme tier on the TOP page", () => {
     render(<WhatWeDo />);
     const links = screen.getAllByRole("link", { name: /Find out more/i });
-    expect(links).toHaveLength(3);
-    for (const link of links) {
-      expect(link).toHaveAttribute("href", "/projects");
-    }
+    expect(links.map((link) => link.getAttribute("href"))).toEqual([
+      "/projects/the-oyo-project#rise-foundations",
+      "/projects/the-oyo-project#rise-horizons",
+      "/projects/the-oyo-project#rise-impact-network",
+    ]);
   });
 });
