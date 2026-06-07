@@ -5,19 +5,22 @@ import { Eyebrow } from "@/components/shared/Eyebrow";
 const testimonials: ReadonlyArray<{
   quote: string;
   name: string;
-  role: string;
+  title: string;
+  school: string;
 }> = [
   {
     quote:
-      "My passion for community impact began when RISE Initiative visited my secondary school to teach us about leadership, the Sustainable Development Goals (SDGs), and how young people can create positive change. That experience planted a seed that has continued to shape my journey.",
+      "My passion for community impact began when RISE Initiative visited my secondary school to teach us about leadership, the Sustainable Development Goals (SDGs), and how young people can create positive change. That experience planted a seed that has continued to shape my journey. I am grateful to RISE Initiative.",
     name: "Timilehin Ayoola",
-    role: "Aatan Baptist Comprehensive School · Co-Founder, Career Forge Africa",
+    title: "Co-Founder, Career Forge Africa",
+    school: "Aatan Baptist Comprehensive School, Oyo",
   },
   {
     quote:
-      "Back in secondary school, the programme opened my eyes to the power of community impact and taught me what it means to take responsibility. It planted a seed of leadership that has grown with me ever since.",
+      "Back in secondary school, the programme opened my eyes to the power of community impact and taught me what it means to take responsibility. Today,  I realize how deeply important that early foundation was. The bootcamp gave me the early confidence to serve others and lead with purpose and values that continue to drive my work as a youth leader today.",
     name: "Paul Adedeji",
-    role: "Aatan Baptist Comprehensive School · Youth leader & Millennium Fellow",
+    title: "Youth leader & Millennium Fellow",
+    school: "Aatan Baptist Comprehensive School, Oyo",
   },
 ];
 
@@ -35,7 +38,10 @@ export function Testimonials() {
             id="testimonials-heading"
             className="text-section-title mt-3 text-ink"
           >
-            Seeds planted early.
+            Seeds planted early.{" "}
+            <em className="font-display font-normal italic text-mist">
+              testimonials from our 2019 Bootcamp
+            </em>
           </h2>
         </div>
 
@@ -52,10 +58,11 @@ export function Testimonials() {
                   {t.quote}
                 </blockquote>
                 <figcaption className="mt-6">
-                  <span className="block font-display font-bold text-ink">
-                    {t.name}
+                  <span className="block text-sm font-medium text-ink">
+                    <span className="font-display font-bold">{t.name}</span>
+                    <span className="text-slate"> · {t.title}</span>
                   </span>
-                  <span className="mt-1 block text-sm text-slate">{t.role}</span>
+                  <span className="mt-0.5 block text-sm text-slate">{t.school}</span>
                 </figcaption>
               </figure>
             </li>

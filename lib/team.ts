@@ -9,6 +9,7 @@ import type { StaticImageData } from "next/image";
 import daraPhoto from "@/public/team/dara.png";
 import tobiPhoto from "@/public/team/tobi.jpeg";
 import quadriPhoto from "@/public/team/quadri.jpeg";
+import ayoPhoto from "@/public/team/ayo.png";
 
 export type TeamMember = {
   slug: string;
@@ -48,6 +49,14 @@ export const team: ReadonlyArray<TeamMember> = [
     slug: "ayo-salaudeen",
     name: "Ayo Salaudeen",
     role: "Chief Human Resource Manager",
+    profession: "AI Engineer",
+    location: "Dublin, Ireland",
+    photo: ayoPhoto,
+    bio: [
+      "Ayo is a doctoral researcher in animal breeding and genetics with over three years of experience in research, data analysis, and scientific problem-solving. She currently works as a Research Scientist at the Natural Resources Institute Finland (Luke) while pursuing her PhD in Animal Breeding and Genomics at the University of Helsinki, Finland.",
+      "Through her academic and mentoring experiences as a student tutor at the University of Helsinki, she has developed a strong passion for youth development and is committed to helping young people maximize their potential and make meaningful contributions to their communities.",
+    ],
+    school: "SPED International Secondary School, Oyo, class of 2013.",
   },
   {
     slug: "oluwadara-adedeji",
