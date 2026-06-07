@@ -19,7 +19,7 @@ const testimonials: ReadonlyArray<{
     quote:
       "Back in secondary school, the programme opened my eyes to the power of community impact and taught me what it means to take responsibility. Today,  I realize how deeply important that early foundation was. The bootcamp gave me the early confidence to serve others and lead with purpose and values that continue to drive my work as a youth leader today.",
     name: "Paul Adedeji",
-    title: "Youth leader & Millennium Fellow",
+    title: "Millennium Fellowship Scholar & SDG Advocate",
     school: "Aatan Baptist Comprehensive School, Oyo",
   },
 ];
