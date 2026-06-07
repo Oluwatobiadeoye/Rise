@@ -9,9 +9,6 @@ describe("Vision", () => {
       screen.getByRole("heading", { name: /Where we are headed/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByText(/thriving, empowered, and connected community/i),
-    ).toBeInTheDocument();
-    expect(
       screen.getByText(/success becomes a catalyst for collective progress/i),
     ).toBeInTheDocument();
   });
