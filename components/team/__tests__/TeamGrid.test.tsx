@@ -5,7 +5,7 @@ import { TeamGrid } from "../TeamGrid";
 describe("TeamGrid", () => {
   it("renders a card for every member", () => {
     render(<TeamGrid />);
-    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(5);
+    expect(screen.getAllByRole("heading", { level: 3 })).toHaveLength(6);
   });
 
   it("shows coming-soon cards for the two members without bios", () => {
