@@ -22,13 +22,12 @@ describe("TeamMemberCard", () => {
     expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
   });
 
-  it("renders a coming-soon shell with no bio prose", () => {
+  it("renders kunle's card with name and role", () => {
     render(<TeamMemberCard member={bySlug("kunle-oguntoye")} />);
     expect(
       screen.getByRole("heading", { name: "Kunle Oguntoye" }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/Full bio coming soon/i)).toBeInTheDocument();
-    // A phrase from a real bio must not leak into a coming-soon card.
+    expect(screen.queryByText(/Full bio coming soon/i)).not.toBeInTheDocument();
     expect(screen.queryByText(/Access Bank/i)).not.toBeInTheDocument();
   });
 });

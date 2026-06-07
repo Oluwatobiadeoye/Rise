@@ -7,9 +7,9 @@ describe("team roster", () => {
       "fareedah-adedeji",
       "kunle-oguntoye",
       "ayo-salaudeen",
-      "oluwadara-adedeji",
-      "tobi-adeoye",
       "quadri-oseni",
+      "tobi-adeoye",
+      "oluwadara-adedeji",
     ]);
   });
 
@@ -22,7 +22,7 @@ describe("team roster", () => {
 
   it("flags bio-less members as coming soon", () => {
     const withoutBio = team.filter((m) => !hasBio(m)).map((m) => m.slug);
-    expect(withoutBio).toEqual(["kunle-oguntoye", "ayo-salaudeen"]);
+    expect(withoutBio).toEqual([]);
   });
 
   it("gives full-bio members a school affiliation", () => {

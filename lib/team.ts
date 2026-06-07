@@ -49,8 +49,8 @@ export const team: ReadonlyArray<TeamMember> = [
     location: "Iowa, United States of America",
     photo: kunlePhoto,
     bio: [
-      "Kunle is ",
-      "xxxxx",
+      "Kunle is a financial services professional with over seven years of experience across operational leadership, financial governance, business strategy, and public policy research. She currently serves as an Operations Manager at Access Bank Plc, where she leads operational execution, strengthens risk and regulatory compliance frameworks, and optimises banking processes across critical functions.",
+      "A former Global Schools Advocate with the United Nations Sustainable Development Solutions Network, Fareedah advances youth leadership and capacity-building initiatives across diverse communities. Her work through RISE Initiative is anchored in the conviction that sustainable societal progress depends on empowering young people with the confidence, skills, and support systems needed to lead and drive positive change.",
     ],
     school: "EACOED Model High School, Isokun, Oyo, class of 2013.",
   },
