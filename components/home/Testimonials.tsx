@@ -1,4 +1,7 @@
-import { Quote } from "lucide-react";
+"use client";
+
+import { useState } from "react";
+import { Quote, ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/shared/Container";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 
@@ -31,8 +34,12 @@ const testimonials: ReadonlyArray<{
   },
 ];
 
-/** Participant testimonials. */
 export function Testimonials() {
+  const [current, setCurrent] = useState(0);
+
+  const prev = () => setCurrent((i) => (i - 1 + testimonials.length) % testimonials.length);
+  const next = () => setCurrent((i) => (i + 1) % testimonials.length);
+
   return (
     <section
       className="bg-surface py-16 sm:py-20"
@@ -49,29 +56,66 @@ export function Testimonials() {
           </h2>
         </div>
 
-        <ul className="mt-12 grid gap-6 md:grid-cols-2">
-          {testimonials.map((t) => (
-            <li key={t.name} className="h-full">
-              <figure className="flex h-full flex-col rounded-lg border border-line/60 bg-bg p-8">
-                <Quote
-                  className="size-8 text-gold"
-                  aria-hidden="true"
-                  fill="currentColor"
-                />
-                <blockquote className="mt-4 flex-1 text-lg leading-relaxed text-ink">
-                  {t.quote}
-                </blockquote>
-                <figcaption className="mt-6">
-                  <span className="block text-sm font-medium text-ink">
-                    <span className="font-display font-bold">{t.name}</span>
-                    <span className="text-slate"> · {t.title}</span>
-                  </span>
-                  <span className="mt-0.5 block text-sm text-slate">{t.school}</span>
-                </figcaption>
-              </figure>
-            </li>
-          ))}
-        </ul>
+        <div className="mt-12 relative overflow-hidden">
+          <ul
+            className="flex transition-transform duration-500 ease-in-out"
+            style={{ transform: `translateX(-${current * 100}%)` }}
+          >
+            {testimonials.map((t) => (
+              <li key={t.name} className="w-full flex-shrink-0 px-1">
+                <figure className="flex flex-col rounded-lg border border-line/60 bg-bg p-8 sm:p-10">
+                  <Quote
+                    className="size-8 text-gold"
+                    aria-hidden="true"
+                    fill="currentColor"
+                  />
+                  <blockquote className="mt-4 flex-1 text-lg leading-relaxed text-ink">
+                    {t.quote}
+                  </blockquote>
+                  <figcaption className="mt-6">
+                    <span className="block text-sm font-medium text-ink">
+                      <span className="font-display font-bold">{t.name}</span>
+                      <span className="text-slate"> · {t.title}</span>
+                    </span>
+                    <span className="mt-0.5 block text-sm text-slate">{t.school}</span>
+                  </figcaption>
+                </figure>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="mt-8 flex items-center justify-between">
+          <div className="flex gap-2">
+            {testimonials.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => setCurrent(i)}
+                aria-label={`Go to testimonial ${i + 1}`}
+                className={`h-2 rounded-full transition-all duration-300 ${
+                  i === current ? "w-6 bg-evergreen-700" : "w-2 bg-line"
+                }`}
+              />
+            ))}
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={prev}
+              aria-label="Previous testimonial"
+              className="flex size-10 items-center justify-center rounded-full border border-line/60 bg-bg text-ink transition hover:border-evergreen-700 hover:text-evergreen-700"
+            >
+              <ChevronLeft className="size-5" />
+            </button>
+            <button
+              onClick={next}
+              aria-label="Next testimonial"
+              className="flex size-10 items-center justify-center rounded-full border border-line/60 bg-bg text-ink transition hover:border-evergreen-700 hover:text-evergreen-700"
+            >
+              <ChevronRight className="size-5" />
+            </button>
+          </div>
+        </div>
       </Container>
     </section>
   );
