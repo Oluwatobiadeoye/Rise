@@ -18,7 +18,7 @@ describe("TierSection", () => {
 
   it("renders the focus areas", () => {
     render(<TierSection tier={horizons} />);
-    expect(screen.getByText("Career Development")).toBeInTheDocument();
+    expect(screen.getByText("Leadership Development")).toBeInTheDocument();
   });
 
   it("renders mentor and mentee CTAs for Horizons", () => {
