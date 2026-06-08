@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Quote, ChevronLeft, ChevronRight } from "lucide-react";
 import { Container } from "@/components/shared/Container";
 import { Eyebrow } from "@/components/shared/Eyebrow";
@@ -36,6 +36,16 @@ const testimonials: ReadonlyArray<{
 
 export function Testimonials() {
   const [current, setCurrent] = useState(0);
+  const paused = useRef(false);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (!paused.current) {
+        setCurrent((i) => (i + 1) % testimonials.length);
+      }
+    }, 5000);
+    return () => clearInterval(id);
+  }, []);
 
   const prev = () => setCurrent((i) => (i - 1 + testimonials.length) % testimonials.length);
   const next = () => setCurrent((i) => (i + 1) % testimonials.length);
@@ -56,7 +66,11 @@ export function Testimonials() {
           </h2>
         </div>
 
-        <div className="mt-12 relative overflow-hidden">
+        <div
+          className="mt-12 relative overflow-hidden"
+          onMouseEnter={() => { paused.current = true; }}
+          onMouseLeave={() => { paused.current = false; }}
+        >
           <ul
             className="flex transition-transform duration-500 ease-in-out"
             style={{ transform: `translateX(-${current * 100}%)` }}
