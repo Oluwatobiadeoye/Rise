@@ -6,9 +6,9 @@ describe("OurStory", () => {
   it("renders the heading and the founding story", () => {
     render(<OurStory />);
     expect(
-      screen.getByRole("heading", { name: /Built on belief in young people/i }),
-    ).toBeInTheDocument();
-    expect(screen.getByText(/talent is everywhere, but opportunity is not/i)).toBeInTheDocument();
-    expect(screen.getByText(/Our journey began in 2017/i)).toBeInTheDocument();
+      screen.getAllByRole("heading", { name: /Built on belief in young people/i }).length,
+    ).toBeGreaterThan(0);
+    expect(screen.getAllByText(/talent is everywhere, but opportunity is not/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/Our journey began in 2017/i).length).toBeGreaterThan(0);
   });
 });

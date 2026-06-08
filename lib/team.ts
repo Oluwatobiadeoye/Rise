@@ -48,7 +48,7 @@ export const team: ReadonlyArray<TeamMember> = [
     slug: "kunle-oguntoye",
     name: "Kunle Oguntoye",
     role: "General Secretary and Director, Partnerships and Collaborations",
-    profession: "Researcher, Data Scientist",
+    profession: "Data Scientist",
     location: "Iowa, United States of America",
     photo: kunlePhoto,
     bio: [
