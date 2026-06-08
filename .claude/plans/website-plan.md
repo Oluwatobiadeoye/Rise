@@ -192,14 +192,15 @@ a lightweight pipeline:
    - [x] Shared UI: Nav (sticky/blur, mobile menu), Footer, Button, Container, Eyebrow, Logo, ImagePlaceholder
    - [x] Unit tests (Vitest + RTL) and a GitHub Actions CI (lint · typecheck · test · build)
    - [x] Deployed to Vercel — live at https://rise-ruby-three.vercel.app/ (production)
-- [ ] **2. Core pages** — Home, About, Team, Projects, Get Involved, Contact, FAQ with
+- [x] **2. Core pages** — Home, About, Team, Projects, Get Involved, Contact, FAQ with
    real content, **SEO baked in** (per-page metadata, OG, `sitemap.xml`, `robots.txt`).
    - [x] **Home** — real content, per-page metadata + OpenGraph, on-brand 404, real hero photo
    - [x] **About** — real content, per-page metadata (story, vision, objectives, values, name & identity)
    - [x] **Team** — full bios for all six members from `lib/team.ts`, per-page metadata
    - [x] **Projects** — index + `[slug]` detail from `lib/projects.ts` (The Oyo Project tiers; Foundations of Impact with the curated 2019 gallery + lightbox); Home/Footer deep-link to tier anchors
-   - [ ] Get Involved · Contact · FAQ
-   - [ ] `sitemap.xml` + `robots.txt`
+   - [x] **Get Involved** — hub (mentor, mentee, volunteer, support-a-student) + mentor/mentee application pages; forms are UI-only (submission deferred to Milestone 4)
+   - [x] **Contact** — details (emails + socials) + contact form UI (submission deferred); **FAQ** — `<details>` accordion + FAQ structured data
+   - [x] `sitemap.xml` + `robots.txt` (driven by `siteConfig.url`)
 - [ ] **3. Media** — Sanity-powered Blog and Gallery (with designed empty states).
 - [ ] **4. Forms** — native forms → Supabase (server-side + RLS), spam protection, cycle
    open/close, notifications to Tobi's email. (Provision Supabase / Resend / Sanity /
