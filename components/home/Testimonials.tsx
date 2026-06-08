@@ -13,14 +13,21 @@ const testimonials: ReadonlyArray<{
       "My passion for community impact began when RISE Initiative visited my secondary school to teach us about leadership, the Sustainable Development Goals (SDGs), and how young people can create positive change. That experience planted a seed that has continued to shape my journey. I am grateful to RISE Initiative.",
     name: "Timilehin Ayoola",
     title: "Co-Founder, Career Forge Africa",
-    school: "Aatan Baptist Comprehensive School, Oyo",
+    school: "Aatan Baptist Comprehensive High School, Oyo",
   },
   {
     quote:
       "Back in secondary school, the programme opened my eyes to the power of community impact and taught me what it means to take responsibility. Today,  I realize how deeply important that early foundation was. The bootcamp gave me the early confidence to serve others and lead with purpose and values that continue to drive my work as a youth leader today.",
     name: "Paul Adedeji",
     title: "Millennium Fellowship Scholar & SDG Advocate",
-    school: "Aatan Baptist Comprehensive School, Oyo",
+    school: "Aatan Baptist Comprehensive High School, Oyo",
+  },
+  {
+    quote:
+      "I recall being part of this enlightenment program, by the RISE Initiative that spoke to us about life, purpose, and intentional living. The details of that day may have faded, but the impression it left has not. It planted a seed, the understanding that success is not accidental, that clarity of purpose is something you pursue deliberately. I can trace a straight line between that early nudge toward purpose and the intentional choices I have made since then.",
+    name: "Worship Adeife Adebayo",
+    title: "Education & History Student, Obafemi Awolowo University",
+    school: "Aatan Baptist Comprehensive High School, Oyo",
   },
 ];
 
