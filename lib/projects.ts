@@ -126,7 +126,7 @@ const theOyoProject: Project = {
       slug: "rise-horizons",
       name: "RISE Horizons",
       subtitle: "Tertiary programme",
-      audience: "Students in tertiary institutions affiliated with Oyo town",
+      audience: "Students in tertiary institutions affiliated with Oyo",
       body: [
         "RISE Horizons supports students as they navigate higher education and prepare for future opportunities.",
         "Through mentorship, professional development sessions, career guidance, scholarship awareness initiatives, networking opportunities, and exposure to experienced professionals, participants gain valuable insights that support both personal growth and career readiness.",
