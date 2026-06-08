@@ -11,6 +11,6 @@ describe("Testimonials", () => {
 
   it("renders the quotes inside blockquotes", () => {
     const { container } = render(<Testimonials />);
-    expect(container.querySelectorAll("blockquote")).toHaveLength(2);
+    expect(container.querySelectorAll("blockquote")).toHaveLength(3);
   });
 });

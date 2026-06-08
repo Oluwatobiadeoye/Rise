@@ -15,7 +15,7 @@ describe("ProjectGallery", () => {
     const schools = getProject("foundations-of-impact")!.gallery!;
     render(<ProjectGallery schools={schools} />);
     expect(
-      screen.getByRole("heading", { name: "Aatan Baptist Comprehensive School" }),
+      screen.getByRole("heading", { name: "Aatan Baptist Comprehensive High School" }),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
@@ -38,7 +38,7 @@ describe("ProjectGallery", () => {
   it("renders thumbnails once a school has photos", () => {
     const schools: GallerySchool[] = [
       {
-        school: "Aatan Baptist Comprehensive School",
+        school: "Aatan Baptist Comprehensive High School",
         location: "Oyo",
         photos: [
           { src: img("/a1.jpg"), alt: "Students at the 2019 bootcamp" },

@@ -37,7 +37,7 @@ describe("projects roster", () => {
     const foundations = getProject("foundations-of-impact");
     expect(foundations?.highlights?.length).toBeGreaterThan(0);
     expect(foundations?.gallery?.map((g) => g.school)).toEqual([
-      "Aatan Baptist Comprehensive School",
+      "Aatan Baptist Comprehensive High School",
       "Best Legacy International Secondary School",
       "SPED International Secondary School",
     ]);
