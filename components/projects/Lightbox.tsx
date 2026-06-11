@@ -1,15 +1,20 @@
 "use client";
 
-import Image from "next/image";
+import Image, { type StaticImageData } from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import { Reveal } from "@/components/shared/Reveal";
-import type { GallerySchool } from "@/lib/projects";
 
-type Photo = GallerySchool["photos"][number];
+export type LightboxPhoto = {
+  src: string | StaticImageData;
+  alt: string;
+  /** Intrinsic pixel size; required when src is a plain path string. */
+  width?: number;
+  height?: number;
+};
 
 type LightboxProps = {
-  photos: Photo[];
+  photos: LightboxPhoto[];
   /** Used to label the thumbnail grid for assistive tech. */
   label: string;
 };
@@ -103,7 +108,9 @@ export function Lightbox({ photos, label }: LightboxProps) {
         className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4"
       >
         {photos.map((photo, index) => (
-          <li key={photo.alt}>
+          <li
+            key={`${typeof photo.src === "string" ? photo.src : photo.src.src}:${photo.alt}`}
+          >
             <Reveal>
               <button
                 type="button"
@@ -118,7 +125,8 @@ export function Lightbox({ photos, label }: LightboxProps) {
                   alt={photo.alt}
                   fill
                   sizes="(min-width: 1024px) 25vw, (min-width: 640px) 33vw, 50vw"
-                  placeholder="blur"
+                  // Blur placeholders only exist for statically imported images.
+                  placeholder={typeof photo.src === "string" ? "empty" : "blur"}
                   className="object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               </button>
@@ -164,7 +172,11 @@ export function Lightbox({ photos, label }: LightboxProps) {
             src={active.src}
             alt={active.alt}
             sizes="100vw"
-            placeholder="blur"
+            // Path-string sources carry no intrinsic size, so it is passed
+            // explicitly; static imports get it (and a blur) for free.
+            {...(typeof active.src === "string"
+              ? { width: active.width, height: active.height }
+              : { placeholder: "blur" as const })}
             className="h-auto max-h-[85vh] w-auto rounded-lg object-contain"
           />
 
