@@ -19,7 +19,7 @@ const programmes: ReadonlyArray<{
   {
     name: "RISE Foundations",
     audience: "Secondary school students",
-    body: "Leadership clubs, mentorship, and exam support that help secondary school students build strong foundations and broaden their aspirations.",
+    body: "Leadership clubs, mentorship, and exam support that build strong foundations for secondary school students.",
     href: routes.riseFoundations,
     image: foundationsImg,
     imageAlt:
@@ -28,7 +28,7 @@ const programmes: ReadonlyArray<{
   {
     name: "RISE Horizons",
     audience: "Tertiary students",
-    body: "Career guidance, scholarship awareness, and structured mentorship that prepare tertiary students for life after school.",
+    body: "Career guidance, scholarship awareness, and mentorship that prepare tertiary students for life after school.",
     href: routes.riseHorizons,
     image: horizonsImg,
     imageAlt:
@@ -37,7 +37,7 @@ const programmes: ReadonlyArray<{
   {
     name: "RISE Impact Network",
     audience: "Early-career professionals",
-    body: "A growing community of professionals sharing mentorship, networking, and opportunities to lead and give back.",
+    body: "A professional community sharing mentorship, networking, and the chance to lead and give back.",
     href: routes.riseImpactNetwork,
     image: impactImg,
     imageAlt:
@@ -65,7 +65,7 @@ export function Programmes() {
               key={programme.name}
               className="group flex flex-col overflow-hidden rounded-lg border border-line/60 bg-surface shadow-md transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"
             >
-              <div className="relative aspect-[16/9] w-full overflow-hidden">
+              <div className="relative aspect-[4/3] w-full overflow-hidden">
                 <Image
                   src={programme.image}
                   alt={programme.imageAlt}
@@ -75,7 +75,7 @@ export function Programmes() {
                   className="object-cover"
                 />
               </div>
-              <div className="flex flex-1 flex-col p-6">
+              <div className="flex flex-1 flex-col p-5">
                 <p className="font-body text-[13px] font-bold uppercase tracking-[0.16em] text-slate">
                   {programme.audience}
                 </p>
