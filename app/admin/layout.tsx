@@ -3,6 +3,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { logoutAdmin } from "@/lib/actions/admin";
 import { Container } from "@/components/shared/Container";
+import { Logo } from "@/components/shared/Logo";
 
 export const metadata: Metadata = {
   title: "RISE admin",
@@ -19,8 +20,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
         <Container className="flex flex-wrap items-center gap-x-6 gap-y-3 py-4">
           <Link
             href="/admin"
-            className="font-display text-lg font-bold text-ink"
+            className="flex items-center gap-2.5 font-display text-lg font-bold text-ink"
           >
+            <Logo className="size-8" />
             RISE admin
           </Link>
           <nav className="flex items-center gap-5 font-body text-sm font-semibold text-muted">
