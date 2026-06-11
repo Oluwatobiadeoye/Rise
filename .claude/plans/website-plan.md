@@ -201,9 +201,11 @@ a lightweight pipeline:
    - [x] **Get Involved** — hub (mentor, mentee, volunteer, support-a-student) + mentor/mentee application pages; forms are UI-only (submission deferred to Milestone 4)
    - [x] **Contact** — details (emails + socials) + contact form UI (submission deferred); **FAQ** — `<details>` accordion + FAQ structured data
    - [x] `sitemap.xml` + `robots.txt` (driven by `siteConfig.url`)
-- [x] **3. Media** — Blog and Gallery on a filesystem content layer (`lib/content`,
-   swap seam for Sanity): markdown posts + a JSON gallery manifest, validated at build,
-   with designed empty states, per-post metadata/OpenGraph, and sitemap entries.
+- [x] **3. Media** — Blog on a filesystem content layer (`lib/content`, swap seam for
+   Sanity): markdown posts (each may carry a cover plus any number of inline images),
+   validated at build, with a designed empty state, per-post metadata/OpenGraph, and
+   sitemap entries. The standalone gallery was dropped: programme updates are blog posts
+   with their own photos, so a separate gallery was redundant.
 - [x] **4. Forms** — native forms wired through server actions to a filesystem-backed
    store (`lib/db`, swap seam for Supabase) with validation, honeypot + rate-limit spam
    protection, cycle open/close (mentor/mentee pages go live or show "notify me"), and
