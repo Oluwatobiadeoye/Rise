@@ -27,7 +27,7 @@ export default async function BlogPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Media"
+        eyebrow="Blog"
         title="Stories from RISE."
         lede="Updates from our programmes and the people behind them: what we are building, what we are learning, and the young leaders making it happen."
       />
