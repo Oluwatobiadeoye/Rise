@@ -1,6 +1,12 @@
 import { createFsSubmissionStore } from "./fs";
+import { createSupabaseSubmissionStore, isSupabaseConfigured } from "./supabase";
 import type { SubmissionStore } from "./types";
 
-// Swap point: replace the factory call (e.g. with a Supabase-backed store)
-// and the rest of the app is unaffected.
-export const db: SubmissionStore = createFsSubmissionStore();
+/**
+ * The single submission store the app depends on. It uses Supabase when its
+ * credentials are configured (the durable production path) and falls back to
+ * the filesystem store otherwise, so local development and tests need no keys.
+ */
+export const db: SubmissionStore = isSupabaseConfigured()
+  ? createSupabaseSubmissionStore()
+  : createFsSubmissionStore();
