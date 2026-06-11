@@ -6,6 +6,8 @@ export type PostMeta = {
   date: string;
   excerpt: string;
   author: string;
+  /** Estimated reading time of the body, in whole minutes (minimum 1). */
+  readingMinutes: number;
   cover: { src: string; alt: string; width: number; height: number } | null;
 };
 

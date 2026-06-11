@@ -14,6 +14,7 @@ const fixturePosts: PostMeta[] = [
     date: "2026-01-10",
     excerpt: "Meet the students starting their RISE journey this year.",
     author: "Dara Olawale",
+    readingMinutes: 3,
     cover: null,
   },
   {
@@ -22,6 +23,7 @@ const fixturePosts: PostMeta[] = [
     date: "2026-03-05",
     excerpt: "Highlights from our latest leadership bootcamp.",
     author: "Ayo Adekunle",
+    readingMinutes: 4,
     cover: null,
   },
 ];

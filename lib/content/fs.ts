@@ -124,6 +124,12 @@ function parseCover(
   };
 }
 
+/** Whole-minute reading estimate at 200 words per minute, minimum 1. */
+function readingMinutes(body: string): number {
+  const words = body.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(words / 200));
+}
+
 function parsePostFile(file: string, raw: string): ParsedPostFile {
   const { fields, body } = parseFrontmatter(file, raw);
 
@@ -155,6 +161,7 @@ function parsePostFile(file: string, raw: string): ParsedPostFile {
       date,
       excerpt: fields.excerpt.trim(),
       author: fields.author.trim(),
+      readingMinutes: readingMinutes(body),
       cover: parseCover(file, fields),
     },
     draft: draftValue === "true",

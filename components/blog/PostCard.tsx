@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { ImagePlaceholder } from "@/components/shared/ImagePlaceholder";
 import type { PostMeta } from "@/lib/content";
 
@@ -43,9 +44,11 @@ export function PostCard({ post }: PostCardProps) {
       )}
 
       <div>
-        <time dateTime={post.date} className="text-sm text-slate">
-          {formatPostDate(post.date)}
-        </time>
+        <p className="flex items-center gap-2 text-sm text-slate">
+          <time dateTime={post.date}>{formatPostDate(post.date)}</time>
+          <span aria-hidden="true">·</span>
+          <span>{post.readingMinutes} min read</span>
+        </p>
         <h2 className="font-display mt-2 text-2xl font-bold tracking-[-0.02em] text-ink">
           <Link
             href={`/blog/${post.slug}`}
@@ -55,7 +58,17 @@ export function PostCard({ post }: PostCardProps) {
           </Link>
         </h2>
         <p className="mt-3 leading-relaxed text-slate">{post.excerpt}</p>
-        <p className="mt-4 text-sm font-semibold text-ink">{post.author}</p>
+        <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm">
+          <span className="font-semibold text-ink">{post.author}</span>
+          <span aria-hidden="true" className="text-line">|</span>
+          <span className="inline-flex items-center gap-1 font-semibold text-primary">
+            Read more
+            <ArrowRight
+              className="size-[15px] transition-transform duration-200 group-hover:translate-x-1"
+              aria-hidden="true"
+            />
+          </span>
+        </div>
       </div>
     </article>
   );

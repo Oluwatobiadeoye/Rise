@@ -63,8 +63,12 @@ export default async function BlogPostPage({
             <time dateTime={post.date}>{formatPostDate(post.date)}</time>
           </Eyebrow>
           <h1 className="text-display mt-3 text-ink">{post.title}</h1>
-          <p className="mt-5 text-slate">
-            By <span className="font-semibold text-ink">{post.author}</span>
+          <p className="mt-5 flex flex-wrap items-center gap-2 text-slate">
+            <span>
+              By <span className="font-semibold text-ink">{post.author}</span>
+            </span>
+            <span aria-hidden="true">·</span>
+            <span>{post.readingMinutes} min read</span>
           </p>
           {post.cover ? (
             <Image

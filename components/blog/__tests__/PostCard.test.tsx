@@ -9,6 +9,7 @@ const basePost: PostMeta = {
   date: "2026-01-10",
   excerpt: "Meet the students starting their RISE journey this year.",
   author: "Dara Olawale",
+  readingMinutes: 3,
   cover: null,
 };
 
