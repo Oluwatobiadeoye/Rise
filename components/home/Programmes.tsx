@@ -6,7 +6,7 @@ import { routes } from "@/lib/site";
 
 import foundationsImg from "@/public/projects/foundations-2019/sped/sped-09.jpg";
 import horizonsImg from "@/public/projects/foundations-2019/sped/sped-01.jpg";
-import impactImg from "@/public/projects/foundations-2019/sped/sped-04.jpg";
+import impactImg from "@/public/projects/foundations-2019/sped/sped-06.jpg";
 
 const programmes: ReadonlyArray<{
   name: string;
