@@ -1,9 +1,17 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { Quote, ChevronLeft, ChevronRight } from "lucide-react";
+import { useState, useEffect, useSyncExternalStore } from "react";
+import { Quote, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { Container } from "@/components/shared/Container";
 import { Eyebrow } from "@/components/shared/Eyebrow";
+
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+
+function subscribeToReducedMotion(onChange: () => void) {
+  const mql = window.matchMedia(REDUCED_MOTION_QUERY);
+  mql.addEventListener("change", onChange);
+  return () => mql.removeEventListener("change", onChange);
+}
 
 const testimonials: ReadonlyArray<{
   quote: string;
@@ -20,7 +28,7 @@ const testimonials: ReadonlyArray<{
   },
   {
     quote:
-      "Back in secondary school, the programme opened my eyes to the power of community impact and taught me what it means to take responsibility. Today,  I realize how deeply important that early foundation was. The bootcamp gave me the early confidence to serve others and lead with purpose and values that continue to drive my work as a youth leader today.",
+      "Back in secondary school, the programme opened my eyes to the power of community impact and taught me what it means to take responsibility. Today, I realize how deeply important that early foundation was. The bootcamp gave me the early confidence to serve others and lead with purpose and values that continue to drive my work as a youth leader today.",
     name: "Paul Adedeji",
     title: "Millennium Fellowship Scholar & SDG Advocate",
     school: "Aatan Baptist Comprehensive High School, Oyo",
@@ -36,19 +44,43 @@ const testimonials: ReadonlyArray<{
 
 export function Testimonials() {
   const [current, setCurrent] = useState(0);
-  const paused = useRef(false);
+  const [override, setOverride] = useState<boolean | null>(null);
+  const [hovered, setHovered] = useState(false);
+
+  // Auto-advance is opt-out: it never starts for reduced-motion users and
+  // stops for good the moment the visitor interacts with the carousel
+  // (focus, touch, or any manual navigation). Hovering pauses it transiently.
+  const prefersReducedMotion = useSyncExternalStore(
+    subscribeToReducedMotion,
+    () => window.matchMedia(REDUCED_MOTION_QUERY).matches,
+    () => true,
+  );
+  const autoPlaying = override ?? !prefersReducedMotion;
+  const playing = autoPlaying && !hovered;
 
   useEffect(() => {
+    if (!playing) return;
     const id = setInterval(() => {
-      if (!paused.current) {
-        setCurrent((i) => (i + 1) % testimonials.length);
-      }
-    }, 5000);
+      setCurrent((i) => (i + 1) % testimonials.length);
+    }, 10000);
     return () => clearInterval(id);
-  }, []);
+  }, [playing]);
 
-  const prev = () => setCurrent((i) => (i - 1 + testimonials.length) % testimonials.length);
-  const next = () => setCurrent((i) => (i + 1) % testimonials.length);
+  // Focus or touch anywhere in the carousel stops rotation, except on the
+  // play/pause toggle itself: stopping there would invert the tap that follows.
+  const stopAuto = (event?: React.SyntheticEvent) => {
+    const target = event?.target;
+    if (target instanceof Element && target.closest("[data-carousel-toggle]")) {
+      return;
+    }
+    setOverride(false);
+  };
+  const goTo = (i: number) => {
+    stopAuto();
+    setCurrent(i);
+  };
+  const prev = () => goTo((current - 1 + testimonials.length) % testimonials.length);
+  const next = () => goTo((current + 1) % testimonials.length);
 
   return (
     <section
@@ -67,16 +99,29 @@ export function Testimonials() {
         </div>
 
         <div
-          className="mt-12 relative overflow-hidden"
-          onMouseEnter={() => { paused.current = true; }}
-          onMouseLeave={() => { paused.current = false; }}
+          role="group"
+          aria-roledescription="carousel"
+          aria-label="Testimonials"
+          onMouseEnter={() => setHovered(true)}
+          onMouseLeave={() => setHovered(false)}
+          onFocusCapture={stopAuto}
+          onTouchStart={stopAuto}
         >
+        <div className="mt-12 relative overflow-hidden">
           <ul
-            className="flex transition-transform duration-500 ease-in-out"
+            className="flex transition-transform duration-500 ease-in-out motion-reduce:transition-none"
             style={{ transform: `translateX(-${current * 100}%)` }}
+            aria-live={playing ? "off" : "polite"}
           >
-            {testimonials.map((t) => (
-              <li key={t.name} className="w-full flex-shrink-0 px-1">
+            {testimonials.map((t, i) => (
+              <li
+                key={t.name}
+                className="w-full flex-shrink-0 px-1"
+                role="group"
+                aria-roledescription="slide"
+                aria-label={`Testimonial ${i + 1} of ${testimonials.length}`}
+                aria-hidden={i !== current}
+              >
                 <figure className="flex flex-col rounded-lg border border-line/60 bg-bg p-8 sm:p-10">
                   <Quote
                     className="size-8 text-gold"
@@ -100,12 +145,25 @@ export function Testimonials() {
         </div>
 
         <div className="mt-8 flex items-center justify-between">
-          <div className="flex gap-2">
+          <div className="flex items-center gap-2">
+            <button
+              data-carousel-toggle
+              onClick={() => setOverride(!autoPlaying)}
+              aria-label={autoPlaying ? "Pause automatic rotation" : "Resume automatic rotation"}
+              className="mr-2 flex size-10 items-center justify-center rounded-full border border-line/60 bg-bg text-ink transition hover:border-evergreen-700 hover:text-evergreen-700"
+            >
+              {autoPlaying ? (
+                <Pause className="size-4" aria-hidden="true" />
+              ) : (
+                <Play className="size-4" aria-hidden="true" />
+              )}
+            </button>
             {testimonials.map((_, i) => (
               <button
                 key={i}
-                onClick={() => setCurrent(i)}
+                onClick={() => goTo(i)}
                 aria-label={`Go to testimonial ${i + 1}`}
+                aria-current={i === current}
                 className={`h-2 rounded-full transition-all duration-300 ${
                   i === current ? "w-6 bg-evergreen-700" : "w-2 bg-line"
                 }`}
@@ -129,6 +187,7 @@ export function Testimonials() {
               <ChevronRight className="size-5" />
             </button>
           </div>
+        </div>
         </div>
       </Container>
     </section>

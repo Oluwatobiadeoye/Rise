@@ -3,23 +3,23 @@ import { Eyebrow } from "@/components/shared/Eyebrow";
 
 const objectives: ReadonlyArray<{ title: string; body: string }> = [
   {
-    title: "Leadership Development",
+    title: "Leadership development",
     body: "To cultivate leaders of character, competence, and purpose who are equipped to create positive change within their professions, communities, and society.",
   },
   {
-    title: "Mentorship and Opportunity Access",
+    title: "Mentorship and opportunity access",
     body: "To expand access to mentorship, networks, information, and opportunities that accelerate personal, educational, and professional growth.",
   },
   {
-    title: "Education and Talent Development",
+    title: "Education and talent development",
     body: "To support the development of human potential by promoting learning, skills acquisition, critical thinking, and lifelong personal growth.",
   },
   {
-    title: "Community Engagement and Service",
+    title: "Community engagement and service",
     body: "To foster a culture of responsibility, service, and civic participation that encourages individuals to contribute meaningfully to the advancement of their communities.",
   },
   {
-    title: "Sustainable Community Transformation",
+    title: "Sustainable community transformation",
     body: "To strengthen communities through collaborative initiatives, strategic partnerships, and locally driven solutions that create lasting social and economic impact.",
   },
 ];
