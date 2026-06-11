@@ -48,7 +48,7 @@ export function Programmes() {
           </p>
         </div>
 
-        <ul className="mt-12 grid gap-6 md:grid-cols-3">
+        <ul className="mt-12 grid gap-5 md:grid-cols-3">
           {programmes.map((programme) => (
             <li
               key={programme.name}
@@ -57,9 +57,9 @@ export function Programmes() {
               <ImagePlaceholder
                 label={programme.image}
                 rounded="rounded-none"
-                className="aspect-[4/3] w-full"
+                className="aspect-[16/9] w-full"
               />
-              <div className="flex flex-1 flex-col p-7">
+              <div className="flex flex-1 flex-col p-6">
                 <p className="font-body text-[13px] font-bold uppercase tracking-[0.16em] text-slate">
                   {programme.audience}
                 </p>
