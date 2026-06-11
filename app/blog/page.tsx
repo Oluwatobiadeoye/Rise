@@ -35,9 +35,9 @@ export default async function BlogPage() {
       <section className="py-14 sm:py-18">
         <Container>
           {posts.length > 0 ? (
-            <ul className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            <ul className="mx-auto flex max-w-4xl flex-col divide-y divide-line">
               {posts.map((post) => (
-                <li key={post.slug}>
+                <li key={post.slug} className="py-8 first:pt-0 last:pb-0">
                   <PostCard post={post} />
                 </li>
               ))}
