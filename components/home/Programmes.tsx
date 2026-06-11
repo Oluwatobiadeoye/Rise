@@ -5,8 +5,8 @@ import { Container } from "@/components/shared/Container";
 import { routes } from "@/lib/site";
 
 import foundationsImg from "@/public/projects/foundations-2019/sped/sped-09.jpg";
-import horizonsImg from "@/public/projects/foundations-2019/sped/sped-04.jpg";
-import impactImg from "@/public/projects/foundations-2019/sped/sped-02.jpg";
+import horizonsImg from "@/public/projects/foundations-2019/sped/sped-01.jpg";
+import impactImg from "@/public/projects/foundations-2019/sped/sped-04.jpg";
 
 const programmes: ReadonlyArray<{
   name: string;
@@ -32,7 +32,7 @@ const programmes: ReadonlyArray<{
     href: routes.riseHorizons,
     image: horizonsImg,
     imageAlt:
-      "A RISE Initiative facilitator speaking into a microphone at a career and leadership session.",
+      "Students seated and engaged during a RISE Initiative career and leadership session.",
   },
   {
     name: "RISE Impact Network",
@@ -41,7 +41,7 @@ const programmes: ReadonlyArray<{
     href: routes.riseImpactNetwork,
     image: impactImg,
     imageAlt:
-      "A RISE Initiative speaker addressing the room with a microphone at a community event.",
+      "A RISE Initiative facilitator speaking into a microphone at a community session.",
   },
 ];
 
