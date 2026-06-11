@@ -21,6 +21,7 @@ const validContact = {
   email: "Ada@Example.COM",
   role: "Student",
   message: "Hello RISE.",
+  consent: "on",
 };
 
 const validMentor = {
@@ -30,6 +31,7 @@ const validMentor = {
   audiencePreference: "tertiary",
   availability: "monthly",
   message: "Happy to help.",
+  consent: "on",
 };
 
 const validMentee = {
@@ -38,6 +40,7 @@ const validMentee = {
   institution: "LAUTECH",
   dateOfBirth: "2004-05-12",
   essay: "My background, goals, and motivation.",
+  consent: "on",
 };
 
 const validVolunteer = {
@@ -45,6 +48,7 @@ const validVolunteer = {
   email: "ada@example.com",
   interestArea: "Events & logistics",
   message: "",
+  consent: "on",
 };
 
 describe("validateContact", () => {
@@ -68,6 +72,7 @@ describe("validateContact", () => {
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(Object.keys(result.errors).sort()).toEqual([
+        "consent",
         "email",
         "fullName",
         "message",
@@ -233,4 +238,45 @@ describe("validateNotifyMe", () => {
     );
     expect(badEmail.ok).toBe(false);
   });
+
+  it("does not require consent (notify-me uses an inline notice, not a checkbox)", () => {
+    const result = validateNotifyMe(
+      formDataOf({ role: "mentor", email: "ada@example.com" }),
+    );
+    expect(result.ok).toBe(true);
+  });
+});
+
+describe("required consent gate", () => {
+  const cases = [
+    { name: "contact", validate: validateContact, valid: validContact },
+    { name: "mentor", validate: validateMentor, valid: validMentor },
+    { name: "mentee", validate: validateMentee, valid: validMentee },
+    { name: "volunteer", validate: validateVolunteer, valid: validVolunteer },
+  ] as const;
+
+  for (const { name, validate, valid } of cases) {
+    it(`rejects ${name} when consent is missing`, () => {
+      const withoutConsent = { ...valid, consent: "" };
+      const result = validate(formDataOf(withoutConsent));
+      expect(result.ok).toBe(false);
+      if (!result.ok) {
+        expect(result.errors.consent).toMatch(/agree to the privacy policy/i);
+      }
+    });
+
+    it(`rejects ${name} when consent has an unexpected value`, () => {
+      const result = validate(formDataOf({ ...valid, consent: "off" }));
+      expect(result.ok).toBe(false);
+      if (!result.ok) expect(result.errors.consent).toBeTruthy();
+    });
+
+    it(`accepts ${name} when consent is "on"`, () => {
+      expect(validate(formDataOf({ ...valid, consent: "on" })).ok).toBe(true);
+    });
+
+    it(`accepts ${name} when consent is "true"`, () => {
+      expect(validate(formDataOf({ ...valid, consent: "true" })).ok).toBe(true);
+    });
+  }
 });

@@ -104,6 +104,18 @@ function dateYmd(
   return value;
 }
 
+/**
+ * A required consent gate. The checkbox submits "on" when ticked; we also accept
+ * "true" for resilience. Consent is validated for presence but deliberately not
+ * stored on the payload, so the submission/admin contract stays unchanged.
+ */
+function consent(formData: FormData, errors: Errors): void {
+  const value = rawString(formData, "consent").toLowerCase();
+  if (value !== "on" && value !== "true") {
+    errors.consent = "Please confirm you agree to the privacy policy.";
+  }
+}
+
 function toResult<T>(errors: Errors, data: T): Result<T> {
   return Object.keys(errors).length > 0 ? { ok: false, errors } : { ok: true, data };
 }
@@ -123,6 +135,7 @@ export function validateContact(formData: FormData): Result<ContactPayload> {
       maxLength: MAX_LONG_TEXT_LENGTH,
     }),
   };
+  consent(formData, errors);
   return toResult(errors, data);
 }
 
@@ -152,6 +165,7 @@ export function validateMentor(formData: FormData): Result<MentorPayload> {
     ),
     message: optionalString(formData, "message", errors),
   };
+  consent(formData, errors);
   return toResult(errors, data);
 }
 
@@ -176,6 +190,7 @@ export function validateMentee(formData: FormData): Result<MenteePayload> {
       maxLength: MAX_LONG_TEXT_LENGTH,
     }),
   };
+  consent(formData, errors);
   return toResult(errors, data);
 }
 
@@ -191,6 +206,7 @@ export function validateVolunteer(formData: FormData): Result<VolunteerPayload> 
     }),
     message: optionalString(formData, "message", errors),
   };
+  consent(formData, errors);
   return toResult(errors, data);
 }
 

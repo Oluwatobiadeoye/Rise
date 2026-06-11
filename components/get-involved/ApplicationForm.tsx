@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useActionState } from "react";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/shared/Button";
@@ -10,11 +11,16 @@ export type FieldOption = { value: string; label: string };
 export type Field = {
   name: string;
   label: string;
-  type: "text" | "email" | "textarea" | "select" | "date";
+  type: "text" | "email" | "textarea" | "select" | "date" | "checkbox";
   required?: boolean;
   autoComplete?: string;
   /** Options for `select` fields. */
   options?: ReadonlyArray<FieldOption>;
+  /**
+   * Rich label content for `checkbox` fields (so the label can carry a link).
+   * Falls back to `label` when omitted.
+   */
+  labelNode?: ReactNode;
 };
 
 type ApplicationFormProps = {
@@ -101,6 +107,43 @@ export function ApplicationForm({
               "aria-invalid": error ? true : undefined,
               "aria-describedby": error ? errorId : undefined,
             };
+
+            if (field.type === "checkbox") {
+              return (
+                <div key={field.name} className="flex flex-col gap-2">
+                  <div className="flex items-start gap-3">
+                    <input
+                      id={id}
+                      name={field.name}
+                      type="checkbox"
+                      required={field.required}
+                      className="mt-1 size-5 shrink-0 rounded border-line text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                      {...a11y}
+                    />
+                    <label
+                      htmlFor={id}
+                      className="font-body text-sm leading-relaxed text-ink"
+                    >
+                      {field.labelNode ?? field.label}
+                      {field.required ? (
+                        <span aria-hidden="true" className="text-primary">
+                          {" *"}
+                        </span>
+                      ) : null}
+                    </label>
+                  </div>
+                  {error ? (
+                    <p
+                      id={errorId}
+                      className="text-sm font-semibold text-danger"
+                    >
+                      {error}
+                    </p>
+                  ) : null}
+                </div>
+              );
+            }
+
             return (
               <div key={field.name} className="flex flex-col gap-2">
                 <label

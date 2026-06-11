@@ -2,6 +2,7 @@
 
 import { useActionState } from "react";
 import { Button } from "@/components/shared/Button";
+import { PrivacyPolicyLink } from "@/components/shared/consent";
 import { submitNotifyMe } from "@/lib/actions/submissions";
 import type { CycleRole, FormState } from "@/lib/types";
 
@@ -81,6 +82,11 @@ export function NotifyMeForm({ role }: { role: CycleRole }) {
           </p>
         ) : null}
       </div>
+
+      <p className="text-sm leading-relaxed text-slate">
+        We will only use your email to tell you when the next cycle opens. See
+        our <PrivacyPolicyLink />.
+      </p>
 
       <div>
         <Button type="submit" disabled={isPending}>

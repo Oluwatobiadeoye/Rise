@@ -27,6 +27,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: routes.mentee, changeFrequency: "monthly", priority: 0.7 },
     { path: routes.contact, changeFrequency: "yearly", priority: 0.5 },
     { path: routes.faq, changeFrequency: "yearly", priority: 0.5 },
+    { path: routes.privacy, changeFrequency: "yearly", priority: 0.3 },
   ];
 
   const projectEntries: ReadonlyArray<EntryDescriptor> = projects.map(

@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { Button } from "@/components/shared/Button";
+import { PrivacyPolicyLink } from "@/components/shared/consent";
 import { submitContact } from "@/lib/actions/submissions";
 import type { FormState } from "@/lib/types";
 
@@ -183,6 +184,28 @@ export function ContactForm() {
               {...a11y("message")}
             />
             <FieldError id="contact-message-error" message={errors.message} />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <div className="flex items-start gap-3">
+              <input
+                id="contact-consent"
+                name="consent"
+                type="checkbox"
+                required
+                className="mt-1 size-5 shrink-0 rounded border-line text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+                {...a11y("consent")}
+              />
+              <label
+                htmlFor="contact-consent"
+                className="font-body text-sm leading-relaxed text-ink"
+              >
+                I agree to RISE Initiative storing my information to respond to
+                my enquiry, as described in the <PrivacyPolicyLink />.
+                <RequiredMark />
+              </label>
+            </div>
+            <FieldError id="contact-consent-error" message={errors.consent} />
           </div>
 
           <div>

@@ -18,6 +18,18 @@ const fields: Field[] = [
   },
   { name: "dateOfBirth", label: "Date of birth", type: "date", required: true },
   { name: "essay", label: "Short essay", type: "textarea", required: true },
+  {
+    name: "consent",
+    label: "I agree to the privacy policy.",
+    type: "checkbox",
+    required: true,
+    labelNode: (
+      <>
+        I agree to the{" "}
+        <a href="/privacy">privacy policy</a>.
+      </>
+    ),
+  },
 ];
 
 function renderForm({
@@ -56,6 +68,37 @@ describe("ApplicationForm", () => {
       "date",
     );
     expect(screen.getByLabelText(/short essay/i)).toBeInTheDocument();
+  });
+
+  it("renders a required consent checkbox with a privacy policy link", () => {
+    renderForm();
+    const checkbox = screen.getByRole("checkbox", {
+      name: /i agree to the privacy policy/i,
+    });
+    expect(checkbox).toBeRequired();
+    expect(checkbox).toHaveAttribute("type", "checkbox");
+    expect(checkbox).toHaveAttribute("name", "consent");
+    expect(
+      screen.getByRole("link", { name: /privacy policy/i }),
+    ).toHaveAttribute("href", "/privacy");
+  });
+
+  it("wires a consent error through aria-describedby", async () => {
+    const action = vi.fn(
+      async (): Promise<FormState> => ({
+        status: "error",
+        errors: { consent: "Please confirm you agree to the privacy policy." },
+      }),
+    );
+    const { container } = renderForm({ action });
+    submitForm(container);
+
+    const error = await screen.findByText(/confirm you agree/i);
+    const checkbox = screen.getByRole("checkbox", {
+      name: /i agree to the privacy policy/i,
+    });
+    expect(checkbox).toHaveAttribute("aria-invalid", "true");
+    expect(checkbox).toHaveAttribute("aria-describedby", error.id);
   });
 
   it("generates stable, namespaced field ids", () => {

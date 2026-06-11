@@ -74,6 +74,12 @@ vi.mock("next/image", async () => {
   };
 });
 
+// Vercel Analytics renders a script tag and pings an endpoint at runtime; it has
+// no place in jsdom unit tests, so render it as nothing.
+vi.mock("@vercel/analytics/next", () => ({
+  Analytics: () => null,
+}));
+
 // Stub the App Router navigation hooks our client components read.
 vi.mock("next/navigation", () => ({
   usePathname: () => "/",

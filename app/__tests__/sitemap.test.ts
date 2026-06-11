@@ -48,6 +48,7 @@ const expectedUrls = [
   url(routes.mentee),
   url(routes.contact),
   url(routes.faq),
+  url(routes.privacy),
   ...projects.map((project) => url(`/projects/${project.slug}`)),
   ...fixturePosts.map((post) => url(`/blog/${post.slug}`)),
 ];

@@ -5,6 +5,7 @@ import {
   ApplicationForm,
   type Field,
 } from "@/components/get-involved/ApplicationForm";
+import { consentField } from "@/components/shared/consent";
 import { NotifyMeForm } from "@/components/get-involved/NotifyMeForm";
 import { submitMentor } from "@/lib/actions/submissions";
 import { db } from "@/lib/db";
@@ -81,6 +82,7 @@ const mentorFields: Field[] = [
     label: "Short message (optional)",
     type: "textarea",
   },
+  consentField("process my application"),
 ];
 
 type PageProps = {

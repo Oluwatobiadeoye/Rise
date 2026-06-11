@@ -2,6 +2,7 @@ import {
   ApplicationForm,
   type Field,
 } from "@/components/get-involved/ApplicationForm";
+import { consentField } from "@/components/shared/consent";
 import { submitVolunteer } from "@/lib/actions/submissions";
 
 const volunteerFields: Field[] = [
@@ -37,6 +38,7 @@ const volunteerFields: Field[] = [
     label: "Short message (optional)",
     type: "textarea",
   },
+  consentField("respond to my enquiry"),
 ];
 
 /** Volunteer interest form embedded on the Get involved hub. */

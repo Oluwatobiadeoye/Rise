@@ -51,6 +51,34 @@ describe("ContactForm", () => {
     ).toBeInTheDocument();
   });
 
+  it("renders a required consent checkbox linking to the privacy policy", () => {
+    render(<ContactForm />);
+    const checkbox = screen.getByRole("checkbox", {
+      name: /i agree to rise initiative storing my information/i,
+    });
+    expect(checkbox).toBeRequired();
+    expect(checkbox).toHaveAttribute("name", "consent");
+    expect(
+      screen.getByRole("link", { name: /privacy policy/i }),
+    ).toHaveAttribute("href", "/privacy");
+  });
+
+  it("shows a consent error wired through aria-describedby", async () => {
+    submitContactMock.mockResolvedValue({
+      status: "error",
+      errors: { consent: "Please confirm you agree to the privacy policy." },
+    } satisfies FormState);
+    const { container } = render(<ContactForm />);
+    submitForm(container);
+
+    const error = await screen.findByText(/confirm you agree/i);
+    const checkbox = screen.getByRole("checkbox", {
+      name: /i agree to rise initiative storing my information/i,
+    });
+    expect(checkbox).toHaveAttribute("aria-invalid", "true");
+    expect(checkbox).toHaveAttribute("aria-describedby", error.id);
+  });
+
   it("includes a hidden honeypot field", () => {
     const { container } = render(<ContactForm />);
     const honeypot = container.querySelector('input[name="company"]');

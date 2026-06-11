@@ -5,6 +5,7 @@ import {
   ApplicationForm,
   type Field,
 } from "@/components/get-involved/ApplicationForm";
+import { consentField } from "@/components/shared/consent";
 import { NotifyMeForm } from "@/components/get-involved/NotifyMeForm";
 import { submitMentee } from "@/lib/actions/submissions";
 import { db } from "@/lib/db";
@@ -62,6 +63,7 @@ const menteeFields: Field[] = [
     type: "textarea",
     required: true,
   },
+  consentField("process my application"),
 ];
 
 type PageProps = {
