@@ -8,6 +8,7 @@ import {
 import { consentField } from "@/components/shared/consent";
 import { NotifyMeForm } from "@/components/get-involved/NotifyMeForm";
 import { submitMentor } from "@/lib/actions/submissions";
+import { sanitizeFromSlug } from "@/lib/from";
 import { db } from "@/lib/db";
 
 export const metadata = pageMetadata({
@@ -19,8 +20,6 @@ export const metadata = pageMetadata({
 
 // Cycle state lives on disk and must be read on every request.
 export const dynamic = "force-dynamic";
-
-const FROM_PATTERN = /^[a-z0-9][a-z0-9-]{0,39}$/i;
 
 const responsibilities = [
   "Meet with your mentee virtually, at least once every two months.",
@@ -92,11 +91,7 @@ type PageProps = {
 export default async function MentorPage({ searchParams }: PageProps) {
   const [cycles, params] = await Promise.all([db.getCycles(), searchParams]);
   const open = cycles.mentor.open;
-  const fromParam = params.from;
-  const from =
-    typeof fromParam === "string" && FROM_PATTERN.test(fromParam)
-      ? fromParam
-      : null;
+  const from = sanitizeFromSlug(params.from);
 
   return (
     <>

@@ -5,6 +5,26 @@ domain, or key provisioning) plus the one-line code swap it unlocks. Until
 these land, the site runs fully on the Vercel URL with filesystem-backed
 content and submissions.
 
+## ⚠️ Blockers before forms are publicly linked / a real cycle opens
+
+These two are not cosmetic. On Vercel's serverless runtime the working
+directory is read-only outside a per-instance, ephemeral `/tmp`, so the
+filesystem-backed pieces below cannot safely run in production as-is.
+
+- [ ] **Durable submission storage (top blocker).** The contact, mentor,
+      mentee, volunteer, and notify-me forms appear functional in production
+      but a real submission will error or be lost on the next cold start.
+      Wire `createSupabaseSubmissionStore()` behind `lib/db/index.ts` (one-line
+      swap) BEFORE linking the forms publicly. Mentor/mentee cycles default to
+      closed (`open: false`), so keep them closed until this lands; do not
+      surface the contact form publicly until then either.
+- [ ] **Effective login throttle.** `lib/rate-limit.ts` is an in-memory,
+      per-instance map that resets on every cold start, so the admin-login
+      brute-force limit is weak in production. Until the limiter moves to a
+      shared store (Supabase / Vercel KV / Upstash), rely on a high-entropy
+      `ADMIN_PASSWORD` (it is the entire auth surface and the session-signing
+      key is derived from it).
+
 ## Domain
 
 - [ ] Purchase the real domain and add it to the Vercel project.

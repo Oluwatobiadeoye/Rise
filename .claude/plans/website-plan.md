@@ -201,18 +201,30 @@ a lightweight pipeline:
    - [x] **Get Involved** — hub (mentor, mentee, volunteer, support-a-student) + mentor/mentee application pages; forms are UI-only (submission deferred to Milestone 4)
    - [x] **Contact** — details (emails + socials) + contact form UI (submission deferred); **FAQ** — `<details>` accordion + FAQ structured data
    - [x] `sitemap.xml` + `robots.txt` (driven by `siteConfig.url`)
-- [ ] **3. Media** — Sanity-powered Blog and Gallery (with designed empty states).
+- [x] **3. Media** — Blog and Gallery on a filesystem content layer (`lib/content`,
+   swap seam for Sanity): markdown posts + a JSON gallery manifest, validated at build,
+   with designed empty states, per-post metadata/OpenGraph, and sitemap entries.
 - [x] **4. Forms** — native forms wired through server actions to a filesystem-backed
    store (`lib/db`, swap seam for Supabase) with validation, honeypot + rate-limit spam
    protection, cycle open/close (mentor/mentee pages go live or show "notify me"), and
    notifications recorded via `lib/notify` (swap seam for Resend → Tobi's email).
    Supabase / Resend / Turnstile swap in later behind `lib/db/index.ts` and
    `lib/notify/index.ts`.
-- [ ] **5. Privacy & polish** — privacy policy + consent, accessibility, cookieless
-   analytics, error/empty states, mobile/low-bandwidth performance.
-- [ ] **6. Full-launch prep** — real domain + branded inboxes + email auth (when ready).
-- [ ] **7. Branded `/admin`** — *last; only as time allows.* Until then, review in the
-   Supabase dashboard.
+- [x] **5. Privacy & polish** — privacy policy page (incl. the minor-applicant data
+   disclosure under the Nigeria Data Protection Act 2023), required consent checkboxes on
+   the data-collecting forms (validated server-side as a gate, not stored), cookieless
+   Vercel Analytics, global error boundary, and baseline security headers. Consent on
+   notify-me is a privacy-policy link rather than a checkbox.
+- [x] **6. Full-launch prep (code-side)** — `siteConfig.url` is env-driven
+   (`NEXT_PUBLIC_SITE_URL`) so the domain switch is one variable, and `docs/launch-checklist.md`
+   captures every external step + one-line swap. Domain, branded inboxes, and email auth
+   remain external steps (see the checklist; durable Supabase storage is the top blocker
+   before forms are publicly linked).
+- [x] **7. Branded `/admin`** — password-gated (`ADMIN_PASSWORD` + signed session cookie),
+   zero-client-component review panel over the submission store: filterable list, detail
+   with status + notes editing, cycle open/close toggles, and accept/decline decision
+   emails. 404s entirely when unconfigured; all type/id input is validated against the
+   union + a UUID pattern before any disk access.
 
 ---
 

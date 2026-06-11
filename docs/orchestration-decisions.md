@@ -91,6 +91,31 @@ files (sitemap, robots, global-error) for a purely cosmetic gain — higher risk
 no functional benefit. Verified: public pages still render nav + footer; admin
 renders bare.
 
+### D7 — Final review gate: both subagent reviewers passed
+The session limit had reset, so I ran the project's mandated reviewers as
+subagents (not in the main loop):
+- **Security review: 🟢 LOW, no blocking issues, "can be considered done."** Zero
+  critical/high; two mediums (admin-cookie `sameSite`, login rate-limit) and four
+  lows, all hardening. Applied the free recommendations: admin cookie →
+  `sameSite: "strict"`; `.env.example` documents the high-entropy `ADMIN_PASSWORD`
+  requirement. (The security-headers low was already covered by `next.config.ts`.)
+- **Code review: mergeable as-is.** Zero critical; two majors, both already
+  documented launch constraints rather than bugs — I promoted them to a prominent
+  "Blockers" section at the top of `docs/launch-checklist.md` (durable Supabase
+  storage before forms are publicly linked; effective login throttle). Applied the
+  cheap minors now: tightened `MentorPayload.availability` to its union,
+  extracted the duplicated `from`-slug logic into `lib/from.ts`, added a
+  plain-text-body note at the notifier seam, and gave the admin dashboard stat
+  cards focus-visible + hover affordance. Minor #7 (marked invariant) needed no
+  change.
+
+**Decision:** the two majors are inherent to the filesystem-as-database approach
+the user chose for this build and are explicitly deferred to the documented
+service swaps — they do not block "completion" of the code, only the eventual
+public launch, so they are recorded as launch blockers rather than reopened as
+build work. With both reviewers passed and all four gates green (lint, typecheck,
+264 tests, build), every milestone is verifier-approved and the build is done.
+
 ### D6 — server-only dependency
 M7 added `server-only@^0.0.1` (a tiny, standard Next.js guard package) so
 `lib/admin/auth.ts` fails the build if ever imported into a client bundle,

@@ -28,7 +28,7 @@ export type MentorPayload = {
   email: string;
   fieldOfExpertise: string;
   audiencePreference: "tertiary" | "early-career" | "either";
-  availability: string;
+  availability: "monthly" | "fortnightly" | "flexible";
   message: string | null;
 };
 

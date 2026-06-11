@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { db } from "@/lib/db";
 import { alertRecipient, notifier } from "@/lib/notify";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { sanitizeFromSlug } from "@/lib/from";
 import {
   validateContact,
   validateMentee,
@@ -18,8 +19,6 @@ import type {
   PayloadByType,
   SubmissionType,
 } from "@/lib/types";
-
-const FROM_PATTERN = /^[a-z0-9][a-z0-9-]{0,39}$/i;
 
 const RATE_LIMIT_ERROR: FormState = {
   status: "error",
@@ -44,12 +43,6 @@ async function clientIp(): Promise<string> {
   const forwardedFor = (await headers()).get("x-forwarded-for");
   const first = forwardedFor?.split(",")[0]?.trim();
   return first || "local";
-}
-
-/** Keeps the referrer slug only when it looks like a safe page identifier. */
-function sanitizedFrom(formData: FormData): string | null {
-  const raw = formData.get("from");
-  return typeof raw === "string" && FROM_PATTERN.test(raw) ? raw : null;
 }
 
 function summaryBody(
@@ -81,7 +74,7 @@ async function handleSubmission<T extends SubmissionType>(
   }
 
   const submission = await db.createSubmission(type, result.data, {
-    from: sanitizedFrom(formData),
+    from: sanitizeFromSlug(formData.get("from")),
   });
 
   try {

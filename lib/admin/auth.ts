@@ -83,11 +83,15 @@ export function verifySessionToken(
   );
 }
 
-/** Cookie attributes shared by the set and delete paths. */
+/**
+ * Cookie attributes shared by the set and delete paths. `strict` because the
+ * admin area has no inbound cross-site link flows, so it closes the residual
+ * cross-site request forgery gap at no usability cost.
+ */
 export const sessionCookieOptions = {
   httpOnly: true,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "lax",
+  sameSite: "strict",
   path: "/admin",
 } as const;
 

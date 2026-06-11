@@ -32,14 +32,29 @@ const STATUS_LABELS: Record<SubmissionStatus, string> = {
 };
 const ROLES: readonly CycleRole[] = ["mentor", "mentee"];
 
-function Stat({ label, value }: { label: string; value: number }) {
+function Stat({
+  label,
+  value,
+  interactive = false,
+}: {
+  label: string;
+  value: number;
+  interactive?: boolean;
+}) {
   return (
-    <div className="rounded-lg border border-line bg-surface p-4">
+    <div
+      className={`h-full rounded-lg border border-line bg-surface p-4 ${
+        interactive ? "transition-colors hover:border-primary" : ""
+      }`}
+    >
       <p className="font-display text-2xl font-bold text-ink">{value}</p>
       <p className="mt-1 font-body text-sm text-muted">{label}</p>
     </div>
   );
 }
+
+const cardLinkClass =
+  "block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2";
 
 export default async function AdminDashboardPage() {
   await requireAdmin();
@@ -73,8 +88,16 @@ export default async function AdminDashboardPage() {
         </h2>
         <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
           {TYPES.map((type) => (
-            <Link key={type} href={`/admin/submissions?type=${type}`}>
-              <Stat label={`${type} submissions`} value={byType(type)} />
+            <Link
+              key={type}
+              href={`/admin/submissions?type=${type}`}
+              className={cardLinkClass}
+            >
+              <Stat
+                label={`${type} submissions`}
+                value={byType(type)}
+                interactive
+              />
             </Link>
           ))}
         </div>
@@ -89,8 +112,13 @@ export default async function AdminDashboardPage() {
             <Link
               key={status}
               href={`/admin/submissions?status=${status}`}
+              className={cardLinkClass}
             >
-              <Stat label={STATUS_LABELS[status]} value={byStatus(status)} />
+              <Stat
+                label={STATUS_LABELS[status]}
+                value={byStatus(status)}
+                interactive
+              />
             </Link>
           ))}
         </div>
