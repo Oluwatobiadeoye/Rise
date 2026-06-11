@@ -1,17 +1,25 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/metadata";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Container } from "@/components/shared/Container";
 import {
   ApplicationForm,
   type Field,
 } from "@/components/get-involved/ApplicationForm";
+import { NotifyMeForm } from "@/components/get-involved/NotifyMeForm";
+import { submitMentor } from "@/lib/actions/submissions";
+import { db } from "@/lib/db";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Apply to mentor",
   description:
     "Become a RISE Initiative mentor and guide a student or young professional in Oyo through career, academic, and personal development support.",
-  alternates: { canonical: "/get-involved/mentor" },
-};
+  path: "/get-involved/mentor",
+});
+
+// Cycle state lives on disk and must be read on every request.
+export const dynamic = "force-dynamic";
+
+const FROM_PATTERN = /^[a-z0-9][a-z0-9-]{0,39}$/i;
 
 const responsibilities = [
   "Meet with your mentee virtually, at least once every two months.",
@@ -27,7 +35,7 @@ const requirements = [
 
 const mentorFields: Field[] = [
   {
-    name: "full-name",
+    name: "fullName",
     label: "Full name",
     type: "text",
     required: true,
@@ -41,19 +49,53 @@ const mentorFields: Field[] = [
     autoComplete: "email",
   },
   {
-    name: "field-of-expertise",
+    name: "fieldOfExpertise",
     label: "Field of expertise",
     type: "text",
     required: true,
   },
   {
+    name: "audiencePreference",
+    label: "Who would you like to mentor?",
+    type: "select",
+    required: true,
+    options: [
+      { value: "tertiary", label: "Tertiary students" },
+      { value: "early-career", label: "Early-career professionals" },
+      { value: "either", label: "Open to either" },
+    ],
+  },
+  {
+    name: "availability",
+    label: "How often can you meet?",
+    type: "select",
+    required: true,
+    options: [
+      { value: "monthly", label: "Monthly" },
+      { value: "fortnightly", label: "Fortnightly" },
+      { value: "flexible", label: "Flexible" },
+    ],
+  },
+  {
     name: "message",
-    label: "Short message",
+    label: "Short message (optional)",
     type: "textarea",
   },
 ];
 
-export default function MentorPage() {
+type PageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function MentorPage({ searchParams }: PageProps) {
+  const [cycles, params] = await Promise.all([db.getCycles(), searchParams]);
+  const open = cycles.mentor.open;
+  const fromParam = params.from;
+  const from =
+    typeof fromParam === "string" && FROM_PATTERN.test(fromParam)
+      ? fromParam
+      : null;
+
   return (
     <>
       <PageHeader
@@ -71,7 +113,7 @@ export default function MentorPage() {
             >
               What mentoring involves
             </h2>
-            <p className="mt-4 font-body text-[13px] font-bold uppercase tracking-[0.16em] text-mist">
+            <p className="mt-4 font-body text-[13px] font-bold uppercase tracking-[0.16em] text-slate">
               As a mentor you will
             </p>
             <ul className="mt-3 flex flex-col gap-2">
@@ -82,7 +124,7 @@ export default function MentorPage() {
               ))}
             </ul>
 
-            <p className="mt-8 font-body text-[13px] font-bold uppercase tracking-[0.16em] text-mist">
+            <p className="mt-8 font-body text-[13px] font-bold uppercase tracking-[0.16em] text-slate">
               Requirements
             </p>
             <ul className="mt-3 flex flex-col gap-2">
@@ -108,12 +150,30 @@ export default function MentorPage() {
             Your application
           </h2>
         </Container>
-        <ApplicationForm
-          formName="mentor"
-          fields={mentorFields}
-          submitLabel="Apply to mentor"
-          note="Applications are reviewed periodically and only successful applicants will be contacted."
-        />
+        {open ? (
+          <ApplicationForm
+            formName="mentor"
+            fields={mentorFields}
+            submitLabel="Apply to mentor"
+            note="Applications are reviewed periodically and only successful applicants will be contacted."
+            action={submitMentor}
+            from={from}
+          />
+        ) : (
+          <Container>
+            <div className="max-w-2xl">
+              <div className="rounded-lg border border-line bg-evergreen-50 p-6 text-ink">
+                <p className="leading-relaxed">
+                  Mentor applications are currently closed. Leave your email
+                  and we will let you know when the next cycle opens.
+                </p>
+              </div>
+              <div className="mt-6">
+                <NotifyMeForm role="mentor" />
+              </div>
+            </div>
+          </Container>
+        )}
       </section>
     </>
   );

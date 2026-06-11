@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Container } from "@/components/shared/Container";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { Button } from "@/components/shared/Button";
@@ -22,6 +23,8 @@ type RoleSectionProps = {
   disabledLabel?: string;
   /** Label for the fallback link. */
   fallbackLabel?: string;
+  /** Extra content (e.g. an embedded form) rendered after the copy and actions. */
+  children?: ReactNode;
 };
 
 /** One "Get involved" role block: copy plus an action. */
@@ -37,6 +40,7 @@ export function RoleSection({
   ctaHref,
   disabledLabel,
   fallbackLabel,
+  children,
 }: RoleSectionProps) {
   const headingId = `${(id ?? title)
     .toLowerCase()
@@ -76,7 +80,7 @@ export function RoleSection({
                   {disabledLabel ?? "Donate"}
                 </Button>
                 {ctaNote ? (
-                  <p className="text-sm text-mist">{ctaNote}</p>
+                  <p className="text-sm text-slate">{ctaNote}</p>
                 ) : null}
               </div>
               {ctaHref ? (
@@ -92,6 +96,8 @@ export function RoleSection({
           ) : null}
         </div>
       </Container>
+
+      {children ? <div className="mt-10">{children}</div> : null}
     </section>
   );
 }

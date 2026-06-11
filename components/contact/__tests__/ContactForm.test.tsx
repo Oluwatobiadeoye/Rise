@@ -1,6 +1,24 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { ContactForm } from "../ContactForm";
+import { submitContact } from "@/lib/actions/submissions";
+import type { FormState } from "@/lib/types";
+
+vi.mock("@/lib/actions/submissions", () => ({
+  submitContact: vi.fn(),
+}));
+
+const submitContactMock = vi.mocked(submitContact);
+
+beforeEach(() => {
+  submitContactMock.mockResolvedValue({ status: "success" });
+});
+
+function submitForm(container: HTMLElement) {
+  const form = container.querySelector("form");
+  expect(form).not.toBeNull();
+  fireEvent.submit(form as HTMLFormElement);
+}
 
 describe("ContactForm", () => {
   it("renders the section heading", () => {
@@ -33,33 +51,51 @@ describe("ContactForm", () => {
     ).toBeInTheDocument();
   });
 
-  it("does not navigate on submit (submission is deferred)", () => {
-    render(<ContactForm />);
-    const form = screen
-      .getByRole("button", { name: /send|submit/i })
-      .closest("form");
-    expect(form).not.toBeNull();
-    const submitEvent = new Event("submit", {
-      bubbles: true,
-      cancelable: true,
-    });
-    fireEvent(form as HTMLFormElement, submitEvent);
-    expect(submitEvent.defaultPrevented).toBe(true);
+  it("includes a hidden honeypot field", () => {
+    const { container } = render(<ContactForm />);
+    const honeypot = container.querySelector('input[name="company"]');
+    expect(honeypot).not.toBeNull();
+    expect(honeypot).toHaveAttribute("autocomplete", "off");
+    expect(honeypot?.closest('[aria-hidden="true"]')).not.toBeNull();
   });
 
-  it("shows an accessible confirmation after submit", () => {
-    render(<ContactForm />);
-    const form = screen
-      .getByRole("button", { name: /send|submit/i })
-      .closest("form");
-    expect(form).not.toBeNull();
-    fireEvent.submit(form as HTMLFormElement);
+  it("shows an accessible confirmation after a successful submit", async () => {
+    const { container } = render(<ContactForm />);
+    submitForm(container);
 
-    const confirmation = screen.getByRole("status");
+    const confirmation = await screen.findByRole("status");
     expect(confirmation).toHaveTextContent(/we will be in touch/i);
-    // The form is replaced by the confirmation, so the submit control is gone.
     expect(
       screen.queryByRole("button", { name: /send|submit/i }),
     ).not.toBeInTheDocument();
+  });
+
+  it("shows field errors returned by the action", async () => {
+    submitContactMock.mockResolvedValue({
+      status: "error",
+      errors: { email: "Please enter a valid email address." },
+    } satisfies FormState);
+    const { container } = render(<ContactForm />);
+    submitForm(container);
+
+    const error = await screen.findByText(/valid email address/i);
+    const emailInput = screen.getByLabelText(/email address/i);
+    expect(emailInput).toHaveAttribute("aria-invalid", "true");
+    expect(emailInput).toHaveAttribute("aria-describedby", error.id);
+  });
+
+  it("shows non-field errors in an alert box and keeps the form", async () => {
+    submitContactMock.mockResolvedValue({
+      status: "error",
+      errors: { _form: "Too many submissions. Please try again later." },
+    } satisfies FormState);
+    const { container } = render(<ContactForm />);
+    submitForm(container);
+
+    const alert = await screen.findByRole("alert");
+    expect(alert).toHaveTextContent(/too many submissions/i);
+    expect(
+      screen.getByRole("button", { name: /send|submit/i }),
+    ).toBeInTheDocument();
   });
 });

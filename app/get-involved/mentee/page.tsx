@@ -1,17 +1,25 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/metadata";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Container } from "@/components/shared/Container";
 import {
   ApplicationForm,
   type Field,
 } from "@/components/get-involved/ApplicationForm";
+import { NotifyMeForm } from "@/components/get-involved/NotifyMeForm";
+import { submitMentee } from "@/lib/actions/submissions";
+import { db } from "@/lib/db";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Apply for mentorship",
   description:
     "Tertiary students affiliated with Oyo town can apply for a place in the structured RISE Initiative mentorship programme.",
-  alternates: { canonical: "/get-involved/mentee" },
-};
+  path: "/get-involved/mentee",
+});
+
+// Cycle state lives on disk and must be read on every request.
+export const dynamic = "force-dynamic";
+
+const FROM_PATTERN = /^[a-z0-9][a-z0-9-]{0,39}$/i;
 
 const eligibility = [
   "Open to tertiary students affiliated with Oyo town.",
@@ -22,7 +30,7 @@ const eligibility = [
 
 const menteeFields: Field[] = [
   {
-    name: "full-name",
+    name: "fullName",
     label: "Full name",
     type: "text",
     required: true,
@@ -42,6 +50,13 @@ const menteeFields: Field[] = [
     required: true,
   },
   {
+    name: "dateOfBirth",
+    label: "Date of birth",
+    type: "date",
+    required: true,
+    autoComplete: "bday",
+  },
+  {
     name: "essay",
     label: "Short essay (your background, goals, and motivation)",
     type: "textarea",
@@ -49,7 +64,19 @@ const menteeFields: Field[] = [
   },
 ];
 
-export default function MenteePage() {
+type PageProps = {
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+};
+
+export default async function MenteePage({ searchParams }: PageProps) {
+  const [cycles, params] = await Promise.all([db.getCycles(), searchParams]);
+  const open = cycles.mentee.open;
+  const fromParam = params.from;
+  const from =
+    typeof fromParam === "string" && FROM_PATTERN.test(fromParam)
+      ? fromParam
+      : null;
+
   return (
     <>
       <PageHeader
@@ -90,12 +117,30 @@ export default function MenteePage() {
             Your application
           </h2>
         </Container>
-        <ApplicationForm
-          formName="mentee"
-          fields={menteeFields}
-          submitLabel="Apply for mentorship"
-          note="Applications open periodically and only successful applicants will be contacted."
-        />
+        {open ? (
+          <ApplicationForm
+            formName="mentee"
+            fields={menteeFields}
+            submitLabel="Apply for mentorship"
+            note="Applications open periodically and only successful applicants will be contacted."
+            action={submitMentee}
+            from={from}
+          />
+        ) : (
+          <Container>
+            <div className="max-w-2xl">
+              <div className="rounded-lg border border-line bg-evergreen-50 p-6 text-ink">
+                <p className="leading-relaxed">
+                  Mentee applications are currently closed. Leave your email
+                  and we will let you know when the next cycle opens.
+                </p>
+              </div>
+              <div className="mt-6">
+                <NotifyMeForm role="mentee" />
+              </div>
+            </div>
+          </Container>
+        )}
       </section>
     </>
   );

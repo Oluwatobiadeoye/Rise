@@ -1,7 +1,11 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import GetInvolvedPage from "../page";
 import { routes } from "@/lib/site";
+
+vi.mock("@/lib/actions/submissions", () => ({
+  submitVolunteer: vi.fn(),
+}));
 
 describe("Get involved hub", () => {
   it("renders the intro lede", () => {
@@ -43,10 +47,16 @@ describe("Get involved hub", () => {
     ).toHaveAttribute("href", routes.mentee);
   });
 
-  it("points the volunteer CTA at the contact route", () => {
-    render(<GetInvolvedPage />);
+  it("embeds the volunteer interest form in the volunteer section", () => {
+    const { container } = render(<GetInvolvedPage />);
+    const volunteerSection = container.querySelector("#volunteer");
+    expect(volunteerSection).not.toBeNull();
+    expect(screen.getByLabelText(/full name/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /register your interest/i }),
-    ).toHaveAttribute("href", routes.contact);
+      screen.getByRole("combobox", { name: /area of interest/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /register your interest/i }),
+    ).toBeInTheDocument();
   });
 });

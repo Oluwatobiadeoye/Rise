@@ -202,9 +202,12 @@ a lightweight pipeline:
    - [x] **Contact** — details (emails + socials) + contact form UI (submission deferred); **FAQ** — `<details>` accordion + FAQ structured data
    - [x] `sitemap.xml` + `robots.txt` (driven by `siteConfig.url`)
 - [ ] **3. Media** — Sanity-powered Blog and Gallery (with designed empty states).
-- [ ] **4. Forms** — native forms → Supabase (server-side + RLS), spam protection, cycle
-   open/close, notifications to Tobi's email. (Provision Supabase / Resend / Sanity /
-   Turnstile keys before this week.)
+- [x] **4. Forms** — native forms wired through server actions to a filesystem-backed
+   store (`lib/db`, swap seam for Supabase) with validation, honeypot + rate-limit spam
+   protection, cycle open/close (mentor/mentee pages go live or show "notify me"), and
+   notifications recorded via `lib/notify` (swap seam for Resend → Tobi's email).
+   Supabase / Resend / Turnstile swap in later behind `lib/db/index.ts` and
+   `lib/notify/index.ts`.
 - [ ] **5. Privacy & polish** — privacy policy + consent, accessibility, cookieless
    analytics, error/empty states, mobile/low-bandwidth performance.
 - [ ] **6. Full-launch prep** — real domain + branded inboxes + email auth (when ready).

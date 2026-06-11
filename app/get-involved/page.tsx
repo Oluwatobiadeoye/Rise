@@ -1,14 +1,15 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/metadata";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { RoleSection } from "@/components/get-involved/RoleSection";
+import { VolunteerForm } from "@/components/get-involved/VolunteerForm";
 import { routes, contactEmails } from "@/lib/site";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Get involved",
   description:
     "Mentor a young person, apply for mentorship, volunteer, or support a student in Oyo. Find the role that fits you at RISE Initiative.",
-  alternates: { canonical: "/get-involved" },
-};
+  path: "/get-involved",
+});
 
 // Keep each section id in sync with its route constant so deep links and
 // anchor targets cannot drift apart.
@@ -52,8 +53,9 @@ export default function GetInvolvedPage() {
           "Recruitment is currently conducted primarily through internal networks and referrals. Some volunteer roles are stipend-supported, and all volunteers receive training to equip them for their responsibilities.",
           "If you have relevant skills and are interested in contributing, we would be happy to hear from you.",
         ]}
-        cta={{ label: "Register your interest", href: routes.contact }}
-      />
+      >
+        <VolunteerForm />
+      </RoleSection>
 
       <RoleSection
         id={anchorId(routes.supportAStudent)}
