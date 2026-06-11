@@ -36,6 +36,7 @@ export const routes = {
   supportAStudent: "/get-involved#support-a-student",
   contact: "/contact",
   faq: "/faq",
+  privacy: "/privacy",
 } as const;
 
 /** Primary navigation. */

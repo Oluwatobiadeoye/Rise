@@ -65,3 +65,34 @@ The plan allows Plausible or Vercel Analytics. I chose **Vercel Analytics**
 cookieless (no consent banner needed), and it needs no external account/keys to
 wire up — consistent with the "buildable and verifiable now" constraint. Swap to
 Plausible later is a one-component change if preferred.
+
+### D5 — Milestone 5 and 7 verified by the orchestrator; admin-chrome fix
+Both verifier slots would have re-run during the 6am session-limit window, so I
+verified both milestones in the main loop:
+- **M5:** code-read the consent gate (validated, required, NOT stored — keeps the
+  submission/admin contract stable), the privacy page (confirmed the required
+  minor-data disclosure, NDPA basis, retention, deletion route, cookieless note),
+  the error boundary, and accessibility of the consent checkbox. 264 tests pass.
+- **M7:** code-read the auth (hashed constant-time password compare; signed-expiry
+  HMAC session token with length-stable comparison and full malformed/expired/
+  tampered rejection) and confirmed every admin action calls `assertAdmin()` and
+  routes all type+id input through `validateSubmissionRef` (type-union + UUID)
+  before any disk path — closing the path-traversal risk from D1. Admin 404s
+  cleanly when `ADMIN_PASSWORD` is unset; build compiles all admin routes.
+
+**Admin-chrome fix (my change, not the workers'):** M7 correctly left
+`app/layout.tsx` to M5, so the public marketing Nav/Footer (with the "Join the
+Movement" call to action) wrapped the admin panel — wrong for an internal tool.
+I added `components/shared/SiteChrome.tsx`, a client gate that reads the pathname
+and suppresses the public skip-link/Nav/Footer on `/admin` routes while leaving
+every public page unchanged. Chosen over a route-group refactor (two root
+layouts) because that would move every route folder and entangle the special
+files (sitemap, robots, global-error) for a purely cosmetic gain — higher risk,
+no functional benefit. Verified: public pages still render nav + footer; admin
+renders bare.
+
+### D6 — server-only dependency
+M7 added `server-only@^0.0.1` (a tiny, standard Next.js guard package) so
+`lib/admin/auth.ts` fails the build if ever imported into a client bundle,
+protecting the password/HMAC code. Accepted — it is the idiomatic way to enforce
+the server boundary and adds no runtime weight.
