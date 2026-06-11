@@ -1,36 +1,47 @@
+import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Container } from "@/components/shared/Container";
-import { ImagePlaceholder } from "@/components/shared/ImagePlaceholder";
 import { routes } from "@/lib/site";
+
+import foundationsImg from "@/public/projects/foundations-2019/sped/sped-09.jpg";
+import horizonsImg from "@/public/projects/foundations-2019/sped/sped-04.jpg";
+import impactImg from "@/public/projects/foundations-2019/sped/sped-02.jpg";
 
 const programmes: ReadonlyArray<{
   name: string;
   audience: string;
   body: string;
   href: string;
-  image: string;
+  image: StaticImageData;
+  imageAlt: string;
 }> = [
   {
     name: "RISE Foundations",
     audience: "Secondary school students",
     body: "Leadership clubs, mentorship, and exam support that help secondary school students build strong foundations and broaden their aspirations.",
     href: routes.riseFoundations,
-    image: "Secondary school students at a RISE Foundations leadership session",
+    image: foundationsImg,
+    imageAlt:
+      "Secondary school students gathered at a RISE Initiative career and leadership bootcamp.",
   },
   {
     name: "RISE Horizons",
     audience: "Tertiary students",
     body: "Career guidance, scholarship awareness, and structured mentorship that prepare tertiary students for life after school.",
     href: routes.riseHorizons,
-    image: "Tertiary students at a RISE Horizons mentorship meeting",
+    image: horizonsImg,
+    imageAlt:
+      "A RISE Initiative facilitator speaking into a microphone at a career and leadership session.",
   },
   {
     name: "RISE Impact Network",
     audience: "Early-career professionals",
     body: "A growing community of professionals sharing mentorship, networking, and opportunities to lead and give back.",
     href: routes.riseImpactNetwork,
-    image: "Professionals connecting at a RISE Impact Network event",
+    image: impactImg,
+    imageAlt:
+      "A RISE Initiative speaker addressing the room with a microphone at a community event.",
   },
 ];
 
@@ -54,11 +65,16 @@ export function Programmes() {
               key={programme.name}
               className="group flex flex-col overflow-hidden rounded-lg border border-line/60 bg-surface shadow-md transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"
             >
-              <ImagePlaceholder
-                label={programme.image}
-                rounded="rounded-none"
-                className="aspect-[16/9] w-full"
-              />
+              <div className="relative aspect-[16/9] w-full overflow-hidden">
+                <Image
+                  src={programme.image}
+                  alt={programme.imageAlt}
+                  fill
+                  sizes="(min-width: 768px) 33vw, 100vw"
+                  placeholder="blur"
+                  className="object-cover"
+                />
+              </div>
               <div className="flex flex-1 flex-col p-6">
                 <p className="font-body text-[13px] font-bold uppercase tracking-[0.16em] text-slate">
                   {programme.audience}
