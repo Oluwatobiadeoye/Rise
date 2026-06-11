@@ -65,17 +65,17 @@ export function Programmes() {
               key={programme.name}
               className="group flex flex-col overflow-hidden rounded-lg border border-line/60 bg-surface shadow-md transition-[transform,box-shadow] duration-200 ease-out hover:-translate-y-1 hover:shadow-lg"
             >
-              <div className="relative aspect-[4/3] w-full overflow-hidden">
+              <div className="relative aspect-[16/9] w-full overflow-hidden">
                 <Image
                   src={programme.image}
                   alt={programme.imageAlt}
                   fill
                   sizes="(min-width: 768px) 33vw, 100vw"
                   placeholder="blur"
-                  className="object-cover"
+                  className="object-cover object-top"
                 />
               </div>
-              <div className="flex flex-1 flex-col p-5">
+              <div className="flex flex-1 flex-col p-6">
                 <p className="font-body text-[13px] font-bold uppercase tracking-[0.16em] text-slate">
                   {programme.audience}
                 </p>
