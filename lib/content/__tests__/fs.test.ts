@@ -114,49 +114,6 @@ describe("validation errors", () => {
   });
 });
 
-describe("listGalleryItems", () => {
-  it("returns items in manifest order with optional fields normalised", async () => {
-    const items = await populated.listGalleryItems();
-    expect(items.map((item) => item.id)).toEqual([
-      "bootcamp-opening",
-      "mentor-circle",
-    ]);
-    expect(items[0]).toEqual({
-      id: "bootcamp-opening",
-      src: "/gallery/bootcamp-opening.jpg",
-      alt: "Students at the bootcamp opening ceremony",
-      caption: "Opening day",
-      width: 1600,
-      height: 1200,
-      takenAt: "2026-03-02",
-    });
-    expect(items[1].caption).toBeNull();
-    expect(items[1].takenAt).toBeNull();
-  });
-
-  it("returns [] for an empty manifest", async () => {
-    await expect(empty.listGalleryItems()).resolves.toEqual([]);
-  });
-
-  it("returns [] when the manifest does not exist", async () => {
-    await expect(missing.listGalleryItems()).resolves.toEqual([]);
-  });
-
-  it("rejects duplicate ids", async () => {
-    const source = createFsContentSource(fixture("invalid-gallery-duplicate-id"));
-    await expect(source.listGalleryItems()).rejects.toThrow(
-      /manifest\.json.*duplicate id "repeat"/,
-    );
-  });
-
-  it("rejects an item without alt text", async () => {
-    const source = createFsContentSource(fixture("invalid-gallery-missing-alt"));
-    await expect(source.listGalleryItems()).rejects.toThrow(
-      /manifest\.json.*item 0.*"alt" is missing or empty/,
-    );
-  });
-});
-
 describe("lazy root resolution", () => {
   it("honours RISE_CONTENT_DIR set after the source is created", async () => {
     const source = createFsContentSource();

@@ -10,7 +10,6 @@ vi.mock("@/lib/content", () => ({
   content: {
     listPosts: () => listPosts(),
     getPost: vi.fn(),
-    listGalleryItems: vi.fn(),
   },
 }));
 

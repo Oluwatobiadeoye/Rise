@@ -31,7 +31,6 @@ const columns: ReadonlyArray<{
       { label: "About", href: routes.about },
       { label: "Our team", href: routes.team },
       { label: "Blog", href: routes.blog },
-      { label: "Gallery", href: routes.gallery },
       { label: "Contact", href: routes.contact },
       { label: "FAQ", href: routes.faq },
     ],

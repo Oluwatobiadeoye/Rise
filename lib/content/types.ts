@@ -14,17 +14,6 @@ export type Post = PostMeta & {
   bodyHtml: string;
 };
 
-export type GalleryItem = {
-  id: string;
-  /** Public path under /gallery/. */
-  src: string;
-  alt: string;
-  caption: string | null;
-  width: number;
-  height: number;
-  takenAt: string | null;
-};
-
 /**
  * The content access interface pages depend on. The filesystem source
  * implements it today; a hosted Content Management System (CMS) adapter can
@@ -35,6 +24,4 @@ export interface ContentSource {
   listPosts(): Promise<PostMeta[]>;
   /** Full post by slug; null for unknown slugs and drafts. */
   getPost(slug: string): Promise<Post | null>;
-  /** Gallery items in manifest order. */
-  listGalleryItems(): Promise<GalleryItem[]>;
 }

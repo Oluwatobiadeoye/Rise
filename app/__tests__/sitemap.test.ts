@@ -30,7 +30,6 @@ vi.mock("@/lib/content", () => ({
   content: {
     listPosts: () => Promise.resolve(fixturePosts),
     getPost: vi.fn(),
-    listGalleryItems: () => Promise.resolve([]),
   },
 }));
 
@@ -42,7 +41,6 @@ const expectedUrls = [
   url(routes.team),
   url(routes.projects),
   url(routes.blog),
-  url(routes.gallery),
   url(routes.getInvolved),
   url(routes.mentor),
   url(routes.mentee),
@@ -80,9 +78,9 @@ describe("sitemap", () => {
     expect(urls).toContain(url(routes.faq));
   });
 
-  it("lists the blog and gallery indexes as weekly entries", async () => {
+  it("lists the blog index as a weekly entry", async () => {
     const entries = await entriesPromise;
-    for (const path of [routes.blog, routes.gallery]) {
+    for (const path of [routes.blog]) {
       const entry = entries.find((candidate) => candidate.url === url(path));
       expect(entry).toBeDefined();
       expect(entry?.changeFrequency).toBe("weekly");

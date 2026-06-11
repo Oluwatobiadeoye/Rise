@@ -21,7 +21,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: routes.team, changeFrequency: "monthly", priority: 0.8 },
     { path: routes.projects, changeFrequency: "monthly", priority: 0.8 },
     { path: routes.blog, changeFrequency: "weekly", priority: 0.6 },
-    { path: routes.gallery, changeFrequency: "weekly", priority: 0.6 },
     { path: routes.getInvolved, changeFrequency: "monthly", priority: 0.8 },
     { path: routes.mentor, changeFrequency: "monthly", priority: 0.7 },
     { path: routes.mentee, changeFrequency: "monthly", priority: 0.7 },

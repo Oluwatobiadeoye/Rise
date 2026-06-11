@@ -7,7 +7,7 @@ import { ArrowRight, Menu, X } from "lucide-react";
 import { Container } from "./Container";
 import { Logo } from "./Logo";
 import { Button } from "./Button";
-import { navLinks, primaryCta, routes, siteConfig } from "@/lib/site";
+import { navLinks, primaryCta, siteConfig } from "@/lib/site";
 import { cn } from "@/lib/cn";
 
 export function Nav() {
@@ -32,14 +32,10 @@ export function Nav() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open]);
 
-  const isActive = (href: string) => {
-    if (href === "/") return pathname === "/";
-    // "Media" points at /blog but covers the gallery too.
-    if (href === routes.blog && pathname.startsWith(routes.gallery)) {
-      return true;
-    }
-    return pathname === href || pathname.startsWith(`${href}/`);
-  };
+  const isActive = (href: string) =>
+    href === "/"
+      ? pathname === "/"
+      : pathname === href || pathname.startsWith(`${href}/`);
 
   // Transparent float-over-hero only on the home page; interior pages (no hero)
   // start with a solid nav so content never scrolls under a see-through header.

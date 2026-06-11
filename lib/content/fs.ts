@@ -1,7 +1,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { Marked } from "marked";
-import type { ContentSource, GalleryItem, Post, PostMeta } from "./types";
+import type { ContentSource, Post, PostMeta } from "./types";
 
 /*
  * Markdown here is committed to this repository and goes through pull-request
@@ -198,52 +198,6 @@ async function readAllPosts(root: string): Promise<ParsedPostFile[]> {
   return posts;
 }
 
-function requireString(
-  file: string,
-  index: number,
-  value: unknown,
-  field: string,
-): string {
-  if (typeof value !== "string" || value.trim() === "") {
-    fail(file, `item ${index}: field "${field}" is missing or empty`);
-  }
-  return value.trim();
-}
-
-function parseGalleryItem(file: string, index: number, raw: unknown): GalleryItem {
-  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
-    fail(file, `item ${index} must be an object`);
-  }
-  const record = raw as Record<string, unknown>;
-
-  const id = requireString(file, index, record.id, "id");
-  const src = requireString(file, index, record.src, "src");
-  if (!src.startsWith("/gallery/")) {
-    fail(file, `item ${index}: field "src" must start with /gallery/`);
-  }
-  const alt = requireString(file, index, record.alt, "alt");
-
-  const dimensions = { width: 0, height: 0 };
-  for (const key of ["width", "height"] as const) {
-    const value = record[key];
-    if (typeof value !== "number" || !Number.isInteger(value) || value <= 0) {
-      fail(file, `item ${index}: field "${key}" must be a positive integer`);
-    }
-    dimensions[key] = value;
-  }
-
-  const caption =
-    record.caption === undefined || record.caption === null
-      ? null
-      : requireString(file, index, record.caption, "caption");
-  const takenAt =
-    record.takenAt === undefined || record.takenAt === null
-      ? null
-      : requireString(file, index, record.takenAt, "takenAt");
-
-  return { id, src, alt, caption, ...dimensions, takenAt };
-}
-
 export function createFsContentSource(root?: string): ContentSource {
   return {
     async listPosts(): Promise<PostMeta[]> {
@@ -260,43 +214,6 @@ export function createFsContentSource(root?: string): ContentSource {
       if (!post || post.draft) return null;
       const bodyHtml = await markdown.parse(post.body, { async: true });
       return { ...post.meta, bodyHtml };
-    },
-
-    async listGalleryItems(): Promise<GalleryItem[]> {
-      const file = path.join(resolveRoot(root), "gallery", "manifest.json");
-
-      let raw: string;
-      try {
-        raw = await readFile(file, "utf8");
-      } catch (error) {
-        // An absent manifest mirrors the empty launch state of the blog.
-        if (isMissingFileError(error)) return [];
-        throw error;
-      }
-
-      let parsed: unknown;
-      try {
-        parsed = JSON.parse(raw);
-      } catch {
-        fail(file, "manifest is not valid JSON");
-      }
-      if (!Array.isArray(parsed)) {
-        fail(file, "manifest must be a JSON array");
-      }
-
-      const items = parsed.map((entry, index) =>
-        parseGalleryItem(file, index, entry),
-      );
-
-      const seenIds = new Set<string>();
-      for (const item of items) {
-        if (seenIds.has(item.id)) {
-          fail(file, `duplicate id "${item.id}"`);
-        }
-        seenIds.add(item.id);
-      }
-
-      return items;
     },
   };
 }
