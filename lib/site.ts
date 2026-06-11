@@ -11,8 +11,8 @@ export const siteConfig = {
   tagline: "...above limitations",
   description:
     "Empowering the next generation of leaders. Leadership development, mentorship, and real opportunities for young people.",
-  // Temporary; replaced with the real domain at full launch.
-  url: "https://rise-initiative.vercel.app",
+  // The Vercel URL until the real domain lands; override via env at launch.
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://rise-ruby-three.vercel.app",
 } as const;
 
 /** Route paths. Some pages are not built yet (they 404 for now). */
@@ -32,7 +32,6 @@ export const routes = {
   getInvolved: "/get-involved",
   mentee: "/get-involved/mentee",
   mentor: "/get-involved/mentor",
-  impactNetwork: "/get-involved/impact-network",
   volunteer: "/get-involved#volunteer",
   supportAStudent: "/get-involved#support-a-student",
   contact: "/contact",
@@ -45,7 +44,8 @@ export const navLinks: ReadonlyArray<{ label: string; href: string }> = [
   { label: "About", href: routes.about },
   { label: "Team", href: routes.team },
   { label: "Projects", href: routes.projects },
-  { label: "Get Involved", href: routes.getInvolved },
+  { label: "Media", href: routes.blog },
+  { label: "Get involved", href: routes.getInvolved },
   { label: "Contact", href: routes.contact },
 ];
 
