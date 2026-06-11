@@ -5,6 +5,30 @@ domain, or key provisioning) plus the one-line code swap it unlocks. Until
 these land, the site runs fully on the Vercel URL with filesystem-backed
 content and submissions.
 
+## Content & accuracy review (human sign-off needed)
+
+Page copy was drafted during the build and baked into code. The items below
+were invented or synthesized and only RISE can confirm them — review before
+the site is shared publicly.
+
+- [ ] **Privacy policy retention periods are placeholders.** `app/privacy/page.tsx`
+      states "up to 24 months" for submissions and "up to 12 months" for the
+      notify-me list. No real RISE policy informed these numbers — set the true
+      figures (this is the concrete version of the data-retention item below).
+- [ ] **Read the whole privacy policy.** It is AI-drafted and covers minors'
+      data under the Nigeria Data Protection Act 2023; have someone with NDPA
+      familiarity confirm it, especially the under-18 guardian-consent
+      mechanism ("offline, in person at onboarding, before mentor matching").
+- [ ] **Applicant decision-email copy** (`lib/actions/admin.ts`, `DECISION_COPY`):
+      review the accept/decline wording before email sending is enabled.
+- [ ] **About page factual claim** (`components/about/OurStory.tsx`): verify
+      "more than 600 students across three secondary schools in Oyo" (2019).
+- [ ] **Home impact stats** (`components/home/ImpactStats.tsx`): confirm
+      "10,000 — five-year goal", "3 tiers", "Since 2017" are accurate to publish.
+- [ ] **Confirm program-design wording**: mentor availability options
+      (monthly/fortnightly/flexible), audience options, the consent-checkbox
+      sentence, the About mission statement, and British spelling as house style.
+
 ## ⚠️ Blockers before forms are publicly linked / a real cycle opens
 
 These two are not cosmetic. On Vercel's serverless runtime the working
