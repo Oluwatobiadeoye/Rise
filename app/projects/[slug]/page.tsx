@@ -6,6 +6,7 @@ import { TierSection } from "@/components/projects/TierSection";
 import { ImpactHighlights } from "@/components/projects/ImpactHighlights";
 import { ProjectGallery } from "@/components/projects/ProjectGallery";
 import { getProject, projects } from "@/lib/projects";
+import { pageMetadata } from "@/lib/metadata";
 
 type PageParams = { slug: string };
 
@@ -22,11 +23,11 @@ export async function generateMetadata({
   const project = getProject(slug);
   if (!project) return {};
 
-  return {
+  return pageMetadata({
     title: project.name,
     description: project.summary,
-    alternates: { canonical: `/projects/${project.slug}` },
-  };
+    path: `/projects/${project.slug}`,
+  });
 }
 
 export default async function ProjectDetailPage({

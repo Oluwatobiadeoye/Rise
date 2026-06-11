@@ -18,7 +18,12 @@ describe("TierSection", () => {
 
   it("renders the focus areas", () => {
     render(<TierSection tier={horizons} />);
-    expect(screen.getByText("Leadership Development")).toBeInTheDocument();
+    expect(screen.getByText("Career Development")).toBeInTheDocument();
+  });
+
+  it("renders the tier subtitle", () => {
+    render(<TierSection tier={horizons} />);
+    expect(screen.getByText(horizons.subtitle)).toBeInTheDocument();
   });
 
   it("renders mentor and mentee CTAs for Horizons", () => {
@@ -31,10 +36,10 @@ describe("TierSection", () => {
     ).toHaveAttribute("href", "/get-involved/mentee");
   });
 
-  it("renders the Impact Network CTA pointing at the dead path", () => {
+  it("renders the Impact Network CTA pointing at the Get Involved hub", () => {
     render(<TierSection tier={network} />);
     expect(
       screen.getByRole("link", { name: /Join the community/i }),
-    ).toHaveAttribute("href", "/get-involved/impact-network");
+    ).toHaveAttribute("href", "/get-involved");
   });
 });

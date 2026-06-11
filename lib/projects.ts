@@ -115,11 +115,11 @@ const theOyoProject: Project = {
         "The programme encourages young people to develop the character, discipline, and leadership capacity required to succeed in school and beyond.",
       ],
       focus: [
-        "Professional Mentorship",
-        "Career Development",
-        "Leadership Growth",
-        "Scholarship and Opportunity Awareness",
-        "Personal Development",  
+        "Leadership Development",
+        "Mentorship",
+        "Academic Excellence",
+        "Character Formation",
+        "Community Engagement",
       ],
     },
     {
@@ -133,11 +133,11 @@ const theOyoProject: Project = {
         "The programme is designed to help students broaden their horizons, make informed decisions, and position themselves for success in an increasingly competitive world.",
       ],
       focus: [
-        "Leadership Development",
-        "Mentorship",
-        "Academic Excellence",
-        "Character Formation",
-        "Community Engagement",
+        "Professional Mentorship",
+        "Career Development",
+        "Leadership Growth",
+        "Scholarship and Opportunity Awareness",
+        "Personal Development",
       ],
       cta: [
         { label: "Apply to be a mentor", href: routes.mentor },
@@ -161,8 +161,7 @@ const theOyoProject: Project = {
         "Leadership in Service",
         "Community Impact",
       ],
-      // No route maps to this path, so it renders the 404 by design.
-      cta: [{ label: "Join the community", href: routes.impactNetwork }],
+      cta: [{ label: "Join the community", href: routes.getInvolved }],
     },
   ],
 };

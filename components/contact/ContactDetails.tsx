@@ -64,7 +64,7 @@ export function ContactDetails() {
                   <span className="block font-medium text-ink">
                     {social.label}
                   </span>
-                  <span className="block text-sm text-mist">
+                  <span className="block text-sm text-slate">
                     {social.handle}
                   </span>
                 </span>
