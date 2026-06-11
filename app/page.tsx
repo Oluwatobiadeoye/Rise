@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Hero } from "@/components/home/Hero";
 import { ImpactStats } from "@/components/home/ImpactStats";
-import { WhatWeDo } from "@/components/home/WhatWeDo";
+import { Programmes } from "@/components/home/Programmes";
 import { MissionSnapshot } from "@/components/home/MissionSnapshot";
 import { Testimonials } from "@/components/home/Testimonials";
 import { FooterCtaBand } from "@/components/home/FooterCtaBand";
@@ -17,7 +17,7 @@ export default function Home() {
     <>
       <Hero />
       <ImpactStats />
-      <WhatWeDo />
+      <Programmes />
       <MissionSnapshot />
       <Testimonials />
       <FooterCtaBand />
