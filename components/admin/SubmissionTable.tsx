@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { StatusBadge } from "./StatusBadge";
 import type { SubmissionSummary } from "@/lib/types";
 
@@ -24,6 +27,7 @@ export function SubmissionTable({
   submissions: SubmissionSummary[];
   reviewerNames?: Record<string, string>;
 }) {
+  const router = useRouter();
   if (submissions.length === 0) {
     return (
       <p className="rounded-md border border-line bg-surface px-5 py-6 font-body text-sm text-muted">
@@ -47,10 +51,13 @@ export function SubmissionTable({
           </tr>
         </thead>
         <tbody>
-          {submissions.map((submission) => (
+          {submissions.map((submission) => {
+            const href = `/admin/submissions/${submission.type}/${submission.id}`;
+            return (
             <tr
               key={`${submission.type}/${submission.id}`}
-              className="border-b border-line last:border-0 hover:bg-surface-sunk"
+              onClick={() => router.push(href)}
+              className="cursor-pointer border-b border-line last:border-0 hover:bg-surface-sunk"
             >
               <td className="px-4 py-3 text-muted">
                 {formatDate(submission.createdAt)}
@@ -60,7 +67,8 @@ export function SubmissionTable({
               </td>
               <td className="px-4 py-3 text-ink">
                 <Link
-                  href={`/admin/submissions/${submission.type}/${submission.id}`}
+                  href={href}
+                  onClick={(e) => e.stopPropagation()}
                   className="font-semibold text-primary hover:text-primary-press"
                 >
                   {submission.fullName || "(no name)"}
@@ -79,7 +87,8 @@ export function SubmissionTable({
               </td>
               <td className="px-4 py-3 text-muted">{submission.from ?? "—"}</td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </div>
