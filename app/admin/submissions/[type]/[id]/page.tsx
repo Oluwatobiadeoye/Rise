@@ -4,14 +4,13 @@ import { requireAdmin } from "@/lib/admin/auth";
 import {
   claimSubmission,
   releaseSubmission,
-  saveSubmissionNotes,
   sendDecisionEmail,
-  updateSubmissionStatus,
 } from "@/lib/actions/admin";
 import { isSubmissionType } from "@/lib/admin/ref";
+import { ReviewEditor } from "@/components/admin/ReviewEditor";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { db } from "@/lib/db";
-import { STATUS_LABELS, statusesForType } from "@/lib/status";
+import { STATUS_LABELS, isTerminalStatus, statusesForType } from "@/lib/status";
 
 export const dynamic = "force-dynamic";
 
@@ -50,6 +49,9 @@ export default async function AdminSubmissionDetailPage({
   const isMine = reviewedBy !== null && reviewedBy === admin.id;
   const isHeldByOther = reviewedBy !== null && reviewedBy !== admin.id;
   const holder = isHeldByOther ? await db.getAdminById(reviewedBy) : null;
+  // A finalized submission stays attributed to whoever handled it, so releasing
+  // (or forcibly taking over) the claim is no longer offered.
+  const finalized = isTerminalStatus(submission.status);
 
   const canEmail = type === "mentor" || type === "mentee";
   // The user-supplied fields are everything except the system/envelope fields.
@@ -58,6 +60,7 @@ export default async function AdminSubmissionDetailPage({
     "type",
     "status",
     "notes",
+    "reviewedBy",
     "from",
     "createdAt",
     "updatedAt",
@@ -127,114 +130,74 @@ export default async function AdminSubmissionDetailPage({
         ) : isMine ? (
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <p className="font-body text-sm text-success">
-              You are reviewing this submission.
+              {finalized
+                ? "This submission is finalized and stays attributed to you."
+                : "You are reviewing this submission."}
             </p>
-            <form action={releaseSubmission}>
-              <input type="hidden" name="type" value={submission.type} />
-              <input type="hidden" name="id" value={submission.id} />
-              <button
-                type="submit"
-                className="inline-flex min-h-11 items-center rounded-pill px-4 py-2 font-body text-sm font-semibold text-charcoal-700 shadow-[inset_0_0_0_2px_var(--rise-line)] transition-colors hover:bg-surface-sunk"
-              >
-                Release
-              </button>
-            </form>
+            {finalized ? null : (
+              <form action={releaseSubmission}>
+                <input type="hidden" name="type" value={submission.type} />
+                <input type="hidden" name="id" value={submission.id} />
+                <button
+                  type="submit"
+                  className="inline-flex min-h-11 items-center rounded-pill px-4 py-2 font-body text-sm font-semibold text-charcoal-700 shadow-[inset_0_0_0_2px_var(--rise-line)] transition-colors hover:bg-surface-sunk"
+                >
+                  Release
+                </button>
+              </form>
+            )}
           </div>
         ) : (
           <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
             <p className="font-body text-sm text-muted">
-              Under review by {holder?.name ?? "another admin"}. The controls
-              are read-only until released.
+              {finalized
+                ? `Finalized by ${holder?.name ?? "another admin"}.`
+                : `Under review by ${holder?.name ?? "another admin"}. The controls are read-only until released.`}
             </p>
-            <form action={releaseSubmission}>
-              <input type="hidden" name="type" value={submission.type} />
-              <input type="hidden" name="id" value={submission.id} />
-              <input type="hidden" name="force" value="1" />
-              <button
-                type="submit"
-                className="inline-flex min-h-11 items-center rounded-pill px-4 py-2 font-body text-sm font-semibold text-danger shadow-[inset_0_0_0_2px_var(--rise-line)] transition-colors hover:bg-surface-sunk"
-              >
-                Force release
-              </button>
-            </form>
+            {finalized ? null : (
+              <form action={releaseSubmission}>
+                <input type="hidden" name="type" value={submission.type} />
+                <input type="hidden" name="id" value={submission.id} />
+                <input type="hidden" name="force" value="1" />
+                <button
+                  type="submit"
+                  className="inline-flex min-h-11 items-center rounded-pill px-4 py-2 font-body text-sm font-semibold text-danger shadow-[inset_0_0_0_2px_var(--rise-line)] transition-colors hover:bg-surface-sunk"
+                >
+                  Force release
+                </button>
+              </form>
+            )}
           </div>
         )}
       </section>
 
       <section className="rounded-lg border border-line bg-surface p-6">
-        <h2 className="font-display text-lg font-semibold text-ink">Status</h2>
-        {!isMine ? (
-          <p className="mt-4 font-body text-sm text-muted">
-            Current status: {STATUS_LABELS[submission.status]}. Start a review
-            to change it.
-          </p>
-        ) : (
-        <form
-          action={updateSubmissionStatus}
-          className="mt-4 flex flex-wrap items-end gap-3"
-        >
-          <input type="hidden" name="type" value={submission.type} />
-          <input type="hidden" name="id" value={submission.id} />
-          <div>
-            <label
-              htmlFor="status"
-              className="block font-body text-sm font-semibold text-ink"
-            >
-              Review status
-            </label>
-            <select
-              id="status"
-              name="status"
-              defaultValue={submission.status}
-              className="mt-1.5 rounded-md border border-line bg-surface px-3 py-2.5 font-body text-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary-tint"
-            >
-              {statusesForType(submission.type).map((value) => (
-                <option key={value} value={value}>
-                  {STATUS_LABELS[value]}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button
-            type="submit"
-            className="inline-flex min-h-11 items-center rounded-pill bg-primary px-5 py-2.5 font-body text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
-          >
-            Save status
-          </button>
-        </form>
-        )}
-      </section>
-
-      <section className="rounded-lg border border-line bg-surface p-6">
-        <h2 className="font-display text-lg font-semibold text-ink">Notes</h2>
-        {!isMine ? (
-          <div className="mt-4">
-            <p className="font-body text-sm whitespace-pre-wrap text-ink">
-              {submission.notes || "(no notes yet)"}
-            </p>
-            <p className="mt-2 font-body text-sm text-muted">
-              Start a review to edit notes.
-            </p>
-          </div>
-        ) : (
-        <form action={saveSubmissionNotes} className="mt-4 space-y-3">
-          <input type="hidden" name="type" value={submission.type} />
-          <input type="hidden" name="id" value={submission.id} />
-          <textarea
-            name="notes"
-            rows={5}
-            maxLength={5000}
-            defaultValue={submission.notes}
-            placeholder="Internal review notes (not shared with the applicant)."
-            className="w-full rounded-md border border-line bg-surface px-3 py-2.5 font-body text-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary-tint"
+        <h2 className="font-display text-lg font-semibold text-ink">
+          Status &amp; notes
+        </h2>
+        {isMine ? (
+          <ReviewEditor
+            type={submission.type}
+            id={submission.id}
+            status={submission.status}
+            notes={submission.notes}
+            statuses={statusesForType(submission.type)}
           />
-          <button
-            type="submit"
-            className="inline-flex min-h-11 items-center rounded-pill bg-charcoal px-5 py-2.5 font-body text-sm font-semibold text-white transition-colors hover:bg-charcoal-700"
-          >
-            Save notes
-          </button>
-        </form>
+        ) : (
+          <div className="mt-4 space-y-4">
+            <p className="font-body text-sm text-muted">
+              Current status: {STATUS_LABELS[submission.status]}.{" "}
+              {finalized
+                ? "This submission is finalized."
+                : "Start a review to change the status and edit notes."}
+            </p>
+            <div>
+              <p className="font-body text-sm font-semibold text-muted">Notes</p>
+              <p className="mt-1 font-body text-sm whitespace-pre-wrap text-ink">
+                {submission.notes || "(no notes yet)"}
+              </p>
+            </div>
+          </div>
         )}
       </section>
 

@@ -124,9 +124,11 @@ export async function logoutAdmin(): Promise<void> {
   redirect("/admin/login");
 }
 
-export async function updateSubmissionStatus(
-  formData: FormData,
-): Promise<void> {
+/**
+ * Saves the whole review in one shot (the detail page's single Save button):
+ * status and notes together, under the caller's active claim.
+ */
+export async function saveSubmissionReview(formData: FormData): Promise<void> {
   const admin = await assertAdmin();
 
   const ref = validateSubmissionRef(
@@ -138,13 +140,20 @@ export async function updateSubmissionStatus(
   const status = formData.get("status");
   if (!isStatusForType(ref.type, status)) throw new Error("Invalid status");
 
+  const raw = formData.get("notes");
+  const notes = (typeof raw === "string" ? raw : "").slice(0, NOTES_MAX_LENGTH);
+
   await loadClaimedSubmission(ref.type, ref.id, admin.id);
-  await db.updateSubmission(ref.type, ref.id, { status });
+  await db.updateSubmission(ref.type, ref.id, { status, notes });
 
   revalidatePath("/admin/submissions");
   revalidatePath(detailPath(ref.type, ref.id));
 }
 
+/**
+ * Saves only the notes (the detail page auto-saves these on blur, so a status
+ * change still in progress is never persisted before the reviewer commits it).
+ */
 export async function saveSubmissionNotes(formData: FormData): Promise<void> {
   const admin = await assertAdmin();
 

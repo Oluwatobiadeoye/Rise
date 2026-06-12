@@ -40,6 +40,20 @@ export const ALL_STATUSES: readonly SubmissionStatus[] = [
   "archived",
 ];
 
+// Once a submission reaches one of these it is finalized: the review is over,
+// so it stays attributed to whoever handled it (no release).
+const TERMINAL_STATUSES: readonly SubmissionStatus[] = [
+  "accepted",
+  "declined",
+  "closed",
+  "archived",
+];
+
+/** Whether a status is a finalized/terminal state (review complete). */
+export function isTerminalStatus(status: SubmissionStatus): boolean {
+  return TERMINAL_STATUSES.includes(status);
+}
+
 /** The statuses valid for a given submission type. */
 export function statusesForType(
   type: SubmissionType,
