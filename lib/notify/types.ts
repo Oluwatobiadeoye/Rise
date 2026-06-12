@@ -1,4 +1,8 @@
-import type { NotificationInput, NotificationRecord } from "@/lib/types";
+import type {
+  NotificationInput,
+  NotificationKind,
+  NotificationRecord,
+} from "@/lib/types";
 
 /**
  * Notification seam. The filesystem implementation records what would be
@@ -7,4 +11,8 @@ import type { NotificationInput, NotificationRecord } from "@/lib/types";
  */
 export interface Notifier {
   send(input: NotificationInput): Promise<NotificationRecord>;
+  /** Recorded notifications, newest first, optionally narrowed by kind. */
+  listNotifications(filter?: {
+    kind?: NotificationKind;
+  }): Promise<NotificationRecord[]>;
 }

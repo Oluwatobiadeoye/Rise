@@ -114,6 +114,21 @@ create table if not exists public.notify_me (
   unique (role, email)
 );
 
+-- Durable, queryable audit log of every notification the app records (new
+-- submission alerts, decision emails). The submission reference is nullable so
+-- a deleted submission leaves the audit row intact.
+create table if not exists public.notifications (
+  id              uuid primary key default gen_random_uuid(),
+  kind            text not null check (kind in ('submission-received','decision-email')),
+  recipient       text not null,
+  subject         text not null,
+  body            text not null,
+  submission_type text check (submission_type in ('contact','mentor','mentee','volunteer')),
+  submission_id   uuid references public.submissions(id) on delete set null,
+  created_at      timestamptz not null default now()
+);
+create index if not exists notifications_created_idx on public.notifications (created_at desc);
+
 -- Atomic create: inserts the supertype row and the matching detail row in one
 -- transaction (a plpgsql function runs in a single transaction), so a failed
 -- detail insert rolls the whole thing back — no orphaned base rows. Returns the
@@ -177,3 +192,4 @@ alter table public.mentee_submissions    enable row level security;
 alter table public.volunteer_submissions enable row level security;
 alter table public.cycles                enable row level security;
 alter table public.notify_me             enable row level security;
+alter table public.notifications         enable row level security;

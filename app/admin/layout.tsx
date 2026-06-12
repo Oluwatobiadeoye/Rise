@@ -32,6 +32,9 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <Link href="/admin/cycles" className="hover:text-ink">
               Cycles
             </Link>
+            <Link href="/admin/notifications" className="hover:text-ink">
+              Notifications
+            </Link>
           </nav>
           <form action={logoutAdmin} className="ms-auto">
             <button
