@@ -232,12 +232,7 @@ export default async function AdminAdminsPage() {
           Admin accounts
         </h1>
         <p className="mt-2 font-body text-sm text-muted">
-          Manage who can sign in to the admin area and what they can do. The
-          first admin account is created from the command line with{" "}
-          <code className="rounded bg-surface-sunk px-1.5 py-0.5 font-mono text-xs">
-            npm run create-admin
-          </code>
-          .
+          Manage who can sign in to the admin area and what they can do.
         </p>
       </div>
 
