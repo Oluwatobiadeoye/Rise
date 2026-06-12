@@ -4,6 +4,7 @@ import {
   check,
   date,
   index,
+  integer,
   pgEnum,
   pgTable,
   text,
@@ -29,6 +30,14 @@ export const adminRole = pgEnum("admin_role", [
   "superadmin",
   "owner",
   "reviewer",
+]);
+
+// Blog post lifecycle. A draft is private; published is on the public site;
+// archived is withdrawn (recoverable, never shown publicly).
+export const postStatus = pgEnum("post_status", [
+  "draft",
+  "published",
+  "archived",
 ]);
 
 export const mentorAudience = pgEnum("mentor_audience", [
@@ -225,5 +234,54 @@ export const notifications = pgTable(
       sql`${table.submissionType} is null or ${table.submissionType} in ('contact','mentor','mentee','volunteer')`,
     ),
     index("notifications_created_idx").on(table.createdAt.desc()),
+  ],
+).enableRLS();
+
+// Blog posts authored in the admin area. The public site reads only published
+// rows (filtered in SQL, not by RLS); the stored HTML is sanitized on write and
+// again on read. `firstPublishedAt` records the first time a post went live,
+// after which its slug is locked so shared URLs never break. The cover columns
+// are all-or-nothing: a present `cover_src` requires alt text and dimensions
+// (the public page needs them for next/image and accessibility).
+export const posts = pgTable(
+  "posts",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    slug: text("slug").notNull().unique(),
+    title: text("title").notNull(),
+    excerpt: text("excerpt").notNull().default(""),
+    author: text("author").notNull(),
+    bodyHtml: text("body_html").notNull().default(""),
+    readingMinutes: integer("reading_minutes").notNull().default(1),
+    coverSrc: text("cover_src"),
+    coverAlt: text("cover_alt"),
+    coverWidth: integer("cover_width"),
+    coverHeight: integer("cover_height"),
+    status: postStatus("status").notNull().default("draft"),
+    publishedAt: timestamp("published_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    firstPublishedAt: timestamp("first_published_at", {
+      withTimezone: true,
+      mode: "string",
+    }),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    check("posts_slug_kebab", sql`${table.slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$'`),
+    check(
+      "posts_cover_complete",
+      sql`${table.coverSrc} is null or (${table.coverAlt} is not null and ${table.coverWidth} is not null and ${table.coverHeight} is not null)`,
+    ),
+    // Partial index over the public list's exact query (published, newest first).
+    index("posts_published_idx")
+      .on(table.publishedAt.desc())
+      .where(sql`${table.status} = 'published'`),
   ],
 ).enableRLS();

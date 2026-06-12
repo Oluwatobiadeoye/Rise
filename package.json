@@ -12,11 +12,13 @@
     "test:watch": "vitest",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "create-admin": "node --env-file-if-exists=.env.local scripts/create-admin.mjs"
+    "create-admin": "node --env-file-if-exists=.env.local scripts/create-admin.mjs",
+    "seed-blog": "node --env-file-if-exists=.env.local scripts/seed-blog.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
     "drizzle-orm": "^0.45.2",
+    "isomorphic-dompurify": "^3.16.0",
     "lucide-react": "^1.17.0",
     "marked": "^18.0.5",
     "next": "16.2.7",
