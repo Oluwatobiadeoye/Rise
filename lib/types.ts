@@ -110,8 +110,18 @@ export type SubmissionBase = {
  */
 export type Submission =
   | (SubmissionBase & { type: "contact"; status: EnquiryStatus } & ContactFields)
-  | (SubmissionBase & { type: "mentor"; status: ApplicationStatus } & MentorFields)
-  | (SubmissionBase & { type: "mentee"; status: ApplicationStatus } & MenteeFields)
+  | (SubmissionBase & {
+      type: "mentor";
+      status: ApplicationStatus;
+      /** The cycle this application belongs to, stamped server-side. */
+      cycleId: string | null;
+    } & MentorFields)
+  | (SubmissionBase & {
+      type: "mentee";
+      status: ApplicationStatus;
+      /** The cycle this application belongs to, stamped server-side. */
+      cycleId: string | null;
+    } & MenteeFields)
   | (SubmissionBase & {
       type: "volunteer";
       status: EnquiryStatus;
@@ -135,13 +145,33 @@ export type SubmissionSummary = SubmissionBase & {
   email: string;
 };
 
-export type CycleState = {
-  open: boolean;
-  /** ISO 8601 timestamp of the last toggle; null until first set. */
-  updatedAt: string | null;
+/**
+ * An application cycle: a scheduled open/close window for a role. Whether a
+ * role is "open" is derived from whether the current instant falls inside a
+ * cycle's window, not stored as a flag.
+ */
+export type Cycle = {
+  id: string;
+  role: CycleRole;
+  /** Human identity, e.g. "Summer 2026". */
+  label: string;
+  /** ISO 8601 timestamp: applications open. */
+  openAt: string;
+  /** ISO 8601 timestamp: applications close. */
+  closeAt: string;
+  /** ISO 8601 timestamp. */
+  createdAt: string;
+  /** ISO 8601 timestamp. */
+  updatedAt: string;
 };
 
-export type Cycles = Record<CycleRole, CycleState>;
+/** What an admin supplies to create a cycle; the store stamps id/timestamps. */
+export type CycleInput = {
+  role: CycleRole;
+  label: string;
+  openAt: string;
+  closeAt: string;
+};
 
 export type NotifyMeEntry = {
   id: string;

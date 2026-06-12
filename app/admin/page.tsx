@@ -1,9 +1,14 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin/auth";
-import { CycleCard } from "@/components/admin/CycleCard";
 import { db } from "@/lib/db";
 import { ALL_STATUSES, STATUS_LABELS } from "@/lib/status";
-import type { CycleRole, SubmissionStatus, SubmissionType } from "@/lib/types";
+import { CYCLE_ROLE_LABELS, formatCycleDate } from "@/lib/cycle-phase";
+import type {
+  Cycle,
+  CycleRole,
+  SubmissionStatus,
+  SubmissionType,
+} from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -40,13 +45,45 @@ function Stat({
 const cardLinkClass =
   "block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2";
 
+function CycleStatusRow({
+  role,
+  cycle,
+}: {
+  role: CycleRole;
+  cycle: Cycle | null;
+}) {
+  return (
+    <div className="rounded-lg border border-line bg-surface p-4">
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-display text-base font-semibold text-ink">
+          {CYCLE_ROLE_LABELS[role]}
+        </p>
+        <span
+          className={`inline-flex items-center rounded-pill px-3 py-1 font-body text-xs font-semibold ${
+            cycle
+              ? "bg-success-tint text-success"
+              : "bg-charcoal-50 text-charcoal-700"
+          }`}
+        >
+          {cycle ? "Open" : "Closed"}
+        </span>
+      </div>
+      <p className="mt-2 font-body text-sm text-muted">
+        {cycle
+          ? `${cycle.label}, closes ${formatCycleDate(cycle.closeAt)}`
+          : "No cycle is currently open."}
+      </p>
+    </div>
+  );
+}
+
 export default async function AdminDashboardPage() {
   await requireAdmin();
 
-  const [submissions, cycles] = await Promise.all([
-    db.listSubmissions(),
-    db.getCycles(),
-  ]);
+  const submissions = await db.listSubmissions();
+  const activeCycles = await Promise.all(
+    ROLES.map((role) => db.getActiveCycle(role)),
+  );
   const notifyCounts = await Promise.all(
     ROLES.map((role) => db.listNotifyMe(role).then((list) => list.length)),
   );
@@ -109,12 +146,20 @@ export default async function AdminDashboardPage() {
       </section>
 
       <section>
-        <h2 className="font-display text-lg font-semibold text-ink">
-          Application cycles
-        </h2>
+        <div className="flex items-center justify-between gap-3">
+          <h2 className="font-display text-lg font-semibold text-ink">
+            Application cycles
+          </h2>
+          <Link
+            href="/admin/cycles"
+            className="font-body text-sm font-semibold text-primary hover:underline"
+          >
+            Manage cycles
+          </Link>
+        </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          {ROLES.map((role) => (
-            <CycleCard key={role} role={role} state={cycles[role]} />
+          {ROLES.map((role, index) => (
+            <CycleStatusRow key={role} role={role} cycle={activeCycles[index]} />
           ))}
         </div>
       </section>

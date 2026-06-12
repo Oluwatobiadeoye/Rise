@@ -96,20 +96,79 @@ export async function saveSubmissionNotes(formData: FormData): Promise<void> {
   revalidatePath(detailPath(ref.type, ref.id));
 }
 
-export async function toggleCycle(formData: FormData): Promise<void> {
+const CYCLE_LABEL_MAX_LENGTH = 120;
+
+function revalidateCycles(): void {
+  revalidatePath("/admin/cycles");
+  revalidatePath("/admin");
+}
+
+/**
+ * Parses a `datetime-local` form value (e.g. "2026-07-01T09:00", local time,
+ * no zone) to an ISO 8601 instant. Returns null if it cannot be parsed.
+ */
+function parseDateTimeLocal(value: unknown): string | null {
+  if (typeof value !== "string" || value.trim() === "") return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return date.toISOString();
+}
+
+/** Validates a label and the open/close window from a cycle form. */
+function readCycleWindow(formData: FormData): {
+  label: string;
+  openAt: string;
+  closeAt: string;
+} {
+  const labelRaw = formData.get("label");
+  const label = (typeof labelRaw === "string" ? labelRaw : "").trim();
+  if (!label || label.length > CYCLE_LABEL_MAX_LENGTH) {
+    throw new Error("Invalid cycle label");
+  }
+
+  const openAt = parseDateTimeLocal(formData.get("openAt"));
+  const closeAt = parseDateTimeLocal(formData.get("closeAt"));
+  if (!openAt || !closeAt) throw new Error("Invalid cycle dates");
+  if (closeAt <= openAt) {
+    throw new Error("Cycle close time must be after the open time");
+  }
+
+  return { label, openAt, closeAt };
+}
+
+export async function createCycle(formData: FormData): Promise<void> {
   await assertAdmin();
 
   const role = formData.get("role");
   if (!isCycleRole(role)) throw new Error("Invalid role");
 
-  const openValue = formData.get("open");
-  if (openValue !== "true" && openValue !== "false") {
-    throw new Error("Invalid cycle state");
-  }
+  const { label, openAt, closeAt } = readCycleWindow(formData);
+  await db.createCycle({ role, label, openAt, closeAt });
 
-  await db.setCycle(role, openValue === "true");
+  revalidateCycles();
+}
 
-  revalidatePath("/admin");
+export async function updateCycle(formData: FormData): Promise<void> {
+  await assertAdmin();
+
+  const id = formData.get("id");
+  if (typeof id !== "string" || !id) throw new Error("Invalid cycle id");
+
+  const { label, openAt, closeAt } = readCycleWindow(formData);
+  await db.updateCycle(id, { label, openAt, closeAt });
+
+  revalidateCycles();
+}
+
+export async function deleteCycle(formData: FormData): Promise<void> {
+  await assertAdmin();
+
+  const id = formData.get("id");
+  if (typeof id !== "string" || !id) throw new Error("Invalid cycle id");
+
+  await db.deleteCycle(id);
+
+  revalidateCycles();
 }
 
 const DECISION_COPY: Record<

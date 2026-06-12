@@ -29,7 +29,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <Link href="/admin/submissions" className="hover:text-ink">
               Submissions
             </Link>
-            <Link href="/admin" className="hover:text-ink">
+            <Link href="/admin/cycles" className="hover:text-ink">
               Cycles
             </Link>
           </nav>

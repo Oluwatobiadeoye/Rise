@@ -2,10 +2,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import MentorPage from "../page";
 import { db } from "@/lib/db";
-import type { Cycles } from "@/lib/types";
+import type { Cycle } from "@/lib/types";
 
 vi.mock("@/lib/db", () => ({
-  db: { getCycles: vi.fn() },
+  db: { getActiveCycle: vi.fn() },
 }));
 
 vi.mock("@/lib/actions/submissions", () => ({
@@ -13,21 +13,24 @@ vi.mock("@/lib/actions/submissions", () => ({
   submitNotifyMe: vi.fn(),
 }));
 
-const getCyclesMock = vi.mocked(db.getCycles);
+const getActiveCycleMock = vi.mocked(db.getActiveCycle);
 
-function cycles(open: boolean): Cycles {
-  return {
-    mentor: { open, updatedAt: null },
-    mentee: { open: false, updatedAt: null },
-  };
-}
+const mentorCycle: Cycle = {
+  id: "cycle-1",
+  role: "mentor",
+  label: "Summer 2026",
+  openAt: "2026-06-01T00:00:00.000Z",
+  closeAt: "2026-07-01T00:00:00.000Z",
+  createdAt: "2026-05-01T00:00:00.000Z",
+  updatedAt: "2026-05-01T00:00:00.000Z",
+};
 
 async function renderPage(searchParams: Record<string, string> = {}) {
   return render(await MentorPage({ searchParams: Promise.resolve(searchParams) }));
 }
 
 beforeEach(() => {
-  getCyclesMock.mockResolvedValue(cycles(true));
+  getActiveCycleMock.mockResolvedValue(mentorCycle);
 });
 
 describe("Mentor application page", () => {
@@ -69,7 +72,7 @@ describe("Mentor application page", () => {
   });
 
   it("shows the closed notice and notify-me form when the cycle is closed", async () => {
-    getCyclesMock.mockResolvedValue(cycles(false));
+    getActiveCycleMock.mockResolvedValue(null);
     await renderPage();
     expect(
       screen.getByText(/mentor applications are currently closed/i),

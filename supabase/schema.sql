@@ -24,6 +24,28 @@ do $$ begin
   create type mentor_availability as enum ('monthly','fortnightly','flexible');
 exception when duplicate_object then null; end $$;
 
+-- Application cycles: a scheduled open/close window per role. Whether a role
+-- is "open" is derived from whether now() falls inside a cycle's window.
+create table if not exists public.cycles (
+  id         uuid primary key default gen_random_uuid(),
+  role       text not null check (role in ('mentor','mentee')),
+  label      text not null,
+  open_at    timestamptz not null,
+  close_at   timestamptz not null,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  constraint cycles_window_valid check (close_at > open_at)
+);
+
+create index if not exists cycles_role_open_idx on public.cycles (role, open_at desc);
+
+-- Two cycles for the same role must not have overlapping windows.
+create extension if not exists btree_gist;
+do $$ begin
+  alter table public.cycles add constraint cycles_no_overlap
+    exclude using gist (role with =, tstzrange(open_at, close_at) with &&);
+exception when duplicate_object then null; end $$;
+
 -- Supertype: shared fields for every submission. The admin inbox lists, sorts,
 -- filters, and counts straight from this table with no joins.
 create table if not exists public.submissions (
@@ -34,6 +56,7 @@ create table if not exists public.submissions (
   status      submission_status not null default 'pending',
   notes       text not null default '',
   from_ref    text,
+  cycle_id    uuid references public.cycles(id) on delete set null,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now(),
   -- Applications are accepted/declined; enquiries are closed. Neither set
@@ -82,13 +105,6 @@ create table if not exists public.volunteer_submissions (
   message       text
 );
 
--- Application cycles: one row per role, flipped open/closed by the admin.
-create table if not exists public.cycles (
-  role        text primary key check (role in ('mentor','mentee')),
-  open        boolean not null default false,
-  updated_at  timestamptz
-);
-
 -- Notify-me signups captured while a cycle is closed.
 create table if not exists public.notify_me (
   id          uuid primary key default gen_random_uuid(),
@@ -107,6 +123,7 @@ create or replace function public.create_submission(
   p_full_name   text,
   p_email       text,
   p_from_ref    text default null,
+  p_cycle_id    uuid default null,
   p_contact_role     text default null,
   p_contact_message  text default null,
   p_mentor_field        text default null,
@@ -126,8 +143,8 @@ as $$
 declare
   new_id uuid;
 begin
-  insert into public.submissions (type, full_name, email, from_ref)
-    values (p_type, p_full_name, p_email, p_from_ref)
+  insert into public.submissions (type, full_name, email, from_ref, cycle_id)
+    values (p_type, p_full_name, p_email, p_from_ref, p_cycle_id)
     returning id into new_id;
 
   if p_type = 'contact' then

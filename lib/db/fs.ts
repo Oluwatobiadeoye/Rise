@@ -1,9 +1,10 @@
-import { mkdir, readFile, readdir, rename, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, rename, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type {
+  Cycle,
+  CycleInput,
   CycleRole,
-  Cycles,
   NotifyMeEntry,
   Submission,
   SubmissionInput,
@@ -33,13 +34,6 @@ function toSummary(submission: Submission): SubmissionSummary {
     from: submission.from,
     createdAt: submission.createdAt,
     updatedAt: submission.updatedAt,
-  };
-}
-
-function defaultCycles(): Cycles {
-  return {
-    mentor: { open: false, updatedAt: null },
-    mentee: { open: false, updatedAt: null },
   };
 }
 
@@ -92,18 +86,26 @@ export function createFsSubmissionStore(root?: string): SubmissionStore {
     path.join(resolveRoot(), "submissions", type, `${id}.json`);
   const submissionsDir = (type: SubmissionType) =>
     path.join(resolveRoot(), "submissions", type);
-  const cyclesFile = () => path.join(resolveRoot(), "cycles.json");
+  const cyclesDir = () => path.join(resolveRoot(), "cycles");
+  const cycleFile = (id: string) => path.join(cyclesDir(), `${id}.json`);
   const notifyMeDir = (role: CycleRole) =>
     path.join(resolveRoot(), "notify-me", role);
 
-  async function getCycles(): Promise<Cycles> {
-    let stored: Partial<Cycles> | null = null;
-    try {
-      stored = await readJsonIfExists<Partial<Cycles>>(cyclesFile());
-    } catch (error) {
-      console.error(`Skipping unreadable cycles file ${cyclesFile()}`, error);
+  async function listCycles(role?: CycleRole): Promise<Cycle[]> {
+    const dir = cyclesDir();
+    const files = await listJsonFiles(dir);
+    const cycles: Cycle[] = [];
+    for (const name of files) {
+      const file = path.join(dir, name);
+      try {
+        const cycle = await readJsonIfExists<Cycle>(file);
+        if (cycle && (!role || cycle.role === role)) cycles.push(cycle);
+      } catch (error) {
+        console.error(`Skipping unreadable cycle file ${file}`, error);
+      }
     }
-    return { ...defaultCycles(), ...stored };
+    cycles.sort((a, b) => b.openAt.localeCompare(a.openAt));
+    return cycles;
   }
 
   async function listNotifyMe(role: CycleRole): Promise<NotifyMeEntry[]> {
@@ -126,7 +128,7 @@ export function createFsSubmissionStore(root?: string): SubmissionStore {
   return {
     async createSubmission(
       input: SubmissionInput,
-      meta?: { from?: string | null },
+      meta?: { from?: string | null; cycleId?: string | null },
     ): Promise<Submission> {
       const now = new Date().toISOString();
       const submission = {
@@ -135,6 +137,10 @@ export function createFsSubmissionStore(root?: string): SubmissionStore {
         status: "pending",
         notes: "",
         from: meta?.from ?? null,
+        // Only applications belong to a cycle; enquiries are always-on.
+        ...(input.type === "mentor" || input.type === "mentee"
+          ? { cycleId: meta?.cycleId ?? null }
+          : {}),
         createdAt: now,
         updatedAt: now,
       } as Submission;
@@ -201,13 +207,50 @@ export function createFsSubmissionStore(root?: string): SubmissionStore {
       return updated;
     },
 
-    getCycles,
+    listCycles,
 
-    async setCycle(role: CycleRole, open: boolean): Promise<Cycles> {
-      const cycles = await getCycles();
-      cycles[role] = { open, updatedAt: new Date().toISOString() };
-      await writeJsonAtomic(cyclesFile(), cycles);
-      return cycles;
+    async getActiveCycle(role: CycleRole): Promise<Cycle | null> {
+      const nowIso = new Date().toISOString();
+      const cycles = await listCycles(role);
+      return (
+        cycles.find((c) => c.openAt <= nowIso && nowIso < c.closeAt) ?? null
+      );
+    },
+
+    async createCycle(input: CycleInput): Promise<Cycle> {
+      const now = new Date().toISOString();
+      const cycle: Cycle = {
+        id: randomUUID(),
+        role: input.role,
+        label: input.label,
+        openAt: input.openAt,
+        closeAt: input.closeAt,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await writeJsonAtomic(cycleFile(cycle.id), cycle);
+      return cycle;
+    },
+
+    async updateCycle(
+      id: string,
+      patch: { label?: string; openAt?: string; closeAt?: string },
+    ): Promise<Cycle> {
+      const existing = await readJsonIfExists<Cycle>(cycleFile(id));
+      if (!existing) throw new Error(`Cycle not found: ${id}`);
+      const updated: Cycle = {
+        ...existing,
+        ...(patch.label !== undefined ? { label: patch.label } : {}),
+        ...(patch.openAt !== undefined ? { openAt: patch.openAt } : {}),
+        ...(patch.closeAt !== undefined ? { closeAt: patch.closeAt } : {}),
+        updatedAt: new Date().toISOString(),
+      };
+      await writeJsonAtomic(cycleFile(id), updated);
+      return updated;
+    },
+
+    async deleteCycle(id: string): Promise<void> {
+      await rm(cycleFile(id), { force: true });
     },
 
     async addNotifyMe(role: CycleRole, email: string): Promise<NotifyMeEntry> {

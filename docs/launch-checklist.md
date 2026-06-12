@@ -5,6 +5,15 @@ domain, or key provisioning) plus the one-line code swap it unlocks. Until
 these land, the site runs fully on the Vercel URL with filesystem-backed
 content and submissions.
 
+## Known behaviour to confirm
+
+- [ ] **Cycle open/close times are interpreted in the server's timezone.** The
+      admin enters a cycle window with `datetime-local` inputs; the server
+      parses them as its own local time, which is UTC on Vercel. So "09:00"
+      means 09:00 UTC (10:00 in Lagos). Fine for day/week-level intake windows,
+      but if hour-precise local times ever matter, capture the timezone or label
+      the inputs as UTC in the admin UI.
+
 ## Content & accuracy review (human sign-off needed)
 
 Page copy was drafted during the build and baked into code. The items below

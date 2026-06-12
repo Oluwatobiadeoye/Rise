@@ -69,14 +69,17 @@ async function handleSubmission<T extends SubmissionType>(
   const result = validate(formData);
   if (!result.ok) return { status: "error", errors: result.errors };
 
+  // Never trust a client-supplied cycle id; always derive it server-side.
+  let cycleId: string | null = null;
   if (cycleRole) {
-    const cycles = await db.getCycles();
-    if (!cycles[cycleRole].open) return CYCLE_CLOSED_ERROR;
+    const cycle = await db.getActiveCycle(cycleRole);
+    if (!cycle) return CYCLE_CLOSED_ERROR;
+    cycleId = cycle.id;
   }
 
   const submission = await db.createSubmission(
     { type, ...result.data } as SubmissionInput,
-    { from: sanitizeFromSlug(formData.get("from")) },
+    { from: sanitizeFromSlug(formData.get("from")), cycleId },
   );
 
   try {

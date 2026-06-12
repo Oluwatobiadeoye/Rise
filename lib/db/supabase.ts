@@ -2,8 +2,9 @@ import "server-only";
 
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 import type {
+  Cycle,
+  CycleInput,
   CycleRole,
-  Cycles,
   NotifyMeEntry,
   Submission,
   SubmissionInput,
@@ -30,11 +31,20 @@ type BaseRow = {
   status: SubmissionStatus;
   notes: string;
   from_ref: string | null;
+  cycle_id: string | null;
   created_at: string;
   updated_at: string;
 };
 
-type CycleRow = { role: CycleRole; open: boolean; updated_at: string | null };
+type CycleRow = {
+  id: string;
+  role: CycleRole;
+  label: string;
+  open_at: string;
+  close_at: string;
+  created_at: string;
+  updated_at: string;
+};
 type NotifyMeRow = {
   id: string;
   role: CycleRole;
@@ -92,6 +102,7 @@ function assemble<K extends SubmissionType>(
       return {
         ...common,
         type: "mentor",
+        cycleId: base.cycle_id,
         fieldOfExpertise: detail.field_of_expertise as string,
         audiencePreference: detail.audience_preference as "tertiary" | "early-career" | "either",
         availability: detail.availability as "monthly" | "fortnightly" | "flexible",
@@ -101,6 +112,7 @@ function assemble<K extends SubmissionType>(
       return {
         ...common,
         type: "mentee",
+        cycleId: base.cycle_id,
         institution: detail.institution as string,
         dateOfBirth: detail.date_of_birth as string,
         essay: detail.essay as string,
@@ -116,12 +128,17 @@ function assemble<K extends SubmissionType>(
 }
 
 /** Maps a SubmissionInput to the typed parameters of the create_submission RPC. */
-function rpcParams(input: SubmissionInput, from: string | null) {
+function rpcParams(
+  input: SubmissionInput,
+  from: string | null,
+  cycleId: string | null,
+) {
   const params: Record<string, unknown> = {
     p_type: input.type,
     p_full_name: input.fullName,
     p_email: input.email,
     p_from_ref: from,
+    p_cycle_id: cycleId,
   };
   switch (input.type) {
     case "contact":
@@ -147,10 +164,15 @@ function rpcParams(input: SubmissionInput, from: string | null) {
   return params;
 }
 
-function defaultCycles(): Cycles {
+function rowToCycle(row: CycleRow): Cycle {
   return {
-    mentor: { open: false, updatedAt: null },
-    mentee: { open: false, updatedAt: null },
+    id: row.id,
+    role: row.role,
+    label: row.label,
+    openAt: row.open_at,
+    closeAt: row.close_at,
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
   };
 }
 
@@ -205,11 +227,11 @@ export function createSupabaseSubmissionStore(): SubmissionStore {
   return {
     async createSubmission(
       input: SubmissionInput,
-      meta?: { from?: string | null },
+      meta?: { from?: string | null; cycleId?: string | null },
     ): Promise<Submission> {
       const { data: newId, error } = await client().rpc(
         "create_submission",
-        rpcParams(input, meta?.from ?? null),
+        rpcParams(input, meta?.from ?? null, meta?.cycleId ?? null),
       );
       if (error) throw new Error(`Failed to create submission: ${error.message}`);
       const created = await getOne(input.type, newId as string);
@@ -263,27 +285,72 @@ export function createSupabaseSubmissionStore(): SubmissionStore {
       return full;
     },
 
-    async getCycles(): Promise<Cycles> {
-      const { data, error } = await client().from("cycles").select();
-      if (error) throw new Error(`Failed to read cycles: ${error.message}`);
-      const cycles = defaultCycles();
-      for (const row of (data as CycleRow[]) ?? []) {
-        if (row.role === "mentor" || row.role === "mentee") {
-          cycles[row.role] = { open: row.open, updatedAt: row.updated_at };
-        }
-      }
-      return cycles;
+    async listCycles(role?: CycleRole): Promise<Cycle[]> {
+      let query = client()
+        .from("cycles")
+        .select()
+        .order("open_at", { ascending: false });
+      if (role) query = query.eq("role", role);
+      const { data, error } = await query;
+      if (error) throw new Error(`Failed to list cycles: ${error.message}`);
+      return (data as CycleRow[]).map(rowToCycle);
     },
 
-    async setCycle(role: CycleRole, open: boolean): Promise<Cycles> {
-      const { error } = await client()
+    async getActiveCycle(role: CycleRole): Promise<Cycle | null> {
+      const nowIso = new Date().toISOString();
+      const { data, error } = await client()
         .from("cycles")
-        .upsert(
-          { role, open, updated_at: new Date().toISOString() },
-          { onConflict: "role" },
-        );
-      if (error) throw new Error(`Failed to set cycle: ${error.message}`);
-      return this.getCycles();
+        .select()
+        .eq("role", role)
+        .lte("open_at", nowIso)
+        .gt("close_at", nowIso)
+        .order("open_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (error) throw new Error(`Failed to read active cycle: ${error.message}`);
+      return data ? rowToCycle(data as CycleRow) : null;
+    },
+
+    async createCycle(input: CycleInput): Promise<Cycle> {
+      const { data, error } = await client()
+        .from("cycles")
+        .insert({
+          role: input.role,
+          label: input.label,
+          open_at: input.openAt,
+          close_at: input.closeAt,
+        })
+        .select()
+        .single();
+      if (error) throw new Error(`Failed to create cycle: ${error.message}`);
+      return rowToCycle(data as CycleRow);
+    },
+
+    async updateCycle(
+      id: string,
+      patch: { label?: string; openAt?: string; closeAt?: string },
+    ): Promise<Cycle> {
+      const update: Record<string, unknown> = {
+        updated_at: new Date().toISOString(),
+      };
+      if (patch.label !== undefined) update.label = patch.label;
+      if (patch.openAt !== undefined) update.open_at = patch.openAt;
+      if (patch.closeAt !== undefined) update.close_at = patch.closeAt;
+
+      const { data, error } = await client()
+        .from("cycles")
+        .update(update)
+        .eq("id", id)
+        .select()
+        .maybeSingle();
+      if (error) throw new Error(`Failed to update cycle: ${error.message}`);
+      if (!data) throw new Error(`Cycle not found: ${id}`);
+      return rowToCycle(data as CycleRow);
+    },
+
+    async deleteCycle(id: string): Promise<void> {
+      const { error } = await client().from("cycles").delete().eq("id", id);
+      if (error) throw new Error(`Failed to delete cycle: ${error.message}`);
     },
 
     async addNotifyMe(role: CycleRole, email: string): Promise<NotifyMeEntry> {

@@ -1,6 +1,7 @@
 import type {
+  Cycle,
+  CycleInput,
   CycleRole,
-  Cycles,
   NotifyMeEntry,
   Submission,
   SubmissionInput,
@@ -19,7 +20,7 @@ export interface SubmissionStore {
   /** Stores a new submission and returns the complete record. */
   createSubmission(
     input: SubmissionInput,
-    meta?: { from?: string | null },
+    meta?: { from?: string | null; cycleId?: string | null },
   ): Promise<Submission>;
 
   /**
@@ -44,9 +45,26 @@ export interface SubmissionStore {
     patch: { status?: SubmissionOf<K>["status"]; notes?: string },
   ): Promise<SubmissionOf<K>>;
 
-  getCycles(): Promise<Cycles>;
+  /** All cycles (optionally for one role), newest first by `openAt` descending. */
+  listCycles(role?: CycleRole): Promise<Cycle[]>;
 
-  setCycle(role: CycleRole, open: boolean): Promise<Cycles>;
+  /**
+   * The cycle for a role whose window contains the current instant
+   * (`openAt <= now < closeAt`), or null if none is currently open.
+   */
+  getActiveCycle(role: CycleRole): Promise<Cycle | null>;
+
+  /** Creates a cycle, stamping id and timestamps. */
+  createCycle(input: CycleInput): Promise<Cycle>;
+
+  /** Applies the patch and bumps `updatedAt`. Throws if the cycle does not exist. */
+  updateCycle(
+    id: string,
+    patch: { label?: string; openAt?: string; closeAt?: string },
+  ): Promise<Cycle>;
+
+  /** Removes a cycle. A missing cycle is a no-op. */
+  deleteCycle(id: string): Promise<void>;
 
   /** Idempotent per role + lowercased email. */
   addNotifyMe(role: CycleRole, email: string): Promise<NotifyMeEntry>;

@@ -89,8 +89,10 @@ type PageProps = {
 };
 
 export default async function MentorPage({ searchParams }: PageProps) {
-  const [cycles, params] = await Promise.all([db.getCycles(), searchParams]);
-  const open = cycles.mentor.open;
+  const [cycle, params] = await Promise.all([
+    db.getActiveCycle("mentor"),
+    searchParams,
+  ]);
   const from = sanitizeFromSlug(params.from);
 
   return (
@@ -146,8 +148,13 @@ export default async function MentorPage({ searchParams }: PageProps) {
           >
             Your application
           </h2>
+          {cycle ? (
+            <p className="-mt-4 mb-8 max-w-2xl leading-relaxed text-slate">
+              Applications for {cycle.label} are open.
+            </p>
+          ) : null}
         </Container>
-        {open ? (
+        {cycle ? (
           <ApplicationForm
             formName="mentor"
             fields={mentorFields}

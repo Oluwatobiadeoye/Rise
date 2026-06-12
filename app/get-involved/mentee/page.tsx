@@ -70,8 +70,10 @@ type PageProps = {
 };
 
 export default async function MenteePage({ searchParams }: PageProps) {
-  const [cycles, params] = await Promise.all([db.getCycles(), searchParams]);
-  const open = cycles.mentee.open;
+  const [cycle, params] = await Promise.all([
+    db.getActiveCycle("mentee"),
+    searchParams,
+  ]);
   const from = sanitizeFromSlug(params.from);
 
   return (
@@ -113,8 +115,13 @@ export default async function MenteePage({ searchParams }: PageProps) {
           >
             Your application
           </h2>
+          {cycle ? (
+            <p className="-mt-4 mb-8 max-w-2xl leading-relaxed text-slate">
+              Applications for {cycle.label} are open.
+            </p>
+          ) : null}
         </Container>
-        {open ? (
+        {cycle ? (
           <ApplicationForm
             formName="mentee"
             fields={menteeFields}

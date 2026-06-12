@@ -18,7 +18,17 @@ function builder(table: string) {
   const result = () =>
     Promise.resolve(state.tables[table] ?? { data: null, error: null });
   const b: Record<string, unknown> = {};
-  for (const method of ["select", "eq", "order", "insert", "upsert"]) {
+  for (const method of [
+    "select",
+    "eq",
+    "order",
+    "insert",
+    "upsert",
+    "delete",
+    "lte",
+    "gt",
+    "limit",
+  ]) {
     b[method] = () => b;
   }
   b.update = (value: unknown) => ((state.lastUpdate = value), b);
@@ -95,6 +105,7 @@ describe("createSubmission", () => {
     expect(params.p_type).toBe("contact");
     expect(params.p_full_name).toBe("Ada");
     expect(params.p_from_ref).toBe("home");
+    expect(params.p_cycle_id).toBeNull();
     expect(params.p_contact_role).toBe("parent");
 
     expect(submission.type).toBe("contact");
@@ -103,6 +114,56 @@ describe("createSubmission", () => {
     if (submission.type === "contact") {
       expect(submission.role).toBe("parent");
       expect(submission.message).toBe("Hello");
+    }
+  });
+
+  it("passes the cycle id from meta into the RPC for a mentor submission", async () => {
+    const id = "33333333-3333-4333-8333-333333333333";
+    state.rpc = { data: id, error: null };
+    state.tables.submissions = {
+      data: {
+        id,
+        type: "mentor",
+        full_name: "Tunde",
+        email: "tunde@example.com",
+        status: "pending",
+        notes: "",
+        from_ref: null,
+        cycle_id: "cycle-abc",
+        created_at: "2026-06-12T10:00:00.000Z",
+        updated_at: "2026-06-12T10:00:00.000Z",
+      },
+      error: null,
+    };
+    state.tables.mentor_submissions = {
+      data: {
+        submission_id: id,
+        field_of_expertise: "Software",
+        audience_preference: "either",
+        availability: "monthly",
+        message: null,
+      },
+      error: null,
+    };
+
+    const store = createSupabaseSubmissionStore();
+    const submission = await store.createSubmission(
+      {
+        type: "mentor",
+        fullName: "Tunde",
+        email: "tunde@example.com",
+        fieldOfExpertise: "Software",
+        audiencePreference: "either",
+        availability: "monthly",
+        message: null,
+      },
+      { cycleId: "cycle-abc" },
+    );
+
+    const params = state.lastRpcParams as Record<string, unknown>;
+    expect(params.p_cycle_id).toBe("cycle-abc");
+    if (submission.type === "mentor") {
+      expect(submission.cycleId).toBe("cycle-abc");
     }
   });
 
@@ -131,15 +192,60 @@ describe("getSubmission", () => {
   });
 });
 
-describe("getCycles", () => {
-  it("maps stored rows and defaults missing roles to closed", async () => {
+describe("getActiveCycle", () => {
+  it("maps a returned row from snake_case to a Cycle, or null", async () => {
     state.tables.cycles = {
-      data: [{ role: "mentor", open: true, updated_at: "2026-06-12T09:00:00.000Z" }],
+      data: {
+        id: "cycle-1",
+        role: "mentor",
+        label: "Summer 2026",
+        open_at: "2026-06-01T00:00:00.000Z",
+        close_at: "2026-07-01T00:00:00.000Z",
+        created_at: "2026-05-01T00:00:00.000Z",
+        updated_at: "2026-05-01T00:00:00.000Z",
+      },
       error: null,
     };
     const store = createSupabaseSubmissionStore();
-    const cycles = await store.getCycles();
-    expect(cycles.mentor).toEqual({ open: true, updatedAt: "2026-06-12T09:00:00.000Z" });
-    expect(cycles.mentee).toEqual({ open: false, updatedAt: null });
+    const cycle = await store.getActiveCycle("mentor");
+    expect(cycle).toEqual({
+      id: "cycle-1",
+      role: "mentor",
+      label: "Summer 2026",
+      openAt: "2026-06-01T00:00:00.000Z",
+      closeAt: "2026-07-01T00:00:00.000Z",
+      createdAt: "2026-05-01T00:00:00.000Z",
+      updatedAt: "2026-05-01T00:00:00.000Z",
+    });
+
+    state.tables.cycles = { data: null, error: null };
+    expect(await store.getActiveCycle("mentee")).toBeNull();
+  });
+});
+
+describe("createCycle", () => {
+  it("inserts open_at/close_at and returns the mapped row", async () => {
+    state.tables.cycles = {
+      data: {
+        id: "cycle-2",
+        role: "mentee",
+        label: "Mentee 2026",
+        open_at: "2026-06-01T00:00:00.000Z",
+        close_at: "2026-07-01T00:00:00.000Z",
+        created_at: "2026-05-01T00:00:00.000Z",
+        updated_at: "2026-05-01T00:00:00.000Z",
+      },
+      error: null,
+    };
+    const store = createSupabaseSubmissionStore();
+    const cycle = await store.createCycle({
+      role: "mentee",
+      label: "Mentee 2026",
+      openAt: "2026-06-01T00:00:00.000Z",
+      closeAt: "2026-07-01T00:00:00.000Z",
+    });
+    expect(cycle.id).toBe("cycle-2");
+    expect(cycle.openAt).toBe("2026-06-01T00:00:00.000Z");
+    expect(cycle.closeAt).toBe("2026-07-01T00:00:00.000Z");
   });
 });
