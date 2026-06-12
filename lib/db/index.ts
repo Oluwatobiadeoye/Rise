@@ -1,12 +1,14 @@
+import { isDatabaseConfigured } from "./client";
+import { createDrizzleSubmissionStore } from "./drizzle";
 import { createFsSubmissionStore } from "./fs";
-import { createSupabaseSubmissionStore, isSupabaseConfigured } from "./supabase";
 import type { SubmissionStore } from "./types";
 
 /**
- * The single submission store the app depends on. It uses Supabase when its
- * credentials are configured (the durable production path) and falls back to
- * the filesystem store otherwise, so local development and tests need no keys.
+ * The single submission store the app depends on. It uses Drizzle over a direct
+ * Postgres connection when `DATABASE_URL` is configured (the durable production
+ * path) and falls back to the filesystem store otherwise, so local development
+ * and tests need no keys.
  */
-export const db: SubmissionStore = isSupabaseConfigured()
-  ? createSupabaseSubmissionStore()
+export const db: SubmissionStore = isDatabaseConfigured()
+  ? createDrizzleSubmissionStore()
   : createFsSubmissionStore();
