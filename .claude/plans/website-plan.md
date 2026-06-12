@@ -222,25 +222,47 @@ a lightweight pipeline:
    captures every external step + one-line swap. Domain, branded inboxes, and email auth
    remain external steps (see the checklist; durable Supabase storage is the top blocker
    before forms are publicly linked).
-- [x] **7. Branded `/admin`** — password-gated (`ADMIN_PASSWORD` + signed session cookie),
-   zero-client-component review panel over the submission store: filterable list, detail
-   with status + notes editing, cycle open/close toggles, and accept/decline decision
-   emails. 404s entirely when unconfigured; all type/id input is validated against the
-   union + a UUID pattern before any disk access.
+- [x] **7. Branded `/admin`** — per-admin accounts (login with username **or** email,
+   scrypt password hashing, no plaintext) gated by an HMAC-signed session cookie keyed by
+   `ADMIN_SESSION_SECRET`; the area 404s entirely when unconfigured. Three roles via a
+   `can(role, action)` matrix — **superadmin** (manage admin accounts; reserved for the
+   owner), **owner** (manage cycles + review), **reviewer** (review only) — plus
+   active/inactive accounts and an account menu. Review panel over the submission store: a
+   filterable, type-aware list and a detail page with a single Save (status + notes; notes
+   auto-save on blur) and accept/decline decision emails. **Exclusive review claim-lock:**
+   claiming a submission sets `reviewedBy`, releasing clears it, and a finalized submission
+   (accepted/declined/closed/archived) stays attributed to its handler and can no longer be
+   released or taken over; any admin can force-release an in-progress claim. All type/id input
+   is validated against the union + a UUID pattern before any store access. The first
+   superadmin is created from the command line (`npm run create-admin`); further admins are
+   created in the UI.
+- [x] **8. Production data layer (Supabase + Drizzle)** — a normalized Class Table
+   Inheritance schema (a `submissions` supertype + per-type detail tables) modelled in code
+   as a discriminated union; writes go through real Drizzle transactions over a direct
+   Postgres connection (the Supabase transaction pooler), with no database function. Per-type
+   status lifecycles are enforced by a CHECK constraint (applications: pending → in_review →
+   accepted/declined → archived; enquiries: pending → in_review → closed → archived).
+   **Cycles** are scheduled open/close windows (time-derived "open", no manual toggle) with a
+   no-overlap exclusion constraint; the public forms switch between live and "notify me" off
+   the active cycle. Notifications are a durable, queryable record. Row Level Security is
+   enabled on every table (the service path uses a direct connection that bypasses it). The
+   whole layer sits behind an env-gated seam: `DATABASE_URL` selects Drizzle, otherwise a
+   filesystem fallback keeps local dev and tests running with no database.
 
 ---
 
 ## Verification
 
 - Click through every page; confirm it looks right on mobile and desktop.
-- Open/close a cycle and confirm the form switches between live and "notify me".
-- Submit each form → confirm it's stored (Supabase) and a notification reaches
-  Tobi's personal email.
-- Review a submission in the **Supabase dashboard** (the v1 review path); confirm RLS
-  blocks client/anon reads of the applications table.
-- Publish a test blog post and gallery photo from `/studio` → appears live with no redeploy.
-- *(When/if built)* in `/admin`: review an applicant, change status, send a decision
-  email; confirm non-signed-in users are blocked.
+- Open/close a cycle (set its open/close window) and confirm the form switches between
+  live and "notify me".
+- Submit each form → confirm a row is stored in Supabase and a notification record is
+  written (email delivery is stubbed until Resend lands).
+- In `/admin`: sign in, claim and review a submission, change its status, add notes, and
+  send a decision email; confirm a signed-out visitor is blocked and the area 404s when
+  `ADMIN_SESSION_SECRET` is unset.
+- Confirm Row Level Security blocks anon/client reads of the submission tables directly.
+- Add a blog post to the filesystem content layer and redeploy → appears live.
 
 ---
 
