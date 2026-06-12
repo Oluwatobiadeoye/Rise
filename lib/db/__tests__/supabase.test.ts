@@ -5,42 +5,47 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // adapter can be unit-tested in Node.
 vi.mock("server-only", () => ({}));
 
-// A chainable stand-in for the Supabase query builder. Every chaining method
-// returns the builder; terminal calls resolve to `state.result`. Mutations are
-// captured so tests can assert what was written.
+// Mock of the Supabase client. `rpc()` resolves `state.rpc`; each `from(table)`
+// query resolves `state.tables[table]`. Mutations are captured for assertions.
 const state: {
-  result: { data: unknown; error: unknown };
-  lastInsert: unknown;
+  rpc: { data: unknown; error: unknown };
+  tables: Record<string, { data: unknown; error: unknown }>;
+  lastRpcParams: unknown;
   lastUpdate: unknown;
-  lastUpsert: unknown;
-} = { result: { data: null, error: null }, lastInsert: null, lastUpdate: null, lastUpsert: null };
+} = { rpc: { data: null, error: null }, tables: {}, lastRpcParams: null, lastUpdate: null };
 
-function builder() {
+function builder(table: string) {
+  const result = () =>
+    Promise.resolve(state.tables[table] ?? { data: null, error: null });
   const b: Record<string, unknown> = {};
-  for (const method of ["select", "eq", "order"]) {
+  for (const method of ["select", "eq", "order", "insert", "upsert"]) {
     b[method] = () => b;
   }
-  b.insert = (value: unknown) => ((state.lastInsert = value), b);
   b.update = (value: unknown) => ((state.lastUpdate = value), b);
-  b.upsert = (value: unknown) => ((state.lastUpsert = value), b);
-  b.single = () => Promise.resolve(state.result);
-  b.maybeSingle = () => Promise.resolve(state.result);
+  b.single = () => result();
+  b.maybeSingle = () => result();
   b.then = (resolve: (v: unknown) => unknown, reject?: (e: unknown) => unknown) =>
-    Promise.resolve(state.result).then(resolve, reject);
+    result().then(resolve, reject);
   return b;
 }
 
 vi.mock("@supabase/supabase-js", () => ({
-  createClient: () => ({ from: () => builder() }),
+  createClient: () => ({
+    from: (table: string) => builder(table),
+    rpc: (_name: string, params: unknown) => {
+      state.lastRpcParams = params;
+      return Promise.resolve(state.rpc);
+    },
+  }),
 }));
 
 import { createSupabaseSubmissionStore, isSupabaseConfigured } from "../supabase";
 
 beforeEach(() => {
-  state.result = { data: null, error: null };
-  state.lastInsert = null;
+  state.rpc = { data: null, error: null };
+  state.tables = {};
+  state.lastRpcParams = null;
   state.lastUpdate = null;
-  state.lastUpsert = null;
   vi.stubEnv("SUPABASE_URL", "https://example.supabase.co");
   vi.stubEnv("SUPABASE_SERVICE_ROLE_KEY", "service-role-test-key");
 });
@@ -58,12 +63,15 @@ describe("isSupabaseConfigured", () => {
 });
 
 describe("createSubmission", () => {
-  it("writes from as from_ref and maps the row back to the domain shape", async () => {
-    state.result = {
+  it("calls the RPC with typed params and assembles base + detail into a Submission", async () => {
+    const id = "11111111-1111-4111-8111-111111111111";
+    state.rpc = { data: id, error: null };
+    state.tables.submissions = {
       data: {
-        id: "11111111-1111-4111-8111-111111111111",
+        id,
         type: "contact",
-        payload: { fullName: "Ada", email: "ada@example.com", role: "parent", message: "Hello" },
+        full_name: "Ada",
+        email: "ada@example.com",
         status: "new",
         notes: "",
         from_ref: "home",
@@ -72,26 +80,38 @@ describe("createSubmission", () => {
       },
       error: null,
     };
+    state.tables.contact_submissions = {
+      data: { submission_id: id, role: "parent", message: "Hello" },
+      error: null,
+    };
 
     const store = createSupabaseSubmissionStore();
     const submission = await store.createSubmission(
-      "contact",
-      { fullName: "Ada", email: "ada@example.com", role: "parent", message: "Hello" },
+      { type: "contact", fullName: "Ada", email: "ada@example.com", role: "parent", message: "Hello" },
       { from: "home" },
     );
 
-    expect((state.lastInsert as { from_ref: string }).from_ref).toBe("home");
-    expect((state.lastInsert as { status: string }).status).toBe("new");
-    expect(submission.from).toBe("home");
-    expect(submission.createdAt).toBe("2026-06-12T10:00:00.000Z");
+    const params = state.lastRpcParams as Record<string, unknown>;
+    expect(params.p_type).toBe("contact");
+    expect(params.p_full_name).toBe("Ada");
+    expect(params.p_from_ref).toBe("home");
+    expect(params.p_contact_role).toBe("parent");
+
     expect(submission.type).toBe("contact");
+    expect(submission.from).toBe("home");
+    expect(submission.fullName).toBe("Ada");
+    if (submission.type === "contact") {
+      expect(submission.role).toBe("parent");
+      expect(submission.message).toBe("Hello");
+    }
   });
 
-  it("throws when Supabase returns an error", async () => {
-    state.result = { data: null, error: { message: "boom" } };
+  it("throws when the RPC returns an error", async () => {
+    state.rpc = { data: null, error: { message: "boom" } };
     const store = createSupabaseSubmissionStore();
     await expect(
-      store.createSubmission("volunteer", {
+      store.createSubmission({
+        type: "volunteer",
         fullName: "Sam",
         email: "sam@example.com",
         interestArea: "events",
@@ -102,8 +122,8 @@ describe("createSubmission", () => {
 });
 
 describe("getSubmission", () => {
-  it("returns null when no row is found", async () => {
-    state.result = { data: null, error: null };
+  it("returns null when the base row is not found", async () => {
+    state.tables.submissions = { data: null, error: null };
     const store = createSupabaseSubmissionStore();
     await expect(
       store.getSubmission("mentor", "22222222-2222-4222-8222-222222222222"),
@@ -113,7 +133,7 @@ describe("getSubmission", () => {
 
 describe("getCycles", () => {
   it("maps stored rows and defaults missing roles to closed", async () => {
-    state.result = {
+    state.tables.cycles = {
       data: [{ role: "mentor", open: true, updated_at: "2026-06-12T09:00:00.000Z" }],
       error: null,
     };

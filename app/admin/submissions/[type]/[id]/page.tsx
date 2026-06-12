@@ -58,9 +58,19 @@ export default async function AdminSubmissionDetailPage({
   if (!submission) notFound();
 
   const canEmail = type === "mentor" || type === "mentee";
-  const payloadEntries = Object.entries(
-    submission.payload as Record<string, unknown>,
-  );
+  // The user-supplied fields are everything except the system/envelope fields.
+  const systemFields = new Set([
+    "id",
+    "type",
+    "status",
+    "notes",
+    "from",
+    "createdAt",
+    "updatedAt",
+  ]);
+  const detailEntries = Object.entries(
+    submission as Record<string, unknown>,
+  ).filter(([key]) => !systemFields.has(key));
 
   return (
     <div className="space-y-8">
@@ -86,7 +96,7 @@ export default async function AdminSubmissionDetailPage({
       <section className="rounded-lg border border-line bg-surface p-6">
         <h2 className="font-display text-lg font-semibold text-ink">Details</h2>
         <dl className="mt-4 grid gap-x-6 gap-y-4 sm:grid-cols-[200px_1fr]">
-          {payloadEntries.map(([key, value]) => (
+          {detailEntries.map(([key, value]) => (
             <div key={key} className="contents">
               <dt className="font-body text-sm font-semibold text-muted">
                 {humanize(key)}

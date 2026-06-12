@@ -5,16 +5,18 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createFsSubmissionStore } from "../fs";
 import type { SubmissionStore } from "../types";
-import type { ContactPayload, MenteePayload } from "@/lib/types";
+import type { SubmissionInput } from "@/lib/types";
 
-const contactPayload: ContactPayload = {
+const contactInput: SubmissionInput = {
+  type: "contact",
   fullName: "Ada Obi",
   email: "ada@example.com",
   role: "Student",
   message: "Hello RISE.",
 };
 
-const menteePayload: MenteePayload = {
+const menteeInput: SubmissionInput = {
+  type: "mentee",
   fullName: "Bisi Ade",
   email: "bisi@example.com",
   institution: "LAUTECH",
@@ -37,7 +39,7 @@ describe("createFsSubmissionStore", () => {
   });
 
   it("creates a submission with new status, empty notes, and timestamps", async () => {
-    const submission = await store.createSubmission("contact", contactPayload);
+    const submission = await store.createSubmission(contactInput);
 
     expect(submission.id).toMatch(/^[0-9a-f-]{36}$/);
     expect(submission.type).toBe("contact");
@@ -45,18 +47,18 @@ describe("createFsSubmissionStore", () => {
     expect(submission.notes).toBe("");
     expect(submission.from).toBeNull();
     expect(submission.createdAt).toBe(submission.updatedAt);
-    expect(submission.payload).toEqual(contactPayload);
+    expect(submission).toMatchObject(contactInput);
   });
 
   it("records the from slug when provided", async () => {
-    const submission = await store.createSubmission("contact", contactPayload, {
+    const submission = await store.createSubmission(contactInput, {
       from: "home",
     });
     expect(submission.from).toBe("home");
   });
 
   it("round-trips a submission through getSubmission", async () => {
-    const created = await store.createSubmission("mentee", menteePayload);
+    const created = await store.createSubmission(menteeInput);
     const fetched = await store.getSubmission("mentee", created.id);
     expect(fetched).toEqual(created);
   });
@@ -68,11 +70,11 @@ describe("createFsSubmissionStore", () => {
   it("lists submissions newest first and filters by type and status", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-06-01T10:00:00Z"));
-    const older = await store.createSubmission("contact", contactPayload);
+    const older = await store.createSubmission(contactInput);
     vi.setSystemTime(new Date("2026-06-01T11:00:00Z"));
-    const newer = await store.createSubmission("contact", contactPayload);
+    const newer = await store.createSubmission(contactInput);
     vi.setSystemTime(new Date("2026-06-01T12:00:00Z"));
-    const mentee = await store.createSubmission("mentee", menteePayload);
+    const mentee = await store.createSubmission(menteeInput);
 
     const all = await store.listSubmissions();
     expect(all.map((s) => s.id)).toEqual([mentee.id, newer.id, older.id]);
@@ -95,7 +97,7 @@ describe("createFsSubmissionStore", () => {
   it("updates status and notes and bumps updatedAt", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-06-01T10:00:00Z"));
-    const created = await store.createSubmission("contact", contactPayload);
+    const created = await store.createSubmission(contactInput);
 
     vi.setSystemTime(new Date("2026-06-01T10:30:00Z"));
     const updated = await store.updateSubmission("contact", created.id, {
@@ -155,7 +157,7 @@ describe("createFsSubmissionStore", () => {
 
   it("skips unparseable submission files without crashing", async () => {
     const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    const valid = await store.createSubmission("contact", contactPayload);
+    const valid = await store.createSubmission(contactInput);
 
     const dir = path.join(root, "submissions", "contact");
     await mkdir(dir, { recursive: true });
@@ -167,7 +169,7 @@ describe("createFsSubmissionStore", () => {
   });
 
   it("leaves no temp files behind after writes", async () => {
-    await store.createSubmission("contact", contactPayload);
+    await store.createSubmission(contactInput);
     await store.setCycle("mentee", true);
     const contactDir = await readdir(path.join(root, "submissions", "contact"));
     const rootDir = await readdir(root);

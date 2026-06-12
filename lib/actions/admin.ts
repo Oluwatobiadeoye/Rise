@@ -171,19 +171,12 @@ export async function sendDecisionEmail(formData: FormData): Promise<void> {
   const submission = await db.getSubmission(ref.type, ref.id);
   if (!submission) notFound();
 
-  const payload = submission.payload as { email?: unknown; fullName?: unknown };
-  const email = typeof payload.email === "string" ? payload.email : null;
-  if (!email) throw new Error("Submission has no email address");
-
-  const name =
-    typeof payload.fullName === "string" && payload.fullName.trim()
-      ? payload.fullName
-      : "there";
+  const name = submission.fullName.trim() ? submission.fullName : "there";
 
   const copy = DECISION_COPY[decision];
   await notifier.send({
     kind: "decision-email",
-    to: email,
+    to: submission.email,
     subject: copy.subject,
     body: copy.body(name),
     submission: { type: ref.type, id: ref.id },

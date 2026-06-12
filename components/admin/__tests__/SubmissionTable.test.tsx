@@ -1,17 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { SubmissionTable } from "../SubmissionTable";
-import type { Submission } from "@/lib/types";
+import type { SubmissionSummary } from "@/lib/types";
 
-const contactSubmission: Submission<"contact"> = {
+const contactSubmission: SubmissionSummary = {
   id: "0a1b2c3d-4e5f-4a7b-8c9d-0e1f2a3b4c5d",
   type: "contact",
-  payload: {
-    fullName: "Ada Obi",
-    email: "ada@example.com",
-    role: "Student",
-    message: "Hello RISE.",
-  },
+  fullName: "Ada Obi",
+  email: "ada@example.com",
   status: "new",
   notes: "",
   from: "contact",

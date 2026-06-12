@@ -1,9 +1,9 @@
 import type {
-  ContactPayload,
+  ContactFields,
   CycleRole,
-  MenteePayload,
-  MentorPayload,
-  VolunteerPayload,
+  MenteeFields,
+  MentorFields,
+  VolunteerFields,
 } from "@/lib/types";
 
 export type Result<T> =
@@ -120,9 +120,9 @@ function toResult<T>(errors: Errors, data: T): Result<T> {
   return Object.keys(errors).length > 0 ? { ok: false, errors } : { ok: true, data };
 }
 
-export function validateContact(formData: FormData): Result<ContactPayload> {
+export function validateContact(formData: FormData): Result<ContactFields> {
   const errors: Errors = {};
-  const data: ContactPayload = {
+  const data: ContactFields = {
     fullName: requiredString(formData, "fullName", errors, {
       message: "Please enter your full name.",
     }),
@@ -139,9 +139,9 @@ export function validateContact(formData: FormData): Result<ContactPayload> {
   return toResult(errors, data);
 }
 
-export function validateMentor(formData: FormData): Result<MentorPayload> {
+export function validateMentor(formData: FormData): Result<MentorFields> {
   const errors: Errors = {};
-  const data: MentorPayload = {
+  const data: MentorFields = {
     fullName: requiredString(formData, "fullName", errors, {
       message: "Please enter your full name.",
     }),
@@ -169,9 +169,9 @@ export function validateMentor(formData: FormData): Result<MentorPayload> {
   return toResult(errors, data);
 }
 
-export function validateMentee(formData: FormData): Result<MenteePayload> {
+export function validateMentee(formData: FormData): Result<MenteeFields> {
   const errors: Errors = {};
-  const data: MenteePayload = {
+  const data: MenteeFields = {
     fullName: requiredString(formData, "fullName", errors, {
       message: "Please enter your full name.",
     }),
@@ -194,9 +194,9 @@ export function validateMentee(formData: FormData): Result<MenteePayload> {
   return toResult(errors, data);
 }
 
-export function validateVolunteer(formData: FormData): Result<VolunteerPayload> {
+export function validateVolunteer(formData: FormData): Result<VolunteerFields> {
   const errors: Errors = {};
-  const data: VolunteerPayload = {
+  const data: VolunteerFields = {
     fullName: requiredString(formData, "fullName", errors, {
       message: "Please enter your full name.",
     }),

@@ -5,9 +5,11 @@ import type {
   CycleRole,
   Cycles,
   NotifyMeEntry,
-  PayloadByType,
   Submission,
+  SubmissionInput,
+  SubmissionOf,
   SubmissionStatus,
+  SubmissionSummary,
   SubmissionType,
 } from "@/lib/types";
 import type { SubmissionStore } from "./types";
@@ -19,11 +21,12 @@ export function isSupabaseConfigured(): boolean {
   );
 }
 
-/** Row shapes as stored. Snake_case columns map to the camelCase domain types. */
-type SubmissionRow = {
+/** Shared (supertype) columns on the `submissions` table. */
+type BaseRow = {
   id: string;
   type: SubmissionType;
-  payload: PayloadByType[SubmissionType];
+  full_name: string;
+  email: string;
   status: SubmissionStatus;
   notes: string;
   from_ref: string | null;
@@ -39,17 +42,109 @@ type NotifyMeRow = {
   created_at: string;
 };
 
-function toSubmission<T extends SubmissionType>(row: SubmissionRow): Submission<T> {
+/** The detail table that holds each type's specific fields. */
+const DETAIL_TABLE: Record<SubmissionType, string> = {
+  contact: "contact_submissions",
+  mentor: "mentor_submissions",
+  mentee: "mentee_submissions",
+  volunteer: "volunteer_submissions",
+};
+
+function baseToSummary(row: BaseRow): SubmissionSummary {
   return {
     id: row.id,
-    type: row.type as T,
-    payload: row.payload as PayloadByType[T],
+    type: row.type,
+    fullName: row.full_name,
+    email: row.email,
     status: row.status,
     notes: row.notes ?? "",
     from: row.from_ref,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
+}
+
+/** Combines a base row and its detail row into the discriminated Submission. */
+function assemble<K extends SubmissionType>(
+  base: BaseRow,
+  detail: Record<string, unknown>,
+): SubmissionOf<K> {
+  const common = {
+    id: base.id,
+    status: base.status,
+    notes: base.notes ?? "",
+    from: base.from_ref,
+    createdAt: base.created_at,
+    updatedAt: base.updated_at,
+    fullName: base.full_name,
+    email: base.email,
+  };
+
+  switch (base.type) {
+    case "contact":
+      return {
+        ...common,
+        type: "contact",
+        role: detail.role as string,
+        message: detail.message as string,
+      } as SubmissionOf<K>;
+    case "mentor":
+      return {
+        ...common,
+        type: "mentor",
+        fieldOfExpertise: detail.field_of_expertise as string,
+        audiencePreference: detail.audience_preference as "tertiary" | "early-career" | "either",
+        availability: detail.availability as "monthly" | "fortnightly" | "flexible",
+        message: (detail.message as string | null) ?? null,
+      } as SubmissionOf<K>;
+    case "mentee":
+      return {
+        ...common,
+        type: "mentee",
+        institution: detail.institution as string,
+        dateOfBirth: detail.date_of_birth as string,
+        essay: detail.essay as string,
+      } as SubmissionOf<K>;
+    case "volunteer":
+      return {
+        ...common,
+        type: "volunteer",
+        interestArea: detail.interest_area as string,
+        message: (detail.message as string | null) ?? null,
+      } as SubmissionOf<K>;
+  }
+}
+
+/** Maps a SubmissionInput to the typed parameters of the create_submission RPC. */
+function rpcParams(input: SubmissionInput, from: string | null) {
+  const params: Record<string, unknown> = {
+    p_type: input.type,
+    p_full_name: input.fullName,
+    p_email: input.email,
+    p_from_ref: from,
+  };
+  switch (input.type) {
+    case "contact":
+      params.p_contact_role = input.role;
+      params.p_contact_message = input.message;
+      break;
+    case "mentor":
+      params.p_mentor_field = input.fieldOfExpertise;
+      params.p_mentor_audience = input.audiencePreference;
+      params.p_mentor_availability = input.availability;
+      params.p_mentor_message = input.message;
+      break;
+    case "mentee":
+      params.p_mentee_institution = input.institution;
+      params.p_mentee_dob = input.dateOfBirth;
+      params.p_mentee_essay = input.essay;
+      break;
+    case "volunteer":
+      params.p_volunteer_interest = input.interestArea;
+      params.p_volunteer_message = input.message;
+      break;
+  }
+  return params;
 }
 
 function defaultCycles(): Cycles {
@@ -83,31 +178,51 @@ export function createSupabaseSubmissionStore(): SubmissionStore {
     return cached;
   };
 
+  async function getOne<K extends SubmissionType>(
+    type: K,
+    id: string,
+  ): Promise<SubmissionOf<K> | null> {
+    const { data: base, error: baseError } = await client()
+      .from("submissions")
+      .select()
+      .eq("id", id)
+      .eq("type", type)
+      .maybeSingle();
+    if (baseError) throw new Error(`Failed to read submission: ${baseError.message}`);
+    if (!base) return null;
+
+    const { data: detail, error: detailError } = await client()
+      .from(DETAIL_TABLE[type])
+      .select()
+      .eq("submission_id", id)
+      .maybeSingle();
+    if (detailError) {
+      throw new Error(`Failed to read submission detail: ${detailError.message}`);
+    }
+    return assemble<K>(base as BaseRow, (detail as Record<string, unknown>) ?? {});
+  }
+
   return {
-    async createSubmission<T extends SubmissionType>(
-      type: T,
-      payload: PayloadByType[T],
+    async createSubmission(
+      input: SubmissionInput,
       meta?: { from?: string | null },
-    ): Promise<Submission<T>> {
-      const { data, error } = await client()
-        .from("submissions")
-        .insert({
-          type,
-          payload,
-          status: "new",
-          notes: "",
-          from_ref: meta?.from ?? null,
-        })
-        .select()
-        .single();
+    ): Promise<Submission> {
+      const { data: newId, error } = await client().rpc(
+        "create_submission",
+        rpcParams(input, meta?.from ?? null),
+      );
       if (error) throw new Error(`Failed to create submission: ${error.message}`);
-      return toSubmission<T>(data as SubmissionRow);
+      const created = await getOne(input.type, newId as string);
+      if (!created) {
+        throw new Error("Submission was created but could not be read back.");
+      }
+      return created;
     },
 
     async listSubmissions(filter?: {
       type?: SubmissionType;
       status?: SubmissionStatus;
-    }): Promise<Submission[]> {
+    }): Promise<SubmissionSummary[]> {
       let query = client()
         .from("submissions")
         .select()
@@ -117,28 +232,16 @@ export function createSupabaseSubmissionStore(): SubmissionStore {
       if (filter?.status) query = query.eq("status", filter.status);
       const { data, error } = await query;
       if (error) throw new Error(`Failed to list submissions: ${error.message}`);
-      return (data as SubmissionRow[]).map((row) => toSubmission(row));
+      return (data as BaseRow[]).map(baseToSummary);
     },
 
-    async getSubmission<T extends SubmissionType>(
-      type: T,
-      id: string,
-    ): Promise<Submission<T> | null> {
-      const { data, error } = await client()
-        .from("submissions")
-        .select()
-        .eq("type", type)
-        .eq("id", id)
-        .maybeSingle();
-      if (error) throw new Error(`Failed to read submission: ${error.message}`);
-      return data ? toSubmission<T>(data as SubmissionRow) : null;
-    },
+    getSubmission: getOne,
 
-    async updateSubmission<T extends SubmissionType>(
-      type: T,
+    async updateSubmission<K extends SubmissionType>(
+      type: K,
       id: string,
       patch: { status?: SubmissionStatus; notes?: string },
-    ): Promise<Submission<T>> {
+    ): Promise<SubmissionOf<K>> {
       const update: Record<string, unknown> = {
         updated_at: new Date().toISOString(),
       };
@@ -154,7 +257,10 @@ export function createSupabaseSubmissionStore(): SubmissionStore {
         .maybeSingle();
       if (error) throw new Error(`Failed to update submission: ${error.message}`);
       if (!data) throw new Error(`Submission not found: ${type}/${id}`);
-      return toSubmission<T>(data as SubmissionRow);
+
+      const full = await getOne(type, id);
+      if (!full) throw new Error(`Submission not found: ${type}/${id}`);
+      return full;
     },
 
     async getCycles(): Promise<Cycles> {
@@ -182,8 +288,6 @@ export function createSupabaseSubmissionStore(): SubmissionStore {
 
     async addNotifyMe(role: CycleRole, email: string): Promise<NotifyMeEntry> {
       const normalized = email.trim().toLowerCase();
-      // Idempotent per (role, email): the unique index turns a repeat into a
-      // no-op, then we read the existing row back.
       const { error } = await client()
         .from("notify_me")
         .upsert(

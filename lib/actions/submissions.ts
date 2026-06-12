@@ -15,8 +15,9 @@ import {
 } from "@/lib/validation";
 import type {
   CycleRole,
+  FieldsByType,
   FormState,
-  PayloadByType,
+  SubmissionInput,
   SubmissionType,
 } from "@/lib/types";
 
@@ -47,9 +48,9 @@ async function clientIp(): Promise<string> {
 
 function summaryBody(
   type: SubmissionType,
-  payload: Record<string, string | null>,
+  fields: Record<string, string | null>,
 ): string {
-  const lines = Object.entries(payload).map(
+  const lines = Object.entries(fields).map(
     ([key, value]) => `${key}: ${value ?? ""}`,
   );
   return [`New ${type} submission received.`, "", ...lines].join("\n");
@@ -58,7 +59,7 @@ function summaryBody(
 async function handleSubmission<T extends SubmissionType>(
   type: T,
   formData: FormData,
-  validate: (formData: FormData) => Result<PayloadByType[T]>,
+  validate: (formData: FormData) => Result<FieldsByType[T]>,
   cycleRole?: CycleRole,
 ): Promise<FormState> {
   if (honeypotTripped(formData)) return { status: "success" };
@@ -73,9 +74,10 @@ async function handleSubmission<T extends SubmissionType>(
     if (!cycles[cycleRole].open) return CYCLE_CLOSED_ERROR;
   }
 
-  const submission = await db.createSubmission(type, result.data, {
-    from: sanitizeFromSlug(formData.get("from")),
-  });
+  const submission = await db.createSubmission(
+    { type, ...result.data } as SubmissionInput,
+    { from: sanitizeFromSlug(formData.get("from")) },
+  );
 
   try {
     await notifier.send({

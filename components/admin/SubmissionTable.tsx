@@ -1,14 +1,6 @@
 import Link from "next/link";
 import { StatusBadge } from "./StatusBadge";
-import type { Submission } from "@/lib/types";
-
-function field(payload: unknown, key: "fullName" | "email"): string {
-  if (payload && typeof payload === "object" && key in payload) {
-    const value = (payload as Record<string, unknown>)[key];
-    if (typeof value === "string") return value;
-  }
-  return "";
-}
+import type { SubmissionSummary } from "@/lib/types";
 
 function formatDate(iso: string): string {
   const date = new Date(iso);
@@ -24,7 +16,7 @@ function formatDate(iso: string): string {
 export function SubmissionTable({
   submissions,
 }: {
-  submissions: Submission[];
+  submissions: SubmissionSummary[];
 }) {
   if (submissions.length === 0) {
     return (
@@ -64,11 +56,11 @@ export function SubmissionTable({
                   href={`/admin/submissions/${submission.type}/${submission.id}`}
                   className="font-semibold text-primary hover:text-primary-press"
                 >
-                  {field(submission.payload, "fullName") || "(no name)"}
+                  {submission.fullName || "(no name)"}
                 </Link>
               </td>
               <td className="px-4 py-3 text-muted">
-                {field(submission.payload, "email") || "—"}
+                {submission.email || "—"}
               </td>
               <td className="px-4 py-3">
                 <StatusBadge status={submission.status} />

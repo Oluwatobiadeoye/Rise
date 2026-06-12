@@ -2,42 +2,47 @@ import type {
   CycleRole,
   Cycles,
   NotifyMeEntry,
-  PayloadByType,
   Submission,
+  SubmissionInput,
+  SubmissionOf,
   SubmissionStatus,
+  SubmissionSummary,
   SubmissionType,
 } from "@/lib/types";
 
 /**
  * Persistence seam for form submissions, application cycles, and
- * notify-me signups. The filesystem implementation behind it can be swapped
- * for a hosted database (e.g. Supabase) by changing one line in
- * `lib/db/index.ts`.
+ * notify-me signups. The filesystem implementation behind it is swapped for
+ * Supabase in `lib/db/index.ts` when its keys are configured.
  */
 export interface SubmissionStore {
-  createSubmission<T extends SubmissionType>(
-    type: T,
-    payload: PayloadByType[T],
+  /** Stores a new submission and returns the complete record. */
+  createSubmission(
+    input: SubmissionInput,
     meta?: { from?: string | null },
-  ): Promise<Submission<T>>;
+  ): Promise<Submission>;
 
-  /** Lists submissions newest first, optionally filtered by type and status. */
+  /**
+   * Lists submissions newest first as lightweight summaries (shared fields
+   * only), optionally filtered by type and status.
+   */
   listSubmissions(filter?: {
     type?: SubmissionType;
     status?: SubmissionStatus;
-  }): Promise<Submission[]>;
+  }): Promise<SubmissionSummary[]>;
 
-  getSubmission<T extends SubmissionType>(
-    type: T,
+  /** Full submission (including type-specific fields) or null if not found. */
+  getSubmission<K extends SubmissionType>(
+    type: K,
     id: string,
-  ): Promise<Submission<T> | null>;
+  ): Promise<SubmissionOf<K> | null>;
 
   /** Applies the patch and bumps `updatedAt`. Throws if the submission does not exist. */
-  updateSubmission<T extends SubmissionType>(
-    type: T,
+  updateSubmission<K extends SubmissionType>(
+    type: K,
     id: string,
     patch: { status?: SubmissionStatus; notes?: string },
-  ): Promise<Submission<T>>;
+  ): Promise<SubmissionOf<K>>;
 
   getCycles(): Promise<Cycles>;
 

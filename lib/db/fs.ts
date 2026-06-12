@@ -5,9 +5,11 @@ import type {
   CycleRole,
   Cycles,
   NotifyMeEntry,
-  PayloadByType,
   Submission,
+  SubmissionInput,
+  SubmissionOf,
   SubmissionStatus,
+  SubmissionSummary,
   SubmissionType,
 } from "@/lib/types";
 import type { SubmissionStore } from "./types";
@@ -18,6 +20,21 @@ const SUBMISSION_TYPES: readonly SubmissionType[] = [
   "mentee",
   "volunteer",
 ];
+
+/** Projects a stored submission to the listing-level summary. */
+function toSummary(submission: Submission): SubmissionSummary {
+  return {
+    id: submission.id,
+    type: submission.type,
+    fullName: submission.fullName,
+    email: submission.email,
+    status: submission.status,
+    notes: submission.notes,
+    from: submission.from,
+    createdAt: submission.createdAt,
+    updatedAt: submission.updatedAt,
+  };
+}
 
 function defaultCycles(): Cycles {
   return {
@@ -107,30 +124,28 @@ export function createFsSubmissionStore(root?: string): SubmissionStore {
   }
 
   return {
-    async createSubmission<T extends SubmissionType>(
-      type: T,
-      payload: PayloadByType[T],
+    async createSubmission(
+      input: SubmissionInput,
       meta?: { from?: string | null },
-    ): Promise<Submission<T>> {
+    ): Promise<Submission> {
       const now = new Date().toISOString();
-      const submission: Submission<T> = {
+      const submission: Submission = {
+        ...input,
         id: randomUUID(),
-        type,
-        payload,
         status: "new",
         notes: "",
         from: meta?.from ?? null,
         createdAt: now,
         updatedAt: now,
       };
-      await writeJsonAtomic(submissionFile(type, submission.id), submission);
+      await writeJsonAtomic(submissionFile(input.type, submission.id), submission);
       return submission;
     },
 
     async listSubmissions(filter?: {
       type?: SubmissionType;
       status?: SubmissionStatus;
-    }): Promise<Submission[]> {
+    }): Promise<SubmissionSummary[]> {
       const types = filter?.type ? [filter.type] : SUBMISSION_TYPES;
       const submissions: Submission[] = [];
       for (const type of types) {
@@ -152,28 +167,31 @@ export function createFsSubmissionStore(root?: string): SubmissionStore {
         (a, b) =>
           b.createdAt.localeCompare(a.createdAt) || a.id.localeCompare(b.id),
       );
-      return filtered;
+      return filtered.map(toSummary);
     },
 
-    async getSubmission<T extends SubmissionType>(
-      type: T,
+    async getSubmission<K extends SubmissionType>(
+      type: K,
       id: string,
-    ): Promise<Submission<T> | null> {
-      return readJsonIfExists<Submission<T>>(submissionFile(type, id));
+    ): Promise<SubmissionOf<K> | null> {
+      const submission = await readJsonIfExists<SubmissionOf<K>>(
+        submissionFile(type, id),
+      );
+      return submission;
     },
 
-    async updateSubmission<T extends SubmissionType>(
-      type: T,
+    async updateSubmission<K extends SubmissionType>(
+      type: K,
       id: string,
       patch: { status?: SubmissionStatus; notes?: string },
-    ): Promise<Submission<T>> {
-      const existing = await readJsonIfExists<Submission<T>>(
+    ): Promise<SubmissionOf<K>> {
+      const existing = await readJsonIfExists<SubmissionOf<K>>(
         submissionFile(type, id),
       );
       if (!existing) {
         throw new Error(`Submission not found: ${type}/${id}`);
       }
-      const updated: Submission<T> = {
+      const updated: SubmissionOf<K> = {
         ...existing,
         ...(patch.status !== undefined ? { status: patch.status } : {}),
         ...(patch.notes !== undefined ? { notes: patch.notes } : {}),

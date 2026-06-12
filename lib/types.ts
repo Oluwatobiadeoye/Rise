@@ -16,14 +16,21 @@ export type SubmissionStatus =
 
 export type CycleRole = "mentor" | "mentee";
 
-export type ContactPayload = {
+/**
+ * User-supplied fields collected by each form. These are what validation
+ * produces and what {@link SubmissionInput} carries into the store. `fullName`
+ * and `email` are common to every type (and live on the supertype table); the
+ * remaining fields are specific to each.
+ */
+export type ContactFields = {
   fullName: string;
   email: string;
+  /** Who the enquirer is (e.g. parent, school, partner). */
   role: string;
   message: string;
 };
 
-export type MentorPayload = {
+export type MentorFields = {
   fullName: string;
   email: string;
   fieldOfExpertise: string;
@@ -32,7 +39,7 @@ export type MentorPayload = {
   message: string | null;
 };
 
-export type MenteePayload = {
+export type MenteeFields = {
   fullName: string;
   email: string;
   institution: string;
@@ -41,24 +48,34 @@ export type MenteePayload = {
   essay: string;
 };
 
-export type VolunteerPayload = {
+export type VolunteerFields = {
   fullName: string;
   email: string;
   interestArea: string;
   message: string | null;
 };
 
-export type PayloadByType = {
-  contact: ContactPayload;
-  mentor: MentorPayload;
-  mentee: MenteePayload;
-  volunteer: VolunteerPayload;
+export type FieldsByType = {
+  contact: ContactFields;
+  mentor: MentorFields;
+  mentee: MenteeFields;
+  volunteer: VolunteerFields;
 };
 
-export type Submission<T extends SubmissionType = SubmissionType> = {
+/**
+ * What a form contributes at creation time: the type discriminant plus its
+ * fields. A discriminated union, so `input.type === "mentee"` narrows to
+ * {@link MenteeFields}.
+ */
+export type SubmissionInput =
+  | ({ type: "contact" } & ContactFields)
+  | ({ type: "mentor" } & MentorFields)
+  | ({ type: "mentee" } & MenteeFields)
+  | ({ type: "volunteer" } & VolunteerFields);
+
+/** System-managed fields shared by every stored submission (the supertype). */
+export type SubmissionBase = {
   id: string;
-  type: T;
-  payload: PayloadByType[T];
   status: SubmissionStatus;
   notes: string;
   /** Sanitized referrer slug from the page that hosted the form, if any. */
@@ -67,6 +84,31 @@ export type Submission<T extends SubmissionType = SubmissionType> = {
   createdAt: string;
   /** ISO 8601 timestamp. */
   updatedAt: string;
+};
+
+/**
+ * A stored submission: the shared base intersected with the type-specific
+ * input. Because the intersection distributes over the union, this is a
+ * discriminated union on `type` — `submission.type === "mentee"` narrows to the
+ * mentee fields with no casts.
+ */
+export type Submission = SubmissionBase & SubmissionInput;
+
+/** A stored submission narrowed to one type. */
+export type SubmissionOf<K extends SubmissionType> = Extract<
+  Submission,
+  { type: K }
+>;
+
+/**
+ * Listing-level view for the admin inbox: the shared fields only, no
+ * type-specific detail. Lets the inbox query the supertype table without
+ * joining every detail table.
+ */
+export type SubmissionSummary = SubmissionBase & {
+  type: SubmissionType;
+  fullName: string;
+  email: string;
 };
 
 export type CycleState = {
