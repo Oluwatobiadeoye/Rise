@@ -5,7 +5,7 @@ import path from "node:path";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createFsSubmissionStore } from "../fs";
 import type { SubmissionStore } from "../types";
-import type { SubmissionInput } from "@/lib/types";
+import type { AdminInput, SubmissionInput } from "@/lib/types";
 
 const contactInput: SubmissionInput = {
   type: "contact",
@@ -289,5 +289,150 @@ describe("createFsSubmissionStore", () => {
     const cyclesDir = await readdir(path.join(root, "cycles"));
     expect(contactDir.some((f) => f.endsWith(".tmp"))).toBe(false);
     expect(cyclesDir.some((f) => f.endsWith(".tmp"))).toBe(false);
+  });
+
+  describe("admin accounts", () => {
+    const adminInput: AdminInput = {
+      username: "ada",
+      email: "Ada@Example.COM",
+      name: "Ada Lovelace",
+      role: "superadmin",
+      passwordHash: "deadbeef:cafef00d",
+    };
+
+    it("creates an admin, lowercasing email, and returns no password hash", async () => {
+      const admin = await store.createAdmin(adminInput);
+      expect(admin.id).toMatch(/^[0-9a-f-]{36}$/);
+      expect(admin.email).toBe("ada@example.com");
+      expect(admin.role).toBe("superadmin");
+      expect("passwordHash" in admin).toBe(false);
+    });
+
+    it("rejects a duplicate username or email", async () => {
+      await store.createAdmin(adminInput);
+      await expect(
+        store.createAdmin({ ...adminInput, email: "other@example.com" }),
+      ).rejects.toThrow(/already exists/i);
+      await expect(
+        store.createAdmin({ ...adminInput, username: "other" }),
+      ).rejects.toThrow(/already exists/i);
+    });
+
+    it("looks up by username or email (case-insensitive) with the hash", async () => {
+      const created = await store.createAdmin(adminInput);
+      const byUsername = await store.getAdminByIdentifier("ada");
+      const byEmail = await store.getAdminByIdentifier("ADA@example.com");
+      expect(byUsername?.id).toBe(created.id);
+      expect(byUsername?.passwordHash).toBe("deadbeef:cafef00d");
+      expect(byEmail?.id).toBe(created.id);
+      expect(await store.getAdminByIdentifier("nobody")).toBeNull();
+    });
+
+    it("getAdminById and listAdmins strip the password hash", async () => {
+      const created = await store.createAdmin(adminInput);
+      const byId = await store.getAdminById(created.id);
+      expect(byId?.name).toBe("Ada Lovelace");
+      expect(byId && "passwordHash" in byId).toBe(false);
+
+      const list = await store.listAdmins();
+      expect(list).toHaveLength(1);
+      expect("passwordHash" in list[0]).toBe(false);
+    });
+
+    it("updates name, role, and password hash and bumps updatedAt", async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-06-01T10:00:00Z"));
+      const created = await store.createAdmin(adminInput);
+
+      vi.setSystemTime(new Date("2026-06-01T10:30:00Z"));
+      const updated = await store.updateAdmin(created.id, {
+        role: "reviewer",
+        name: "Ada L.",
+        passwordHash: "aa:bb",
+      });
+      expect(updated.role).toBe("reviewer");
+      expect(updated.name).toBe("Ada L.");
+      expect(updated.updatedAt > created.updatedAt).toBe(true);
+
+      const record = await store.getAdminByIdentifier("ada");
+      expect(record?.passwordHash).toBe("aa:bb");
+    });
+
+    it("throws when updating a missing admin and is a no-op deleting one", async () => {
+      await expect(
+        store.updateAdmin("missing", { role: "owner" }),
+      ).rejects.toThrow(/not found/i);
+      await expect(store.deleteAdmin("missing")).resolves.toBeUndefined();
+    });
+
+    it("deletes an admin", async () => {
+      const created = await store.createAdmin(adminInput);
+      await store.deleteAdmin(created.id);
+      expect(await store.getAdminById(created.id)).toBeNull();
+      expect(await store.listAdmins()).toEqual([]);
+    });
+  });
+
+  describe("review claim lock", () => {
+    const adminA = "11111111-1111-4111-8111-111111111111";
+    const adminB = "22222222-2222-4222-8222-222222222222";
+
+    it("claims a free submission and is idempotent for the same admin", async () => {
+      const created = await store.createSubmission(contactInput);
+      expect(created.reviewedBy).toBeNull();
+
+      const claimed = await store.claimSubmission("contact", created.id, adminA);
+      expect(claimed?.reviewedBy).toBe(adminA);
+
+      // Re-claiming by the same admin succeeds (idempotent).
+      const again = await store.claimSubmission("contact", created.id, adminA);
+      expect(again?.reviewedBy).toBe(adminA);
+    });
+
+    it("returns null when another admin already holds the claim", async () => {
+      const created = await store.createSubmission(contactInput);
+      await store.claimSubmission("contact", created.id, adminA);
+      const blocked = await store.claimSubmission("contact", created.id, adminB);
+      expect(blocked).toBeNull();
+
+      const fetched = await store.getSubmission("contact", created.id);
+      expect(fetched?.reviewedBy).toBe(adminA);
+    });
+
+    it("returns null when claiming a missing submission", async () => {
+      expect(
+        await store.claimSubmission(
+          "contact",
+          "00000000-0000-4000-8000-000000000000",
+          adminA,
+        ),
+      ).toBeNull();
+    });
+
+    it("releases the holder's own claim", async () => {
+      const created = await store.createSubmission(contactInput);
+      await store.claimSubmission("contact", created.id, adminA);
+      await store.releaseSubmission("contact", created.id, adminA);
+      const fetched = await store.getSubmission("contact", created.id);
+      expect(fetched?.reviewedBy).toBeNull();
+    });
+
+    it("does not release another admin's claim without force", async () => {
+      const created = await store.createSubmission(contactInput);
+      await store.claimSubmission("contact", created.id, adminA);
+      await store.releaseSubmission("contact", created.id, adminB);
+      const fetched = await store.getSubmission("contact", created.id);
+      expect(fetched?.reviewedBy).toBe(adminA);
+    });
+
+    it("force-releases another admin's claim", async () => {
+      const created = await store.createSubmission(contactInput);
+      await store.claimSubmission("contact", created.id, adminA);
+      await store.releaseSubmission("contact", created.id, adminB, {
+        force: true,
+      });
+      const fetched = await store.getSubmission("contact", created.id);
+      expect(fetched?.reviewedBy).toBeNull();
+    });
   });
 });

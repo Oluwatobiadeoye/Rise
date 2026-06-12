@@ -11,6 +11,7 @@ const contactSubmission: SubmissionSummary = {
   status: "pending",
   notes: "",
   from: "contact",
+  reviewedBy: null,
   createdAt: "2026-06-01T10:00:00.000Z",
   updatedAt: "2026-06-01T10:00:00.000Z",
 };
@@ -43,5 +44,19 @@ describe("SubmissionTable", () => {
     render(<SubmissionTable submissions={[contactSubmission]} />);
     // The type cell and the from cell both read "contact".
     expect(screen.getAllByText("contact")).toHaveLength(2);
+  });
+
+  it("resolves the reviewer id to a name via the map", () => {
+    const claimed: SubmissionSummary = {
+      ...contactSubmission,
+      reviewedBy: "admin-1",
+    };
+    render(
+      <SubmissionTable
+        submissions={[claimed]}
+        reviewerNames={{ "admin-1": "Bisi Ade" }}
+      />,
+    );
+    expect(screen.getByText("Bisi Ade")).toBeInTheDocument();
   });
 });

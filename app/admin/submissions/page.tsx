@@ -71,6 +71,10 @@ export default async function AdminSubmissionsPage({
   const status = isStatus(rawStatus) ? rawStatus : undefined;
 
   const submissions = await db.listSubmissions({ type, status });
+  const admins = await db.listAdmins();
+  const reviewerNames: Record<string, string> = Object.fromEntries(
+    admins.map((a) => [a.id, a.name]),
+  );
 
   return (
     <div className="space-y-8">
@@ -119,7 +123,10 @@ export default async function AdminSubmissionsPage({
         </div>
       </div>
 
-      <SubmissionTable submissions={submissions} />
+      <SubmissionTable
+        submissions={submissions}
+        reviewerNames={reviewerNames}
+      />
     </div>
   );
 }

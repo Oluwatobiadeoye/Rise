@@ -12,11 +12,17 @@ function formatDate(iso: string): string {
   });
 }
 
-/** Read-only list of submissions, each row linking to its detail page. */
+/**
+ * Read-only list of submissions, each row linking to its detail page. The
+ * `reviewerNames` map resolves the `reviewedBy` admin id to a display name; an
+ * id with no entry (e.g. a deleted admin) falls back to a dash.
+ */
 export function SubmissionTable({
   submissions,
+  reviewerNames = {},
 }: {
   submissions: SubmissionSummary[];
+  reviewerNames?: Record<string, string>;
 }) {
   if (submissions.length === 0) {
     return (
@@ -36,6 +42,7 @@ export function SubmissionTable({
             <th className="px-4 py-3 font-semibold">Name</th>
             <th className="px-4 py-3 font-semibold">Email</th>
             <th className="px-4 py-3 font-semibold">Status</th>
+            <th className="px-4 py-3 font-semibold">Reviewer</th>
             <th className="px-4 py-3 font-semibold">From</th>
           </tr>
         </thead>
@@ -64,6 +71,11 @@ export function SubmissionTable({
               </td>
               <td className="px-4 py-3">
                 <StatusBadge status={submission.status} />
+              </td>
+              <td className="px-4 py-3 text-muted">
+                {submission.reviewedBy
+                  ? (reviewerNames[submission.reviewedBy] ?? "—")
+                  : "—"}
               </td>
               <td className="px-4 py-3 text-muted">{submission.from ?? "—"}</td>
             </tr>

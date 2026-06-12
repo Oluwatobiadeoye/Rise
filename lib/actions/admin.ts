@@ -9,14 +9,20 @@ import {
   createSessionToken,
   isAdminConfigured,
   sessionCookieOptions,
-  verifyPassword,
 } from "@/lib/admin/auth";
+import { hashPassword, verifyPassword } from "@/lib/admin/password";
+import { requireCan } from "@/lib/admin/permissions";
 import { validateSubmissionRef } from "@/lib/admin/ref";
 import { db } from "@/lib/db";
 import { notifier } from "@/lib/notify";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { isStatusForType } from "@/lib/status";
-import type { CycleRole, SubmissionType } from "@/lib/types";
+import type {
+  AdminRole,
+  CycleRole,
+  SubmissionOf,
+  SubmissionType,
+} from "@/lib/types";
 
 const NOTES_MAX_LENGTH = 5000;
 
@@ -34,6 +40,45 @@ function detailPath(type: SubmissionType, id: string): string {
   return `/admin/submissions/${type}/${id}`;
 }
 
+// A valid scrypt hash verified against on the no-account login path so that a
+// missing account costs the same work as a real one (no user-enumeration via
+// timing).
+const DUMMY_PASSWORD_HASH = hashPassword("timing-equalizer-not-a-real-password");
+
+/**
+ * Throws if the given admin is the last remaining superadmin, so a demotion or
+ * deletion can never leave zero superadmins (which would lock everyone out of
+ * account management through the UI).
+ */
+async function assertNotLastSuperadmin(id: string): Promise<void> {
+  const target = await db.getAdminById(id);
+  if (target?.role !== "superadmin") return;
+  const superadmins = (await db.listAdmins()).filter(
+    (a) => a.role === "superadmin",
+  );
+  if (superadmins.length <= 1) {
+    throw new Error("Cannot remove the last superadmin");
+  }
+}
+
+/**
+ * Loads a submission and enforces that the given admin holds its review claim.
+ * Throws "Submission is not under your review" when the claim is unheld or held
+ * by another admin, so review mutations can only proceed under an active claim.
+ */
+async function loadClaimedSubmission<K extends SubmissionType>(
+  type: K,
+  id: string,
+  adminId: string,
+): Promise<SubmissionOf<K>> {
+  const submission = await db.getSubmission(type, id);
+  if (!submission) notFound();
+  if (submission.reviewedBy !== adminId) {
+    throw new Error("Submission is not under your review");
+  }
+  return submission;
+}
+
 export async function loginAdmin(formData: FormData): Promise<void> {
   if (!isAdminConfigured()) notFound();
 
@@ -41,14 +86,29 @@ export async function loginAdmin(formData: FormData): Promise<void> {
     redirect("/admin/login?error=1");
   }
 
-  const candidate = formData.get("password");
-  if (typeof candidate !== "string" || !verifyPassword(candidate)) {
+  const identifier = formData.get("identifier");
+  const password = formData.get("password");
+  if (typeof identifier !== "string" || typeof password !== "string") {
+    redirect("/admin/login?error=1");
+  }
+
+  // Look up by username or email, then verify the password. A single generic
+  // failure path for both a missing account and a wrong password avoids
+  // revealing which field was wrong (and which usernames exist).
+  const record = await db.getAdminByIdentifier(identifier as string);
+  if (!record) {
+    // Spend the same work as a real verify so the timing doesn't reveal that
+    // no account exists for this identifier.
+    verifyPassword(password as string, DUMMY_PASSWORD_HASH);
+    redirect("/admin/login?error=1");
+  }
+  if (!verifyPassword(password as string, record.passwordHash)) {
     redirect("/admin/login?error=1");
   }
 
   (await cookies()).set(
     ADMIN_SESSION_COOKIE,
-    createSessionToken(),
+    createSessionToken(record!.id),
     sessionCookieOptions,
   );
   redirect("/admin");
@@ -62,7 +122,7 @@ export async function logoutAdmin(): Promise<void> {
 export async function updateSubmissionStatus(
   formData: FormData,
 ): Promise<void> {
-  await assertAdmin();
+  const admin = await assertAdmin();
 
   const ref = validateSubmissionRef(
     formData.get("type"),
@@ -73,6 +133,7 @@ export async function updateSubmissionStatus(
   const status = formData.get("status");
   if (!isStatusForType(ref.type, status)) throw new Error("Invalid status");
 
+  await loadClaimedSubmission(ref.type, ref.id, admin.id);
   await db.updateSubmission(ref.type, ref.id, { status });
 
   revalidatePath("/admin/submissions");
@@ -80,7 +141,7 @@ export async function updateSubmissionStatus(
 }
 
 export async function saveSubmissionNotes(formData: FormData): Promise<void> {
-  await assertAdmin();
+  const admin = await assertAdmin();
 
   const ref = validateSubmissionRef(
     formData.get("type"),
@@ -91,8 +152,36 @@ export async function saveSubmissionNotes(formData: FormData): Promise<void> {
   const raw = formData.get("notes");
   const notes = (typeof raw === "string" ? raw : "").slice(0, NOTES_MAX_LENGTH);
 
+  await loadClaimedSubmission(ref.type, ref.id, admin.id);
   await db.updateSubmission(ref.type, ref.id, { notes });
 
+  revalidatePath(detailPath(ref.type, ref.id));
+}
+
+export async function claimSubmission(formData: FormData): Promise<void> {
+  const admin = await assertAdmin();
+
+  const ref = validateSubmissionRef(formData.get("type"), formData.get("id"));
+  if (!ref) notFound();
+
+  await db.claimSubmission(ref.type, ref.id, admin.id);
+
+  revalidatePath("/admin/submissions");
+  revalidatePath(detailPath(ref.type, ref.id));
+}
+
+export async function releaseSubmission(formData: FormData): Promise<void> {
+  const admin = await assertAdmin();
+
+  const ref = validateSubmissionRef(formData.get("type"), formData.get("id"));
+  if (!ref) notFound();
+
+  // A force release (taking over another admin's claim) is an explicit,
+  // opt-in field; the holder can always release their own claim regardless.
+  const force = formData.get("force") === "1";
+  await db.releaseSubmission(ref.type, ref.id, admin.id, { force });
+
+  revalidatePath("/admin/submissions");
   revalidatePath(detailPath(ref.type, ref.id));
 }
 
@@ -137,7 +226,7 @@ function readCycleWindow(formData: FormData): {
 }
 
 export async function createCycle(formData: FormData): Promise<void> {
-  await assertAdmin();
+  await requireCan("manage-cycles");
 
   const role = formData.get("role");
   if (!isCycleRole(role)) throw new Error("Invalid role");
@@ -149,7 +238,7 @@ export async function createCycle(formData: FormData): Promise<void> {
 }
 
 export async function updateCycle(formData: FormData): Promise<void> {
-  await assertAdmin();
+  await requireCan("manage-cycles");
 
   const id = formData.get("id");
   if (typeof id !== "string" || !id) throw new Error("Invalid cycle id");
@@ -161,7 +250,7 @@ export async function updateCycle(formData: FormData): Promise<void> {
 }
 
 export async function deleteCycle(formData: FormData): Promise<void> {
-  await assertAdmin();
+  await requireCan("manage-cycles");
 
   const id = formData.get("id");
   if (typeof id !== "string" || !id) throw new Error("Invalid cycle id");
@@ -196,7 +285,7 @@ const DECISION_COPY: Record<
 };
 
 export async function sendDecisionEmail(formData: FormData): Promise<void> {
-  await assertAdmin();
+  const admin = await assertAdmin();
 
   const ref = validateSubmissionRef(
     formData.get("type"),
@@ -209,8 +298,7 @@ export async function sendDecisionEmail(formData: FormData): Promise<void> {
     throw new Error("Invalid decision");
   }
 
-  const submission = await db.getSubmission(ref.type, ref.id);
-  if (!submission) notFound();
+  const submission = await loadClaimedSubmission(ref.type, ref.id, admin.id);
 
   const name = submission.fullName.trim() ? submission.fullName : "there";
 
@@ -224,4 +312,102 @@ export async function sendDecisionEmail(formData: FormData): Promise<void> {
   });
 
   revalidatePath(detailPath(ref.type, ref.id));
+}
+
+// --- Admin account management (superadmin only) ---
+
+const USERNAME_PATTERN = /^[a-z0-9._-]{3,40}$/i;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const NAME_MAX_LENGTH = 120;
+const PASSWORD_MIN_LENGTH = 12;
+
+function isAdminRole(value: unknown): value is AdminRole {
+  return value === "superadmin" || value === "owner" || value === "reviewer";
+}
+
+function revalidateAdmins(): void {
+  revalidatePath("/admin/admins");
+  revalidatePath("/admin");
+}
+
+export async function createAdminAccount(formData: FormData): Promise<void> {
+  await requireCan("manage-admins");
+
+  const username = String(formData.get("username") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim();
+  const name = String(formData.get("name") ?? "").trim();
+  const role = formData.get("role");
+  const password = formData.get("password");
+
+  if (!USERNAME_PATTERN.test(username)) throw new Error("Invalid username");
+  if (!EMAIL_PATTERN.test(email)) throw new Error("Invalid email");
+  if (!name || name.length > NAME_MAX_LENGTH) throw new Error("Invalid name");
+  if (!isAdminRole(role)) throw new Error("Invalid role");
+  if (typeof password !== "string" || password.length < PASSWORD_MIN_LENGTH) {
+    throw new Error("Password must be at least 12 characters");
+  }
+
+  await db.createAdmin({
+    username,
+    email,
+    name,
+    role,
+    passwordHash: hashPassword(password),
+  });
+
+  revalidateAdmins();
+}
+
+export async function updateAdminAccount(formData: FormData): Promise<void> {
+  await requireCan("manage-admins");
+
+  const id = formData.get("id");
+  if (typeof id !== "string" || !id) throw new Error("Invalid admin id");
+
+  const patch: { name?: string; role?: AdminRole; passwordHash?: string } = {};
+
+  const nameRaw = formData.get("name");
+  if (typeof nameRaw === "string" && nameRaw.trim()) {
+    const name = nameRaw.trim();
+    if (name.length > NAME_MAX_LENGTH) throw new Error("Invalid name");
+    patch.name = name;
+  }
+
+  const role = formData.get("role");
+  if (role !== null) {
+    if (!isAdminRole(role)) throw new Error("Invalid role");
+    patch.role = role;
+  }
+
+  const password = formData.get("password");
+  if (typeof password === "string" && password.length > 0) {
+    if (password.length < PASSWORD_MIN_LENGTH) {
+      throw new Error("Password must be at least 12 characters");
+    }
+    patch.passwordHash = hashPassword(password);
+  }
+
+  // Never demote the last superadmin out of the role.
+  if (patch.role && patch.role !== "superadmin") {
+    await assertNotLastSuperadmin(id);
+  }
+
+  await db.updateAdmin(id, patch);
+
+  revalidateAdmins();
+}
+
+export async function deleteAdminAccount(formData: FormData): Promise<void> {
+  const admin = await requireCan("manage-admins");
+
+  const id = formData.get("id");
+  if (typeof id !== "string" || !id) throw new Error("Invalid admin id");
+  // A superadmin cannot delete their own account, which would risk locking the
+  // last administrator out of account management.
+  if (id === admin.id) throw new Error("You cannot delete your own account");
+  await assertNotLastSuperadmin(id);
+
+  await db.deleteAdmin(id);
+
+  revalidateAdmins();
 }

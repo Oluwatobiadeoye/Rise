@@ -1,4 +1,6 @@
+import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin/auth";
+import { can } from "@/lib/admin/permissions";
 import { createCycle, deleteCycle, updateCycle } from "@/lib/actions/admin";
 import { db } from "@/lib/db";
 import {
@@ -180,7 +182,8 @@ function CreateCycleForm() {
 }
 
 export default async function AdminCyclesPage() {
-  await requireAdmin();
+  const admin = await requireAdmin();
+  if (!can(admin.role, "manage-cycles")) notFound();
 
   const cycles = await db.listCycles();
   const byRole = (role: CycleRole) => cycles.filter((c) => c.role === role);

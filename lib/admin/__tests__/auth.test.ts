@@ -5,9 +5,9 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 // under vitest it is a no-op marker, so stub it away.
 vi.mock("server-only", () => ({}));
 
-// The auth module imports next/headers and next/navigation at the top level.
-// These pure-function tests never exercise the cookie/redirect paths, but the
-// imports must resolve, so stub them.
+// The auth module imports next/headers, next/navigation, and the store at the
+// top level. These pure session-token tests never exercise the cookie/redirect
+// or store paths, but the imports must resolve, so stub them.
 vi.mock("next/headers", () => ({
   cookies: vi.fn(),
 }));
@@ -19,112 +19,118 @@ vi.mock("next/navigation", () => ({
     throw new Error(`NEXT_REDIRECT:${url}`);
   }),
 }));
+vi.mock("@/lib/db", () => ({
+  db: { getAdminById: vi.fn() },
+}));
 
 import {
   createSessionToken,
   isAdminConfigured,
-  verifyPassword,
   verifySessionToken,
 } from "../auth";
 
-const PASSWORD = "correct horse battery staple";
+const SECRET = "a-very-high-entropy-session-secret-value";
+const ADMIN_ID = "0a1b2c3d-4e5f-4a7b-8c9d-0e1f2a3b4c5d";
 
 afterEach(() => {
   vi.unstubAllEnvs();
 });
 
 describe("isAdminConfigured", () => {
-  it("is false when ADMIN_PASSWORD is unset", () => {
-    vi.stubEnv("ADMIN_PASSWORD", "");
+  it("is false when ADMIN_SESSION_SECRET is unset", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", "");
     expect(isAdminConfigured()).toBe(false);
   });
 
-  it("is true when ADMIN_PASSWORD is set", () => {
-    vi.stubEnv("ADMIN_PASSWORD", PASSWORD);
+  it("is true when ADMIN_SESSION_SECRET is set", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", SECRET);
     expect(isAdminConfigured()).toBe(true);
   });
 });
 
-describe("verifyPassword", () => {
-  it("accepts the correct password", () => {
-    vi.stubEnv("ADMIN_PASSWORD", PASSWORD);
-    expect(verifyPassword(PASSWORD)).toBe(true);
-  });
-
-  it("rejects an incorrect password", () => {
-    vi.stubEnv("ADMIN_PASSWORD", PASSWORD);
-    expect(verifyPassword("wrong")).toBe(false);
-    expect(verifyPassword("")).toBe(false);
-    expect(verifyPassword(`${PASSWORD} `)).toBe(false);
-  });
-
-  it("rejects everything when admin is unconfigured", () => {
-    vi.stubEnv("ADMIN_PASSWORD", "");
-    expect(verifyPassword("")).toBe(false);
-    expect(verifyPassword("anything")).toBe(false);
-  });
-});
-
 describe("session token", () => {
-  it("round-trips a freshly minted token", () => {
-    vi.stubEnv("ADMIN_PASSWORD", PASSWORD);
+  it("carries the admin id and round-trips a fresh token", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", SECRET);
     const now = 1_000_000_000_000;
-    const token = createSessionToken(now);
-    expect(verifySessionToken(token, now + 1000)).toBe(true);
+    const token = createSessionToken(ADMIN_ID, now);
+    expect(token.startsWith(`${ADMIN_ID}.`)).toBe(true);
+    expect(verifySessionToken(token, now + 1000)).toBe(ADMIN_ID);
   });
 
   it("rejects an expired token", () => {
-    vi.stubEnv("ADMIN_PASSWORD", PASSWORD);
+    vi.stubEnv("ADMIN_SESSION_SECRET", SECRET);
     const now = 1_000_000_000_000;
-    const token = createSessionToken(now);
+    const token = createSessionToken(ADMIN_ID, now);
     const justAfterExpiry = now + 24 * 60 * 60 * 1000 + 1;
-    expect(verifySessionToken(token, justAfterExpiry)).toBe(false);
+    expect(verifySessionToken(token, justAfterExpiry)).toBeNull();
   });
 
   it("rejects a token with a tampered signature", () => {
-    vi.stubEnv("ADMIN_PASSWORD", PASSWORD);
+    vi.stubEnv("ADMIN_SESSION_SECRET", SECRET);
     const now = 1_000_000_000_000;
-    const token = createSessionToken(now);
-    const [expiry, hmac] = token.split(".");
-    // Flip the first hex character of the signature.
+    const token = createSessionToken(ADMIN_ID, now);
+    const lastDot = token.lastIndexOf(".");
+    const payload = token.slice(0, lastDot);
+    const hmac = token.slice(lastDot + 1);
     const flipped = (hmac[0] === "0" ? "1" : "0") + hmac.slice(1);
-    expect(verifySessionToken(`${expiry}.${flipped}`, now)).toBe(false);
+    expect(verifySessionToken(`${payload}.${flipped}`, now)).toBeNull();
   });
 
   it("rejects a token with a tampered (extended) expiry", () => {
-    vi.stubEnv("ADMIN_PASSWORD", PASSWORD);
+    vi.stubEnv("ADMIN_SESSION_SECRET", SECRET);
     const now = 1_000_000_000_000;
-    const token = createSessionToken(now);
-    const [expiry, hmac] = token.split(".");
+    const token = createSessionToken(ADMIN_ID, now);
+    const lastDot = token.lastIndexOf(".");
+    const payload = token.slice(0, lastDot);
+    const hmac = token.slice(lastDot + 1);
+    const sep = payload.lastIndexOf(".");
+    const idPart = payload.slice(0, sep);
+    const expiry = payload.slice(sep + 1);
     const forgedExpiry = String(Number(expiry) + 1_000_000);
-    expect(verifySessionToken(`${forgedExpiry}.${hmac}`, now)).toBe(false);
+    expect(
+      verifySessionToken(`${idPart}.${forgedExpiry}.${hmac}`, now),
+    ).toBeNull();
+  });
+
+  it("rejects a token with a swapped admin id", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", SECRET);
+    const now = 1_000_000_000_000;
+    const token = createSessionToken(ADMIN_ID, now);
+    const lastDot = token.lastIndexOf(".");
+    const payload = token.slice(0, lastDot);
+    const hmac = token.slice(lastDot + 1);
+    const sep = payload.lastIndexOf(".");
+    const expiry = payload.slice(sep + 1);
+    // Reuse a valid signature with a different id: the payload no longer matches.
+    expect(
+      verifySessionToken(`other-admin-id.${expiry}.${hmac}`, now),
+    ).toBeNull();
   });
 
   it("rejects empty and garbage tokens", () => {
-    vi.stubEnv("ADMIN_PASSWORD", PASSWORD);
-    expect(verifySessionToken("", 0)).toBe(false);
-    expect(verifySessionToken("garbage", 0)).toBe(false);
-    expect(verifySessionToken("123", 0)).toBe(false);
-    expect(verifySessionToken(".abc", 0)).toBe(false);
-    expect(verifySessionToken("123.", 0)).toBe(false);
-    expect(verifySessionToken("notanumber.abc", 0)).toBe(false);
-    expect(verifySessionToken("123.nothex", 0)).toBe(false);
+    vi.stubEnv("ADMIN_SESSION_SECRET", SECRET);
+    expect(verifySessionToken("", 0)).toBeNull();
+    expect(verifySessionToken("garbage", 0)).toBeNull();
+    expect(verifySessionToken("123", 0)).toBeNull();
+    expect(verifySessionToken("id.abc", 0)).toBeNull();
+    expect(verifySessionToken("id.123.", 0)).toBeNull();
+    expect(verifySessionToken("id.notanumber.abc", 0)).toBeNull();
+    expect(verifySessionToken("id.123.nothex", 0)).toBeNull();
   });
 
-  it("rejects a token signed under a different password", () => {
-    vi.stubEnv("ADMIN_PASSWORD", PASSWORD);
+  it("rejects a token signed under a different secret", () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", SECRET);
     const now = 1_000_000_000_000;
-    const token = createSessionToken(now);
-    // Rotate the password: the old token's signature no longer verifies.
-    vi.stubEnv("ADMIN_PASSWORD", "a different password");
-    expect(verifySessionToken(token, now)).toBe(false);
+    const token = createSessionToken(ADMIN_ID, now);
+    vi.stubEnv("ADMIN_SESSION_SECRET", "a different secret");
+    expect(verifySessionToken(token, now)).toBeNull();
   });
 
   it("rejects any token when admin is unconfigured", () => {
-    vi.stubEnv("ADMIN_PASSWORD", PASSWORD);
+    vi.stubEnv("ADMIN_SESSION_SECRET", SECRET);
     const now = 1_000_000_000_000;
-    const token = createSessionToken(now);
-    vi.stubEnv("ADMIN_PASSWORD", "");
-    expect(verifySessionToken(token, now)).toBe(false);
+    const token = createSessionToken(ADMIN_ID, now);
+    vi.stubEnv("ADMIN_SESSION_SECRET", "");
+    expect(verifySessionToken(token, now)).toBeNull();
   });
 });

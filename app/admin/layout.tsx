@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { logoutAdmin } from "@/lib/actions/admin";
+import { getCurrentAdmin } from "@/lib/admin/auth";
+import { can } from "@/lib/admin/permissions";
 import { Container } from "@/components/shared/Container";
 import { Logo } from "@/components/shared/Logo";
 
@@ -12,8 +14,14 @@ export const metadata: Metadata = {
 };
 
 // The layout renders shared chrome only; each page guards itself with
-// requireAdmin, because a layout is not a reliable place to gate access.
-export default function AdminLayout({ children }: { children: ReactNode }) {
+// requireAdmin, because a layout is not a reliable place to gate access. The
+// nav links are shown by capability for usability; the underlying pages and
+// actions still enforce the policy independently.
+export default async function AdminLayout({ children }: { children: ReactNode }) {
+  const admin = await getCurrentAdmin();
+  const showCycles = admin ? can(admin.role, "manage-cycles") : false;
+  const showAdmins = admin ? can(admin.role, "manage-admins") : false;
+
   return (
     <div className="min-h-dvh bg-bg">
       <header className="border-b border-line bg-surface">
@@ -29,12 +37,19 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
             <Link href="/admin/submissions" className="hover:text-ink">
               Submissions
             </Link>
-            <Link href="/admin/cycles" className="hover:text-ink">
-              Cycles
-            </Link>
+            {showCycles ? (
+              <Link href="/admin/cycles" className="hover:text-ink">
+                Cycles
+              </Link>
+            ) : null}
             <Link href="/admin/notifications" className="hover:text-ink">
               Notifications
             </Link>
+            {showAdmins ? (
+              <Link href="/admin/admins" className="hover:text-ink">
+                Admins
+              </Link>
+            ) : null}
           </nav>
           <form action={logoutAdmin} className="ms-auto">
             <button

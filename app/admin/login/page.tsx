@@ -17,7 +17,8 @@ export default async function AdminLoginPage({
     <div className="mx-auto max-w-sm">
       <h1 className="font-display text-2xl font-bold text-ink">Admin sign in</h1>
       <p className="mt-2 font-body text-sm text-muted">
-        Enter the admin password to review submissions and application cycles.
+        Sign in with your admin account to review submissions and application
+        cycles.
       </p>
 
       {error ? (
@@ -25,11 +26,27 @@ export default async function AdminLoginPage({
           role="alert"
           className="mt-5 rounded-md border border-danger/30 bg-charcoal-50 px-4 py-3 font-body text-sm text-danger"
         >
-          Incorrect password, or too many attempts. Please try again.
+          Incorrect details, or too many attempts. Please try again.
         </p>
       ) : null}
 
       <form action={loginAdmin} className="mt-6 space-y-4">
+        <div>
+          <label
+            htmlFor="identifier"
+            className="block font-body text-sm font-semibold text-ink"
+          >
+            Username or email
+          </label>
+          <input
+            id="identifier"
+            name="identifier"
+            type="text"
+            autoComplete="username"
+            required
+            className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2.5 font-body text-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary-tint"
+          />
+        </div>
         <div>
           <label
             htmlFor="password"

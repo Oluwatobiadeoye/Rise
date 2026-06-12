@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireAdmin } from "@/lib/admin/auth";
+import { can } from "@/lib/admin/permissions";
 import { db } from "@/lib/db";
 import { ALL_STATUSES, STATUS_LABELS } from "@/lib/status";
 import { CYCLE_ROLE_LABELS, formatCycleDate } from "@/lib/cycle-phase";
@@ -77,8 +78,16 @@ function CycleStatusRow({
   );
 }
 
+const ROLE_LABELS: Record<string, string> = {
+  superadmin: "Super admin",
+  owner: "Owner",
+  reviewer: "Reviewer",
+};
+
 export default async function AdminDashboardPage() {
-  await requireAdmin();
+  const admin = await requireAdmin();
+  const showCycles = can(admin.role, "manage-cycles");
+  const showAdmins = can(admin.role, "manage-admins");
 
   const submissions = await db.listSubmissions();
   const activeCycles = await Promise.all(
@@ -98,6 +107,9 @@ export default async function AdminDashboardPage() {
       <div>
         <h1 className="font-display text-2xl font-bold text-ink">Dashboard</h1>
         <p className="mt-2 font-body text-sm text-muted">
+          Signed in as {admin.name} ({ROLE_LABELS[admin.role] ?? admin.role}).
+        </p>
+        <p className="mt-1 font-body text-sm text-muted">
           {submissions.length} submission{submissions.length === 1 ? "" : "s"} in
           total.
         </p>
@@ -150,12 +162,14 @@ export default async function AdminDashboardPage() {
           <h2 className="font-display text-lg font-semibold text-ink">
             Application cycles
           </h2>
-          <Link
-            href="/admin/cycles"
-            className="font-body text-sm font-semibold text-primary hover:underline"
-          >
-            Manage cycles
-          </Link>
+          {showCycles ? (
+            <Link
+              href="/admin/cycles"
+              className="font-body text-sm font-semibold text-primary hover:underline"
+            >
+              Manage cycles
+            </Link>
+          ) : null}
         </div>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
           {ROLES.map((role, index) => (
@@ -163,6 +177,22 @@ export default async function AdminDashboardPage() {
           ))}
         </div>
       </section>
+
+      {showAdmins ? (
+        <section>
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="font-display text-lg font-semibold text-ink">
+              Admin accounts
+            </h2>
+            <Link
+              href="/admin/admins"
+              className="font-body text-sm font-semibold text-primary hover:underline"
+            >
+              Manage admins
+            </Link>
+          </div>
+        </section>
+      ) : null}
 
       <section>
         <h2 className="font-display text-lg font-semibold text-ink">

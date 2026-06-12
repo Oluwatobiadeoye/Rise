@@ -2,6 +2,10 @@ import { mkdir, readFile, readdir, rename, rm, writeFile } from "node:fs/promise
 import path from "node:path";
 import { randomUUID } from "node:crypto";
 import type {
+  Admin,
+  AdminInput,
+  AdminRecord,
+  AdminRole,
   Cycle,
   CycleInput,
   CycleRole,
@@ -14,6 +18,19 @@ import type {
   SubmissionType,
 } from "@/lib/types";
 import type { SubmissionStore } from "./types";
+
+/** Strips the password hash from a stored admin record. */
+function stripHash(record: AdminRecord): Admin {
+  return {
+    id: record.id,
+    username: record.username,
+    email: record.email,
+    name: record.name,
+    role: record.role,
+    createdAt: record.createdAt,
+    updatedAt: record.updatedAt,
+  };
+}
 
 const SUBMISSION_TYPES: readonly SubmissionType[] = [
   "contact",
@@ -32,6 +49,7 @@ function toSummary(submission: Submission): SubmissionSummary {
     status: submission.status,
     notes: submission.notes,
     from: submission.from,
+    reviewedBy: submission.reviewedBy ?? null,
     createdAt: submission.createdAt,
     updatedAt: submission.updatedAt,
   };
@@ -90,6 +108,28 @@ export function createFsSubmissionStore(root?: string): SubmissionStore {
   const cycleFile = (id: string) => path.join(cyclesDir(), `${id}.json`);
   const notifyMeDir = (role: CycleRole) =>
     path.join(resolveRoot(), "notify-me", role);
+  const adminsDir = () => path.join(resolveRoot(), "admins");
+  const adminFile = (id: string) => path.join(adminsDir(), `${id}.json`);
+
+  async function listAdminRecords(): Promise<AdminRecord[]> {
+    const dir = adminsDir();
+    const files = await listJsonFiles(dir);
+    const records: AdminRecord[] = [];
+    for (const name of files) {
+      const file = path.join(dir, name);
+      try {
+        const record = await readJsonIfExists<AdminRecord>(file);
+        if (record) records.push(record);
+      } catch (error) {
+        console.error(`Skipping unreadable admin file ${file}`, error);
+      }
+    }
+    records.sort(
+      (a, b) =>
+        b.createdAt.localeCompare(a.createdAt) || a.id.localeCompare(b.id),
+    );
+    return records;
+  }
 
   async function listCycles(role?: CycleRole): Promise<Cycle[]> {
     const dir = cyclesDir();
@@ -137,6 +177,7 @@ export function createFsSubmissionStore(root?: string): SubmissionStore {
         status: "pending",
         notes: "",
         from: meta?.from ?? null,
+        reviewedBy: null,
         // Only applications belong to a cycle; enquiries are always-on.
         ...(input.type === "mentor" || input.type === "mentee"
           ? { cycleId: meta?.cycleId ?? null }
@@ -273,5 +314,122 @@ export function createFsSubmissionStore(root?: string): SubmissionStore {
     },
 
     listNotifyMe,
+
+    async createAdmin(input: AdminInput): Promise<Admin> {
+      const username = input.username.trim();
+      const email = input.email.trim().toLowerCase();
+      const existing = await listAdminRecords();
+      if (
+        existing.some(
+          (a) =>
+            a.username.toLowerCase() === username.toLowerCase() ||
+            a.email.toLowerCase() === email,
+        )
+      ) {
+        throw new Error("An admin with that username or email already exists.");
+      }
+      const now = new Date().toISOString();
+      const record: AdminRecord = {
+        id: randomUUID(),
+        username,
+        email,
+        name: input.name.trim(),
+        role: input.role,
+        passwordHash: input.passwordHash,
+        createdAt: now,
+        updatedAt: now,
+      };
+      await writeJsonAtomic(adminFile(record.id), record);
+      return stripHash(record);
+    },
+
+    async getAdminByIdentifier(
+      identifier: string,
+    ): Promise<AdminRecord | null> {
+      const trimmed = identifier.trim();
+      if (!trimmed) return null;
+      const lowered = trimmed.toLowerCase();
+      const records = await listAdminRecords();
+      return (
+        records.find(
+          (a) => a.username === trimmed || a.email.toLowerCase() === lowered,
+        ) ?? null
+      );
+    },
+
+    async getAdminById(id: string): Promise<Admin | null> {
+      const record = await readJsonIfExists<AdminRecord>(adminFile(id));
+      return record ? stripHash(record) : null;
+    },
+
+    async listAdmins(): Promise<Admin[]> {
+      const records = await listAdminRecords();
+      return records.map(stripHash);
+    },
+
+    async updateAdmin(
+      id: string,
+      patch: { name?: string; role?: AdminRole; passwordHash?: string },
+    ): Promise<Admin> {
+      const existing = await readJsonIfExists<AdminRecord>(adminFile(id));
+      if (!existing) throw new Error(`Admin not found: ${id}`);
+      const updated: AdminRecord = {
+        ...existing,
+        ...(patch.name !== undefined ? { name: patch.name.trim() } : {}),
+        ...(patch.role !== undefined ? { role: patch.role } : {}),
+        ...(patch.passwordHash !== undefined
+          ? { passwordHash: patch.passwordHash }
+          : {}),
+        updatedAt: new Date().toISOString(),
+      };
+      await writeJsonAtomic(adminFile(id), updated);
+      return stripHash(updated);
+    },
+
+    async deleteAdmin(id: string): Promise<void> {
+      await rm(adminFile(id), { force: true });
+    },
+
+    async claimSubmission<K extends SubmissionType>(
+      type: K,
+      id: string,
+      adminId: string,
+    ): Promise<SubmissionOf<K> | null> {
+      // Read-modify-write: NOT atomic under true concurrency. Acceptable for the
+      // single-process dev fallback only; the Drizzle store enforces atomicity.
+      const existing = await readJsonIfExists<SubmissionOf<K>>(
+        submissionFile(type, id),
+      );
+      if (!existing) return null;
+      const current = existing.reviewedBy ?? null;
+      if (current !== null && current !== adminId) return null;
+      const updated: SubmissionOf<K> = {
+        ...existing,
+        reviewedBy: adminId,
+        updatedAt: new Date().toISOString(),
+      };
+      await writeJsonAtomic(submissionFile(type, id), updated);
+      return updated;
+    },
+
+    async releaseSubmission(
+      type: SubmissionType,
+      id: string,
+      adminId: string,
+      opts?: { force?: boolean },
+    ): Promise<void> {
+      const existing = await readJsonIfExists<Submission>(
+        submissionFile(type, id),
+      );
+      if (!existing) return;
+      const current = existing.reviewedBy ?? null;
+      if (!opts?.force && current !== adminId) return;
+      const updated = {
+        ...existing,
+        reviewedBy: null,
+        updatedAt: new Date().toISOString(),
+      } as Submission;
+      await writeJsonAtomic(submissionFile(type, id), updated);
+    },
   };
 }

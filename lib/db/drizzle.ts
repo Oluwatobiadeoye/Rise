@@ -1,7 +1,11 @@
 import "server-only";
 
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { and, asc, desc, eq, isNull, or, sql } from "drizzle-orm";
 import type {
+  Admin,
+  AdminInput,
+  AdminRecord,
+  AdminRole,
   Cycle,
   CycleInput,
   CycleRole,
@@ -15,6 +19,7 @@ import type {
 } from "@/lib/types";
 import { getDb } from "./client";
 import {
+  admins,
   contactSubmissions,
   cycles,
   menteeSubmissions,
@@ -29,6 +34,19 @@ import type { SubmissionStore } from "./types";
 type BaseRow = typeof submissions.$inferSelect;
 type CycleRow = typeof cycles.$inferSelect;
 type NotifyMeRow = typeof notifyMe.$inferSelect;
+type AdminRow = typeof admins.$inferSelect;
+
+function rowToAdmin(row: AdminRow): Admin {
+  return {
+    id: row.id,
+    username: row.username,
+    email: row.email,
+    name: row.name,
+    role: row.role as AdminRole,
+    createdAt: row.createdAt,
+    updatedAt: row.updatedAt,
+  };
+}
 
 /** The detail table that holds each type's specific fields. */
 const DETAIL_TABLE = {
@@ -47,6 +65,7 @@ function baseToSummary(row: BaseRow): SubmissionSummary {
     status: row.status,
     notes: row.notes ?? "",
     from: row.fromRef,
+    reviewedBy: row.reviewedBy,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -62,6 +81,7 @@ function assemble<K extends SubmissionType>(
     status: base.status,
     notes: base.notes ?? "",
     from: base.fromRef,
+    reviewedBy: base.reviewedBy,
     createdAt: base.createdAt,
     updatedAt: base.updatedAt,
     fullName: base.fullName,
@@ -369,6 +389,146 @@ export function createDrizzleSubmissionStore(): SubmissionStore {
         .where(eq(notifyMe.role, role))
         .orderBy(desc(notifyMe.createdAt));
       return rows.map(rowToNotifyMe);
+    },
+
+    async createAdmin(input: AdminInput): Promise<Admin> {
+      const db = getDb();
+      try {
+        const [row] = await db
+          .insert(admins)
+          .values({
+            username: input.username.trim(),
+            email: input.email.trim().toLowerCase(),
+            name: input.name.trim(),
+            role: input.role,
+            passwordHash: input.passwordHash,
+          })
+          .returning();
+        return rowToAdmin(row);
+      } catch (error) {
+        // Postgres unique_violation; surface a clear, non-leaky message.
+        if ((error as { code?: string }).code === "23505") {
+          throw new Error("An admin with that username or email already exists.");
+        }
+        throw error;
+      }
+    },
+
+    async getAdminByIdentifier(
+      identifier: string,
+    ): Promise<AdminRecord | null> {
+      const db = getDb();
+      const trimmed = identifier.trim();
+      if (!trimmed) return null;
+      const lowered = trimmed.toLowerCase();
+      const [row] = await db
+        .select()
+        .from(admins)
+        .where(
+          or(
+            eq(admins.username, trimmed),
+            eq(sql`lower(${admins.email})`, lowered),
+          ),
+        )
+        .limit(1);
+      if (!row) return null;
+      return { ...rowToAdmin(row), passwordHash: row.passwordHash };
+    },
+
+    async getAdminById(id: string): Promise<Admin | null> {
+      const db = getDb();
+      const [row] = await db
+        .select()
+        .from(admins)
+        .where(eq(admins.id, id))
+        .limit(1);
+      return row ? rowToAdmin(row) : null;
+    },
+
+    async listAdmins(): Promise<Admin[]> {
+      const db = getDb();
+      const rows = await db
+        .select()
+        .from(admins)
+        .orderBy(desc(admins.createdAt), asc(admins.id));
+      return rows.map(rowToAdmin);
+    },
+
+    async updateAdmin(
+      id: string,
+      patch: { name?: string; role?: AdminRole; passwordHash?: string },
+    ): Promise<Admin> {
+      const db = getDb();
+      const update: {
+        updatedAt: string;
+        name?: string;
+        role?: AdminRole;
+        passwordHash?: string;
+      } = { updatedAt: new Date().toISOString() };
+      if (patch.name !== undefined) update.name = patch.name.trim();
+      if (patch.role !== undefined) update.role = patch.role;
+      if (patch.passwordHash !== undefined) {
+        update.passwordHash = patch.passwordHash;
+      }
+
+      const rows = await db
+        .update(admins)
+        .set(update)
+        .where(eq(admins.id, id))
+        .returning();
+      if (rows.length === 0) throw new Error(`Admin not found: ${id}`);
+      return rowToAdmin(rows[0]);
+    },
+
+    async deleteAdmin(id: string): Promise<void> {
+      const db = getDb();
+      await db.delete(admins).where(eq(admins.id, id));
+    },
+
+    async claimSubmission<K extends SubmissionType>(
+      type: K,
+      id: string,
+      adminId: string,
+    ): Promise<SubmissionOf<K> | null> {
+      const db = getDb();
+      // Atomic: the WHERE guard means at most one concurrent caller flips an
+      // unclaimed row. A row already held by the same admin also matches
+      // (idempotent); a row held by another admin matches nothing -> null.
+      const updated = await db
+        .update(submissions)
+        .set({ reviewedBy: adminId, updatedAt: new Date().toISOString() })
+        .where(
+          and(
+            eq(submissions.id, id),
+            eq(submissions.type, type),
+            or(isNull(submissions.reviewedBy), eq(submissions.reviewedBy, adminId)),
+          ),
+        )
+        .returning({ id: submissions.id });
+      if (updated.length === 0) return null;
+      return getOne(type, id);
+    },
+
+    async releaseSubmission(
+      type: SubmissionType,
+      id: string,
+      adminId: string,
+      opts?: { force?: boolean },
+    ): Promise<void> {
+      const db = getDb();
+      const holderGuard = opts?.force
+        ? undefined
+        : eq(submissions.reviewedBy, adminId);
+      await db
+        .update(submissions)
+        .set({ reviewedBy: null, updatedAt: new Date().toISOString() })
+        .where(
+          and(
+            eq(submissions.id, id),
+            eq(submissions.type, type),
+            ...(holderGuard ? [holderGuard] : []),
+          ),
+        );
     },
   };
 }

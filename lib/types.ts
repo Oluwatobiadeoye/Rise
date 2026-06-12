@@ -30,6 +30,38 @@ export type SubmissionStatus = ApplicationStatus | EnquiryStatus;
 export type CycleRole = "mentor" | "mentee";
 
 /**
+ * Admin capability tiers. `superadmin` is the only role that can manage other
+ * admin accounts; `owner` additionally manages cycles; `reviewer` is limited to
+ * reviewing submissions and viewing notifications.
+ */
+export type AdminRole = "superadmin" | "owner" | "reviewer";
+
+/** An admin account as exposed to the app (never carries the password hash). */
+export type Admin = {
+  id: string;
+  username: string;
+  email: string;
+  name: string;
+  role: AdminRole;
+  /** ISO 8601 timestamp. */
+  createdAt: string;
+  /** ISO 8601 timestamp. */
+  updatedAt: string;
+};
+
+/** The full stored admin record, including the password hash (login path only). */
+export type AdminRecord = Admin & { passwordHash: string };
+
+/** What an admin account is created with; the store stamps id and timestamps. */
+export type AdminInput = {
+  username: string;
+  email: string;
+  name: string;
+  role: AdminRole;
+  passwordHash: string;
+};
+
+/**
  * User-supplied fields collected by each form. These are what validation
  * produces and what {@link SubmissionInput} carries into the store. `fullName`
  * and `email` are common to every type (and live on the supertype table); the
@@ -96,6 +128,11 @@ export type SubmissionBase = {
   notes: string;
   /** Sanitized referrer slug from the page that hosted the form, if any. */
   from: string | null;
+  /**
+   * The admin id holding the exclusive review claim, or null when unclaimed.
+   * A claim must be held before status, notes, or decision actions are allowed.
+   */
+  reviewedBy: string | null;
   /** ISO 8601 timestamp. */
   createdAt: string;
   /** ISO 8601 timestamp. */

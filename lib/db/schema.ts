@@ -23,6 +23,13 @@ export const submissionStatus = pgEnum("submission_status", [
   "archived",
 ]);
 
+// Admin capability tiers. Only `superadmin` may manage other admins.
+export const adminRole = pgEnum("admin_role", [
+  "superadmin",
+  "owner",
+  "reviewer",
+]);
+
 export const mentorAudience = pgEnum("mentor_audience", [
   "tertiary",
   "early-career",
@@ -34,6 +41,28 @@ export const mentorAvailability = pgEnum("mentor_availability", [
   "fortnightly",
   "flexible",
 ]);
+
+// Admin accounts. The session-signing secret (an env var) gates the admin area;
+// these rows identify individual admins and their capability role. The password
+// hash is a self-describing scrypt string, never plaintext. RLS blocks any
+// anonymous path; the server connection bypasses it.
+export const admins = pgTable(
+  "admins",
+  {
+    id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+    username: text("username").notNull().unique(),
+    email: text("email").notNull().unique(),
+    name: text("name").notNull(),
+    role: adminRole("role").notNull().default("reviewer"),
+    passwordHash: text("password_hash").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .notNull()
+      .defaultNow(),
+  },
+).enableRLS();
 
 // Application cycles: a scheduled open/close window per role. Whether a role is
 // "open" is derived from whether now() falls inside a cycle's window. The
@@ -74,6 +103,12 @@ export const submissions = pgTable(
     notes: text("notes").notNull().default(""),
     fromRef: text("from_ref"),
     cycleId: uuid("cycle_id").references(() => cycles.id, {
+      onDelete: "set null",
+    }),
+    // The exclusive review claim: the admin currently reviewing this
+    // submission, or null when unclaimed. Set null on admin delete so a removed
+    // reviewer's claims are released rather than orphaning the row.
+    reviewedBy: uuid("reviewed_by").references(() => admins.id, {
       onDelete: "set null",
     }),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })

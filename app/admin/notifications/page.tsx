@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { requireAdmin } from "@/lib/admin/auth";
+import { can } from "@/lib/admin/permissions";
 import { cn } from "@/lib/cn";
 import { notifier } from "@/lib/notify";
 import type { NotificationKind } from "@/lib/types";
@@ -29,7 +31,8 @@ function formatDateTime(iso: string): string {
 }
 
 export default async function AdminNotificationsPage() {
-  await requireAdmin();
+  const admin = await requireAdmin();
+  if (!can(admin.role, "view-notifications")) notFound();
 
   const notifications = await notifier.listNotifications();
 
