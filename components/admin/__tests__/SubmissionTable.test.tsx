@@ -40,10 +40,9 @@ describe("SubmissionTable", () => {
     expect(screen.getByText("Pending")).toBeInTheDocument();
   });
 
-  it("renders the type and referrer cells", () => {
+  it("renders the type cell", () => {
     render(<SubmissionTable submissions={[contactSubmission]} />);
-    // The type cell and the from cell both read "contact".
-    expect(screen.getAllByText("contact")).toHaveLength(2);
+    expect(screen.getByText("contact")).toBeInTheDocument();
   });
 
   it("resolves the reviewer id to a name via the map", () => {

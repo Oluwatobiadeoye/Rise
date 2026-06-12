@@ -78,16 +78,79 @@ export default async function AdminSubmissionDetailPage({
         >
           ← Back to submissions
         </Link>
-        <div className="mt-3 flex flex-wrap items-center gap-3">
-          <h1 className="font-display text-2xl font-bold capitalize text-ink">
-            {submission.type} submission
-          </h1>
-          <StatusBadge status={submission.status} />
+        <div className="mt-3 flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <div className="flex flex-wrap items-center gap-3">
+              <h1 className="font-display text-2xl font-bold capitalize text-ink">
+                {submission.type} submission
+              </h1>
+              <StatusBadge status={submission.status} />
+            </div>
+            <p className="mt-2 font-body text-sm text-muted">
+              Received {formatDateTime(submission.createdAt)}
+            </p>
+          </div>
+
+          <div className="flex shrink-0 flex-col items-start gap-1.5 sm:items-end">
+            {reviewedBy === null && finalized ? (
+              <p className="font-body text-sm text-muted">
+                No longer open for review.
+              </p>
+            ) : reviewedBy === null ? (
+              <form action={claimSubmission}>
+                <input type="hidden" name="type" value={submission.type} />
+                <input type="hidden" name="id" value={submission.id} />
+                <button
+                  type="submit"
+                  className="inline-flex min-h-11 items-center rounded-pill bg-primary px-5 py-2.5 font-body text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
+                >
+                  Start review
+                </button>
+              </form>
+            ) : isMine ? (
+              <>
+                <p className="font-body text-sm font-semibold text-success">
+                  {finalized
+                    ? "Finalized · attributed to you"
+                    : "You are reviewing this"}
+                </p>
+                {finalized ? null : (
+                  <form action={releaseSubmission}>
+                    <input type="hidden" name="type" value={submission.type} />
+                    <input type="hidden" name="id" value={submission.id} />
+                    <button
+                      type="submit"
+                      className="inline-flex min-h-11 items-center rounded-pill px-4 py-2 font-body text-sm font-semibold text-charcoal-700 shadow-[inset_0_0_0_2px_var(--rise-line)] transition-colors hover:bg-surface-sunk"
+                    >
+                      Release
+                    </button>
+                  </form>
+                )}
+              </>
+            ) : (
+              <>
+                <p className="font-body text-sm text-muted">
+                  {finalized
+                    ? `Finalized by ${holder?.name ?? "another admin"}`
+                    : `Under review by ${holder?.name ?? "another admin"}`}
+                </p>
+                {finalized ? null : (
+                  <form action={releaseSubmission}>
+                    <input type="hidden" name="type" value={submission.type} />
+                    <input type="hidden" name="id" value={submission.id} />
+                    <input type="hidden" name="force" value="1" />
+                    <button
+                      type="submit"
+                      className="inline-flex min-h-11 items-center rounded-pill px-4 py-2 font-body text-sm font-semibold text-danger shadow-[inset_0_0_0_2px_var(--rise-line)] transition-colors hover:bg-surface-sunk"
+                    >
+                      Force release
+                    </button>
+                  </form>
+                )}
+              </>
+            )}
+          </div>
         </div>
-        <p className="mt-2 font-body text-sm text-muted">
-          Received {formatDateTime(submission.createdAt)}
-          {submission.from ? ` · from ${submission.from}` : ""}
-        </p>
       </div>
 
       <section className="rounded-lg border border-line bg-surface p-6">
@@ -106,73 +169,6 @@ export default async function AdminSubmissionDetailPage({
             </div>
           ))}
         </dl>
-      </section>
-
-      <section className="rounded-lg border border-line bg-surface p-6">
-        <h2 className="font-display text-lg font-semibold text-ink">Review</h2>
-        {reviewedBy === null && finalized ? (
-          <p className="mt-4 font-body text-sm text-muted">
-            This submission is finalized and is no longer open for review.
-          </p>
-        ) : reviewedBy === null ? (
-          <div className="mt-4">
-            <p className="font-body text-sm text-muted">
-              This submission is not under review. Start a review to claim it
-              for exclusive editing.
-            </p>
-            <form action={claimSubmission} className="mt-3">
-              <input type="hidden" name="type" value={submission.type} />
-              <input type="hidden" name="id" value={submission.id} />
-              <button
-                type="submit"
-                className="inline-flex min-h-11 items-center rounded-pill bg-primary px-5 py-2.5 font-body text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
-              >
-                Start review
-              </button>
-            </form>
-          </div>
-        ) : isMine ? (
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <p className="font-body text-sm text-success">
-              {finalized
-                ? "This submission is finalized and stays attributed to you."
-                : "You are reviewing this submission."}
-            </p>
-            {finalized ? null : (
-              <form action={releaseSubmission}>
-                <input type="hidden" name="type" value={submission.type} />
-                <input type="hidden" name="id" value={submission.id} />
-                <button
-                  type="submit"
-                  className="inline-flex min-h-11 items-center rounded-pill px-4 py-2 font-body text-sm font-semibold text-charcoal-700 shadow-[inset_0_0_0_2px_var(--rise-line)] transition-colors hover:bg-surface-sunk"
-                >
-                  Release
-                </button>
-              </form>
-            )}
-          </div>
-        ) : (
-          <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-            <p className="font-body text-sm text-muted">
-              {finalized
-                ? `Finalized by ${holder?.name ?? "another admin"}.`
-                : `Under review by ${holder?.name ?? "another admin"}. The controls are read-only until released.`}
-            </p>
-            {finalized ? null : (
-              <form action={releaseSubmission}>
-                <input type="hidden" name="type" value={submission.type} />
-                <input type="hidden" name="id" value={submission.id} />
-                <input type="hidden" name="force" value="1" />
-                <button
-                  type="submit"
-                  className="inline-flex min-h-11 items-center rounded-pill px-4 py-2 font-body text-sm font-semibold text-danger shadow-[inset_0_0_0_2px_var(--rise-line)] transition-colors hover:bg-surface-sunk"
-                >
-                  Force release
-                </button>
-              </form>
-            )}
-          </div>
-        )}
       </section>
 
       <section className="rounded-lg border border-line bg-surface p-6">

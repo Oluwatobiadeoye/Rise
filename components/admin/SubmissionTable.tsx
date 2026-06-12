@@ -47,7 +47,6 @@ export function SubmissionTable({
             <th className="px-4 py-3 font-semibold">Email</th>
             <th className="px-4 py-3 font-semibold">Status</th>
             <th className="px-4 py-3 font-semibold">Reviewer</th>
-            <th className="px-4 py-3 font-semibold">From</th>
           </tr>
         </thead>
         <tbody>
@@ -85,7 +84,6 @@ export function SubmissionTable({
                   ? (reviewerNames[submission.reviewedBy] ?? "—")
                   : "—"}
               </td>
-              <td className="px-4 py-3 text-muted">{submission.from ?? "—"}</td>
             </tr>
             );
           })}
