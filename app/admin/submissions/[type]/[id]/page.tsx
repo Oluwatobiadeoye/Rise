@@ -9,24 +9,9 @@ import {
 import { isSubmissionType } from "@/lib/admin/ref";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { db } from "@/lib/db";
-import type { SubmissionStatus } from "@/lib/types";
+import { STATUS_LABELS, statusesForType } from "@/lib/status";
 
 export const dynamic = "force-dynamic";
-
-const STATUSES: readonly SubmissionStatus[] = [
-  "new",
-  "in_review",
-  "accepted",
-  "declined",
-  "archived",
-];
-const STATUS_LABELS: Record<SubmissionStatus, string> = {
-  new: "New",
-  in_review: "In review",
-  accepted: "Accepted",
-  declined: "Declined",
-  archived: "Archived",
-};
 
 function humanize(key: string): string {
   return key
@@ -132,7 +117,7 @@ export default async function AdminSubmissionDetailPage({
               defaultValue={submission.status}
               className="mt-1.5 rounded-md border border-line bg-surface px-3 py-2.5 font-body text-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary-tint"
             >
-              {STATUSES.map((value) => (
+              {statusesForType(submission.type).map((value) => (
                 <option key={value} value={value}>
                   {STATUS_LABELS[value]}
                 </option>

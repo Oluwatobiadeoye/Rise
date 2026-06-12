@@ -240,7 +240,7 @@ export function createSupabaseSubmissionStore(): SubmissionStore {
     async updateSubmission<K extends SubmissionType>(
       type: K,
       id: string,
-      patch: { status?: SubmissionStatus; notes?: string },
+      patch: { status?: SubmissionOf<K>["status"]; notes?: string },
     ): Promise<SubmissionOf<K>> {
       const update: Record<string, unknown> = {
         updated_at: new Date().toISOString(),

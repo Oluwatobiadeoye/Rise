@@ -8,7 +8,7 @@ const contactSubmission: SubmissionSummary = {
   type: "contact",
   fullName: "Ada Obi",
   email: "ada@example.com",
-  status: "new",
+  status: "pending",
   notes: "",
   from: "contact",
   createdAt: "2026-06-01T10:00:00.000Z",
@@ -36,7 +36,7 @@ describe("SubmissionTable", () => {
 
   it("shows the status badge", () => {
     render(<SubmissionTable submissions={[contactSubmission]} />);
-    expect(screen.getByText("New")).toBeInTheDocument();
+    expect(screen.getByText("Pending")).toBeInTheDocument();
   });
 
   it("renders the type and referrer cells", () => {

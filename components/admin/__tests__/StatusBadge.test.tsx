@@ -5,10 +5,11 @@ import { StatusBadge } from "../StatusBadge";
 describe("StatusBadge", () => {
   it("renders the human label for each status", () => {
     const cases = [
-      ["new", "New"],
+      ["pending", "Pending"],
       ["in_review", "In review"],
       ["accepted", "Accepted"],
       ["declined", "Declined"],
+      ["closed", "Closed"],
       ["archived", "Archived"],
     ] as const;
 

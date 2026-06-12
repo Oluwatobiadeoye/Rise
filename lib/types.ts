@@ -7,12 +7,25 @@
 
 export type SubmissionType = "contact" | "mentor" | "mentee" | "volunteer";
 
-export type SubmissionStatus =
-  | "new"
+/**
+ * Review lifecycle for the application types (mentor, mentee): they are
+ * accepted or declined onto a programme.
+ */
+export type ApplicationStatus =
+  | "pending"
   | "in_review"
   | "accepted"
   | "declined"
   | "archived";
+
+/**
+ * Review lifecycle for the always-on enquiry types (contact, volunteer):
+ * they are handled and closed, never "accepted".
+ */
+export type EnquiryStatus = "pending" | "in_review" | "closed" | "archived";
+
+/** Every status value, for code that handles submissions of any type. */
+export type SubmissionStatus = ApplicationStatus | EnquiryStatus;
 
 export type CycleRole = "mentor" | "mentee";
 
@@ -73,10 +86,13 @@ export type SubmissionInput =
   | ({ type: "mentee" } & MenteeFields)
   | ({ type: "volunteer" } & VolunteerFields);
 
-/** System-managed fields shared by every stored submission (the supertype). */
+/**
+ * System-managed fields shared by every stored submission (the supertype).
+ * `status` is not here because its valid values depend on the type, so it is
+ * declared per variant below.
+ */
 export type SubmissionBase = {
   id: string;
-  status: SubmissionStatus;
   notes: string;
   /** Sanitized referrer slug from the page that hosted the form, if any. */
   from: string | null;
@@ -87,12 +103,19 @@ export type SubmissionBase = {
 };
 
 /**
- * A stored submission: the shared base intersected with the type-specific
- * input. Because the intersection distributes over the union, this is a
- * discriminated union on `type` — `submission.type === "mentee"` narrows to the
- * mentee fields with no casts.
+ * A stored submission: a discriminated union on `type`. Each variant carries
+ * the shared base, its own status lifecycle, and its type-specific fields, so
+ * `submission.type === "mentee"` narrows to the mentee fields and the
+ * application status with no casts.
  */
-export type Submission = SubmissionBase & SubmissionInput;
+export type Submission =
+  | (SubmissionBase & { type: "contact"; status: EnquiryStatus } & ContactFields)
+  | (SubmissionBase & { type: "mentor"; status: ApplicationStatus } & MentorFields)
+  | (SubmissionBase & { type: "mentee"; status: ApplicationStatus } & MenteeFields)
+  | (SubmissionBase & {
+      type: "volunteer";
+      status: EnquiryStatus;
+    } & VolunteerFields);
 
 /** A stored submission narrowed to one type. */
 export type SubmissionOf<K extends SubmissionType> = Extract<
@@ -101,12 +124,13 @@ export type SubmissionOf<K extends SubmissionType> = Extract<
 >;
 
 /**
- * Listing-level view for the admin inbox: the shared fields only, no
- * type-specific detail. Lets the inbox query the supertype table without
- * joining every detail table.
+ * Listing-level view for the admin inbox: the shared fields plus type and
+ * status, no type-specific detail. Lets the inbox query the supertype table
+ * without joining every detail table.
  */
 export type SubmissionSummary = SubmissionBase & {
   type: SubmissionType;
+  status: SubmissionStatus;
   fullName: string;
   email: string;
 };

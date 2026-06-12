@@ -15,19 +15,8 @@ import { validateSubmissionRef } from "@/lib/admin/ref";
 import { db } from "@/lib/db";
 import { notifier } from "@/lib/notify";
 import { checkRateLimit } from "@/lib/rate-limit";
-import type {
-  CycleRole,
-  SubmissionStatus,
-  SubmissionType,
-} from "@/lib/types";
-
-const SUBMISSION_STATUSES: readonly SubmissionStatus[] = [
-  "new",
-  "in_review",
-  "accepted",
-  "declined",
-  "archived",
-];
+import { isStatusForType } from "@/lib/status";
+import type { CycleRole, SubmissionType } from "@/lib/types";
 
 const NOTES_MAX_LENGTH = 5000;
 
@@ -35,13 +24,6 @@ async function clientIp(): Promise<string> {
   const forwardedFor = (await headers()).get("x-forwarded-for");
   const first = forwardedFor?.split(",")[0]?.trim();
   return first || "local";
-}
-
-function isStatus(value: unknown): value is SubmissionStatus {
-  return (
-    typeof value === "string" &&
-    (SUBMISSION_STATUSES as readonly string[]).includes(value)
-  );
 }
 
 function isCycleRole(value: unknown): value is CycleRole {
@@ -89,7 +71,7 @@ export async function updateSubmissionStatus(
   if (!ref) notFound();
 
   const status = formData.get("status");
-  if (!isStatus(status)) throw new Error("Invalid status");
+  if (!isStatusForType(ref.type, status)) throw new Error("Invalid status");
 
   await db.updateSubmission(ref.type, ref.id, { status });
 

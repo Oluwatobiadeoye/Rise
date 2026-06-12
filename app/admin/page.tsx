@@ -2,11 +2,8 @@ import Link from "next/link";
 import { requireAdmin } from "@/lib/admin/auth";
 import { CycleCard } from "@/components/admin/CycleCard";
 import { db } from "@/lib/db";
-import type {
-  CycleRole,
-  SubmissionStatus,
-  SubmissionType,
-} from "@/lib/types";
+import { ALL_STATUSES, STATUS_LABELS } from "@/lib/status";
+import type { CycleRole, SubmissionStatus, SubmissionType } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
 
@@ -16,20 +13,7 @@ const TYPES: readonly SubmissionType[] = [
   "mentee",
   "volunteer",
 ];
-const STATUSES: readonly SubmissionStatus[] = [
-  "new",
-  "in_review",
-  "accepted",
-  "declined",
-  "archived",
-];
-const STATUS_LABELS: Record<SubmissionStatus, string> = {
-  new: "New",
-  in_review: "In review",
-  accepted: "Accepted",
-  declined: "Declined",
-  archived: "Archived",
-};
+const STATUSES = ALL_STATUSES;
 const ROLES: readonly CycleRole[] = ["mentor", "mentee"];
 
 function Stat({
@@ -107,7 +91,7 @@ export default async function AdminDashboardPage() {
         <h2 className="font-display text-lg font-semibold text-ink">
           By status
         </h2>
-        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-5">
+        <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {STATUSES.map((status) => (
             <Link
               key={status}

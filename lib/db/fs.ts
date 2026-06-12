@@ -129,15 +129,15 @@ export function createFsSubmissionStore(root?: string): SubmissionStore {
       meta?: { from?: string | null },
     ): Promise<Submission> {
       const now = new Date().toISOString();
-      const submission: Submission = {
+      const submission = {
         ...input,
         id: randomUUID(),
-        status: "new",
+        status: "pending",
         notes: "",
         from: meta?.from ?? null,
         createdAt: now,
         updatedAt: now,
-      };
+      } as Submission;
       await writeJsonAtomic(submissionFile(input.type, submission.id), submission);
       return submission;
     },
@@ -183,7 +183,7 @@ export function createFsSubmissionStore(root?: string): SubmissionStore {
     async updateSubmission<K extends SubmissionType>(
       type: K,
       id: string,
-      patch: { status?: SubmissionStatus; notes?: string },
+      patch: { status?: SubmissionOf<K>["status"]; notes?: string },
     ): Promise<SubmissionOf<K>> {
       const existing = await readJsonIfExists<SubmissionOf<K>>(
         submissionFile(type, id),

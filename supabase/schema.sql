@@ -8,9 +8,12 @@
 
 create extension if not exists "pgcrypto";
 
--- Closed value sets, enforced by the database.
+-- Closed value sets, enforced by the database. The status enum is the union of
+-- both lifecycles; a per-type CHECK below restricts which values each type may
+-- hold (applications are accepted/declined; enquiries are closed).
 do $$ begin
-  create type submission_status as enum ('new','in_review','accepted','declined','archived');
+  create type submission_status as enum
+    ('pending','in_review','accepted','declined','closed','archived');
 exception when duplicate_object then null; end $$;
 
 do $$ begin
@@ -28,11 +31,20 @@ create table if not exists public.submissions (
   type        text not null check (type in ('contact','mentor','mentee','volunteer')),
   full_name   text not null,
   email       text not null,
-  status      submission_status not null default 'new',
+  status      submission_status not null default 'pending',
   notes       text not null default '',
   from_ref    text,
   created_at  timestamptz not null default now(),
-  updated_at  timestamptz not null default now()
+  updated_at  timestamptz not null default now(),
+  -- Applications are accepted/declined; enquiries are closed. Neither set
+  -- includes the other's terminal states.
+  constraint submissions_status_for_type check (
+    (type in ('mentor','mentee')
+       and status in ('pending','in_review','accepted','declined','archived'))
+    or
+    (type in ('contact','volunteer')
+       and status in ('pending','in_review','closed','archived'))
+  )
 );
 
 create index if not exists submissions_type_created_idx

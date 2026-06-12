@@ -4,6 +4,7 @@ import { SubmissionTable } from "@/components/admin/SubmissionTable";
 import { isSubmissionType } from "@/lib/admin/ref";
 import { cn } from "@/lib/cn";
 import { db } from "@/lib/db";
+import { ALL_STATUSES, STATUS_LABELS } from "@/lib/status";
 import type { SubmissionStatus, SubmissionType } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -14,20 +15,7 @@ const TYPES: readonly SubmissionType[] = [
   "mentee",
   "volunteer",
 ];
-const STATUSES: readonly SubmissionStatus[] = [
-  "new",
-  "in_review",
-  "accepted",
-  "declined",
-  "archived",
-];
-const STATUS_LABELS: Record<SubmissionStatus, string> = {
-  new: "New",
-  in_review: "In review",
-  accepted: "Accepted",
-  declined: "Declined",
-  archived: "Archived",
-};
+const STATUSES = ALL_STATUSES;
 
 function isStatus(value: string | undefined): value is SubmissionStatus {
   return (

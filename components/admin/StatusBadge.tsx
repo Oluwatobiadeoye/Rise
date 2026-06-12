@@ -1,19 +1,13 @@
 import { cn } from "@/lib/cn";
+import { STATUS_LABELS } from "@/lib/status";
 import type { SubmissionStatus } from "@/lib/types";
 
-const STATUS_LABELS: Record<SubmissionStatus, string> = {
-  new: "New",
-  in_review: "In review",
-  accepted: "Accepted",
-  declined: "Declined",
-  archived: "Archived",
-};
-
 const STATUS_STYLES: Record<SubmissionStatus, string> = {
-  new: "bg-evergreen-50 text-evergreen-700",
+  pending: "bg-evergreen-50 text-evergreen-700",
   in_review: "bg-gold-50 text-gold-600",
   accepted: "bg-success-tint text-success",
   declined: "bg-charcoal-50 text-danger",
+  closed: "bg-charcoal-50 text-charcoal-700",
   archived: "bg-charcoal-50 text-charcoal-700",
 };
 

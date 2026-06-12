@@ -38,12 +38,12 @@ describe("createFsSubmissionStore", () => {
     await rm(root, { recursive: true, force: true });
   });
 
-  it("creates a submission with new status, empty notes, and timestamps", async () => {
+  it("creates a submission with pending status, empty notes, and timestamps", async () => {
     const submission = await store.createSubmission(contactInput);
 
     expect(submission.id).toMatch(/^[0-9a-f-]{36}$/);
     expect(submission.type).toBe("contact");
-    expect(submission.status).toBe("new");
+    expect(submission.status).toBe("pending");
     expect(submission.notes).toBe("");
     expect(submission.from).toBeNull();
     expect(submission.createdAt).toBe(submission.updatedAt);
@@ -83,11 +83,11 @@ describe("createFsSubmissionStore", () => {
     expect(contactsOnly.map((s) => s.id)).toEqual([newer.id, older.id]);
 
     await store.updateSubmission("contact", older.id, { status: "in_review" });
-    const stillNew = await store.listSubmissions({
+    const stillPending = await store.listSubmissions({
       type: "contact",
-      status: "new",
+      status: "pending",
     });
-    expect(stillNew.map((s) => s.id)).toEqual([newer.id]);
+    expect(stillPending.map((s) => s.id)).toEqual([newer.id]);
   });
 
   it("returns an empty list when nothing has been stored", async () => {
@@ -97,10 +97,10 @@ describe("createFsSubmissionStore", () => {
   it("updates status and notes and bumps updatedAt", async () => {
     vi.useFakeTimers();
     vi.setSystemTime(new Date("2026-06-01T10:00:00Z"));
-    const created = await store.createSubmission(contactInput);
+    const created = await store.createSubmission(menteeInput);
 
     vi.setSystemTime(new Date("2026-06-01T10:30:00Z"));
-    const updated = await store.updateSubmission("contact", created.id, {
+    const updated = await store.updateSubmission("mentee", created.id, {
       status: "accepted",
       notes: "Strong applicant.",
     });
@@ -110,7 +110,7 @@ describe("createFsSubmissionStore", () => {
     expect(updated.createdAt).toBe(created.createdAt);
     expect(updated.updatedAt > created.updatedAt).toBe(true);
 
-    const persisted = await store.getSubmission("contact", created.id);
+    const persisted = await store.getSubmission("mentee", created.id);
     expect(persisted).toEqual(updated);
   });
 
