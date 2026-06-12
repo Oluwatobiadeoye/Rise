@@ -6,6 +6,7 @@ export type AdminAction =
   | "review-submissions"
   | "manage-cycles"
   | "manage-admins"
+  | "manage-blog"
   | "view-notifications";
 
 // The role -> capability matrix. Listing the roles allowed for each action
@@ -13,6 +14,7 @@ export type AdminAction =
 const MATRIX: Record<AdminAction, readonly AdminRole[]> = {
   "manage-admins": ["superadmin"],
   "manage-cycles": ["superadmin", "owner"],
+  "manage-blog": ["superadmin", "owner", "reviewer"],
   "review-submissions": ["superadmin", "owner", "reviewer"],
   "view-notifications": ["superadmin", "owner", "reviewer"],
 };

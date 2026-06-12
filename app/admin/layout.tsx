@@ -21,6 +21,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   const admin = await getCurrentAdmin();
   const showCycles = admin ? can(admin.role, "manage-cycles") : false;
   const showAdmins = admin ? can(admin.role, "manage-admins") : false;
+  const showBlog = admin ? can(admin.role, "manage-blog") : false;
 
   return (
     <div className="min-h-dvh bg-bg">
@@ -37,6 +38,11 @@ export default async function AdminLayout({ children }: { children: ReactNode })
             <Link href="/admin/submissions" className="hover:text-ink">
               Submissions
             </Link>
+            {showBlog ? (
+              <Link href="/admin/blog" className="hover:text-ink">
+                Blog
+              </Link>
+            ) : null}
             {showCycles ? (
               <Link href="/admin/cycles" className="hover:text-ink">
                 Cycles

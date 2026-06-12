@@ -19,18 +19,21 @@ const EXPECTED: Record<AdminRole, Record<AdminAction, boolean>> = {
   superadmin: {
     "manage-admins": true,
     "manage-cycles": true,
+    "manage-blog": true,
     "review-submissions": true,
     "view-notifications": true,
   },
   owner: {
     "manage-admins": false,
     "manage-cycles": true,
+    "manage-blog": true,
     "review-submissions": true,
     "view-notifications": true,
   },
   reviewer: {
     "manage-admins": false,
     "manage-cycles": false,
+    "manage-blog": true,
     "review-submissions": true,
     "view-notifications": true,
   },
