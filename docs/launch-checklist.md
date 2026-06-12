@@ -94,17 +94,29 @@ filesystem-backed pieces below cannot safely run in production as-is.
 - [ ] Confirm the data-retention policy and the deletion path for
       under-18 applicants who do not progress.
 
-## Content publishing (optional swap)
+## Blog authoring (in-house, live)
 
-- [ ] If the team outgrows publish-by-pull-request, provision Sanity and
-      implement `createSanityContentSource()` behind the seam in
-      `lib/content/index.ts` (one-line swap); add the Sanity image host to
-      `next.config.ts` `images.remotePatterns`.
+The team publishes from `/admin/blog`; posts live in the `posts` table and
+images in a Supabase Storage bucket. Per environment:
+
+- [ ] Set `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` (the `sb_secret_…`
+      service key — server-only, never `NEXT_PUBLIC`). Rotate the service key
+      from the Supabase dashboard if it is ever exposed.
+- [ ] Provision the storage bucket once: `npm run setup-blog-bucket`
+      (public `blog` bucket, 8 MB cap, JPEG/PNG/WebP only).
+- [ ] **Cutover order matters** (the `DATABASE_URL` gate flips `/blog` to the DB
+      source on deploy): apply the migration (`npm run db:migrate`), then
+      `npm run seed-blog` to import existing markdown posts, then verify a row
+      exists — *before* the deploy that ships the source swap. (Already done for
+      the current production database.)
+- [ ] The CSP in `next.config.ts` allows the Supabase storage origin for
+      `img-src`/`connect-src`; update it if the project URL changes.
 
 ## Admin
 
-- [ ] Set `ADMIN_PASSWORD` in Vercel project env to enable `/admin`
-      (it is hidden and returns 404 when unset).
+- [ ] Set `ADMIN_SESSION_SECRET` in Vercel project env to enable `/admin`
+      (the area returns 404 when unset). Create the first superadmin with
+      `npm run create-admin`; further admins are added in the UI.
 
 ## Payments (deferred)
 

@@ -248,6 +248,18 @@ a lightweight pipeline:
    enabled on every table (the service path uses a direct connection that bypasses it). The
    whole layer sits behind an env-gated seam: `DATABASE_URL` selects Drizzle, otherwise a
    filesystem fallback keeps local dev and tests running with no database.
+- [x] **9. In-house blog authoring** — the team writes and publishes posts from `/admin/blog`
+   with one login, no Git, no hosted CMS. A `posts` table backs a database `ContentSource`
+   swapped in behind the same `DATABASE_URL` gate (falling back to the filesystem markdown if
+   the table is missing, so a deploy before migration cannot break `/blog`). A TipTap editor
+   (headings, lists, quote, link, inline images) saves through `manage-blog`-guarded server
+   actions that return typed inline errors, sanitize HTML on write **and** on read (DOMPurify
+   allowlist: http/https/mailto only, no `data:` URLs, forced `rel`), recompute reading time,
+   and lock the slug once first published. Drafts auto-save; a published post updates live only
+   on explicit Save. Images upload to a Supabase Storage bucket validated by magic bytes; a CSP
+   and a scoped `next/image` pattern bound the new external origin. Publishing calls
+   `revalidatePath` so posts go live with no redeploy. `npm run seed-blog` imported the
+   existing 2019 post; `npm run setup-blog-bucket` provisions the bucket.
 
 ---
 
@@ -262,7 +274,8 @@ a lightweight pipeline:
   send a decision email; confirm a signed-out visitor is blocked and the area 404s when
   `ADMIN_SESSION_SECRET` is unset.
 - Confirm Row Level Security blocks anon/client reads of the submission tables directly.
-- Add a blog post to the filesystem content layer and redeploy → appears live.
+- In `/admin/blog`: write a post, upload a cover, Preview it, Publish → it appears on `/blog`
+  with no redeploy; edit the title of a published post and confirm the slug stays locked.
 
 ---
 

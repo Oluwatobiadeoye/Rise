@@ -121,3 +121,32 @@ M7 added `server-only@^0.0.1` (a tiny, standard Next.js guard package) so
 `lib/admin/auth.ts` fails the build if ever imported into a client bundle,
 protecting the password/HMAC code. Accepted — it is the idiomatic way to enforce
 the server boundary and adds no runtime weight.
+
+### D7 — in-house blog authoring over a hosted CMS
+The team needs to publish blog posts without the user in the loop and without
+Git. The two options were a hosted CMS (Sanity: free editor, but a second system
+and a second login, content living off-platform) or building authoring into the
+existing `/admin`. **Decision: in-house.** It keeps one login and one datastore
+(Supabase), reuses the admin auth/RBAC already built, and — because the editor
+lives in the same Next app as the public blog — makes "publish appears live" a
+direct `revalidatePath` call with no webhook. The editor itself is not built from
+scratch: TipTap (open source, headless) provides it; we wrote the glue, the
+sanitizer, the store, and the image pipeline.
+
+Plan-level decisions, all confirmed with the user:
+- **Image storage: Supabase Storage** (single vendor) over Vercel Blob.
+- **Roles: a single `manage-blog` capability for all three roles** (the writer is
+  often reviewer-tier; no separate publish gate for now).
+- **Body stored as sanitized HTML, re-sanitized on read** (DOMPurify allowlist),
+  never trusting stored HTML — defends mutation-XSS and allowlist drift.
+- **Slug locked after first publish** to protect shared URLs (no redirects v1).
+
+An adversarial design/UX/security review of the plan (three independent
+reviewers) caught, and the plan absorbed before implementation: the env gate
+auto-flipping the blog source on deploy (→ defensive fs fallback + ordered
+cutover), an imprecise freshness model (→ documented route-cache invalidation +
+verified publish→live), sanitize-on-write-only (→ also on read), `data:`-URL and
+content-type-spoof gaps (→ scheme stripping + magic-byte validation), and a
+thin editor UX (→ draft auto-save, typed inline errors, preview, alt-text gate).
+A later test run found DOMPurify permits `data:` URIs on `<img>` by default; the
+sanitizer now strips unsafe-scheme `src`/`href` in a hook (covered by a test).
