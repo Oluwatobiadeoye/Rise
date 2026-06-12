@@ -91,11 +91,14 @@ function buildInput(
   if (existing?.firstPublishedAt) {
     slug = existing.slug;
   } else {
-    slug = str(form, "slug") || slugify(title);
+    // The slug is derived from the title (the client sends the derived value,
+    // but we re-derive defensively). The only failure is a title with no
+    // letters or numbers, which is really a title problem — report it there.
+    slug = slugify(str(form, "slug") || title);
     if (!slug || !isValidSlug(slug)) {
       return fieldError(
-        "slug",
-        "The URL slug must be lower-case words separated by hyphens.",
+        "title",
+        "Add a title with letters or numbers so the post can have a web address.",
       );
     }
   }

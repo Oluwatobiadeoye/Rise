@@ -82,7 +82,6 @@ export default async function AdminBlogPage() {
                     >
                       {post.title || "(untitled)"}
                     </Link>
-                    <div className="font-body text-xs text-muted">/blog/{post.slug}</div>
                   </td>
                   <td className="px-4 py-3">
                     <span

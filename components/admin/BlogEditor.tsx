@@ -68,7 +68,6 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
   const router = useRouter();
   const [id, setId] = useState(post?.id ?? null);
   const [title, setTitle] = useState(post?.title ?? "");
-  const [slug, setSlug] = useState(post?.slug ?? "");
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
   const [author, setAuthor] = useState(post?.author ?? "RISE Initiative");
   const [cover, setCover] = useState<PostCover | null>(post?.cover ?? null);
@@ -78,7 +77,11 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
   const [firstPublished, setFirstPublished] = useState(
     Boolean(post?.firstPublishedAt),
   );
+  // The URL slug is always derived from the title — never an input the author
+  // fills. It tracks the title until first publish, then stays fixed (locked)
+  // so links that have been shared never break.
   const slugLocked = firstPublished;
+  const derivedSlug = slugLocked ? (post?.slug ?? "") : slugify(title);
   const publishedDate = post?.publishedAt
     ? new Date(post.publishedAt).toLocaleDateString("en-GB", {
         year: "numeric",
@@ -93,8 +96,6 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
   const [isPending, startTransition] = useTransition();
   const [uploadingCover, setUploadingCover] = useState(false);
   const dirtyRef = useRef(false);
-  // Once the author edits the slug by hand, stop auto-deriving it from the title.
-  const slugEditedRef = useRef(Boolean(post));
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -123,8 +124,6 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
   function handleTitleChange(value: string) {
     setTitle(value);
     dirtyRef.current = true;
-    // Track the title until the author takes over the slug (new posts only).
-    if (!slugLocked && !slugEditedRef.current) setSlug(slugify(value));
   }
 
   // Warn before leaving with unsaved changes.
@@ -143,7 +142,7 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
     const fd = new FormData();
     if (id) fd.set("id", id);
     fd.set("title", title);
-    fd.set("slug", slug);
+    fd.set("slug", derivedSlug);
     fd.set("excerpt", excerpt);
     fd.set("author", author);
     fd.set("bodyHtml", editor?.getHTML() ?? "");
@@ -154,7 +153,7 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
       fd.set("coverHeight", String(cover.height));
     }
     return fd;
-  }, [id, title, slug, excerpt, author, cover, editor]);
+  }, [id, title, derivedSlug, excerpt, author, cover, editor]);
 
   const applyResult = useCallback(
     (result: BlogActionResult, publishedNow?: boolean) => {
@@ -307,18 +306,17 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
         </div>
 
         <div>
-          <label className={labelClass} htmlFor="slug">
-            URL slug {slugLocked ? "(locked after publishing)" : ""}
-          </label>
-          <input
-            id="slug"
-            value={slug}
-            onChange={(e) => { setSlug(e.target.value); slugEditedRef.current = true; dirtyRef.current = true; }}
-            onBlur={autoSaveDraft}
-            disabled={slugLocked}
-            className={`${inputClass} ${slugLocked ? "opacity-60" : ""}`}
-          />
-          <p className="mt-1 font-body text-xs text-muted">/blog/{slug || "…"}</p>
+          <p className={labelClass}>
+            Post URL {slugLocked ? "(locked)" : ""}
+          </p>
+          <p className="mt-1 rounded-lg border border-line bg-surface-sunk px-3 py-2 font-body text-sm text-muted">
+            /blog/{derivedSlug || "…"}
+          </p>
+          <p className="mt-1 font-body text-xs text-muted">
+            {slugLocked
+              ? "Set from the title when first published; fixed now so shared links keep working."
+              : "Created automatically from the title."}
+          </p>
           {fieldErr("slug")}
         </div>
 
@@ -465,7 +463,7 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
           </button>
         ) : null}
         {status === "published" && post ? (
-          <a href={`/blog/${slug}`} target="_blank" rel="noopener noreferrer" className="font-body text-sm font-semibold text-primary hover:underline">
+          <a href={`/blog/${derivedSlug}`} target="_blank" rel="noopener noreferrer" className="font-body text-sm font-semibold text-primary hover:underline">
             View live post →
           </a>
         ) : null}
