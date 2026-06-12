@@ -101,6 +101,7 @@ function rowToAdminSummary(row: PostRow): AdminPostSummary {
     id: row.id,
     slug: row.slug,
     title: row.title,
+    author: row.author,
     status: row.status as PostStatus,
     publishedAt: row.publishedAt,
     updatedAt: row.updatedAt,

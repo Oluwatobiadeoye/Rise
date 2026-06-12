@@ -32,6 +32,7 @@ export type AdminPostSummary = {
   id: string;
   slug: string;
   title: string;
+  author: string;
   status: PostStatus;
   /** Null until first published. */
   publishedAt: string | null;

@@ -64,6 +64,7 @@ export default async function AdminBlogPage() {
             <thead>
               <tr className="border-b border-line bg-surface-sunk text-xs uppercase tracking-wide text-muted">
                 <th className="px-4 py-3 font-semibold">Title</th>
+                <th className="px-4 py-3 font-semibold">Author</th>
                 <th className="px-4 py-3 font-semibold">Status</th>
                 <th className="px-4 py-3 font-semibold">Published</th>
                 <th className="px-4 py-3 font-semibold">Updated</th>
@@ -83,6 +84,7 @@ export default async function AdminBlogPage() {
                       {post.title || "(untitled)"}
                     </Link>
                   </td>
+                  <td className="px-4 py-3 text-muted">{post.author}</td>
                   <td className="px-4 py-3">
                     <span
                       className={`inline-flex items-center rounded-pill px-3 py-1 font-body text-xs font-semibold ${STATUS_STYLE[post.status]}`}
