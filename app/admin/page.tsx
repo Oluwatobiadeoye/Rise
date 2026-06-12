@@ -81,7 +81,6 @@ function CycleStatusRow({
 export default async function AdminDashboardPage() {
   const admin = await requireAdmin();
   const showCycles = can(admin.role, "manage-cycles");
-  const showAdmins = can(admin.role, "manage-admins");
 
   const submissions = await db.listSubmissions();
   const activeCycles = await Promise.all(
@@ -168,22 +167,6 @@ export default async function AdminDashboardPage() {
           ))}
         </div>
       </section>
-
-      {showAdmins ? (
-        <section>
-          <div className="flex items-center justify-between gap-3">
-            <h2 className="font-display text-lg font-semibold text-ink">
-              Admin accounts
-            </h2>
-            <Link
-              href="/admin/admins"
-              className="font-body text-sm font-semibold text-primary hover:underline"
-            >
-              Manage admins
-            </Link>
-          </div>
-        </section>
-      ) : null}
 
       <section>
         <h2 className="font-display text-lg font-semibold text-ink">
