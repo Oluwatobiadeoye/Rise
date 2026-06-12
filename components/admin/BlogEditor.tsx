@@ -38,6 +38,46 @@ const primaryBtn =
 const ghostBtn =
   "inline-flex min-h-11 items-center justify-center rounded-pill px-4 py-2 font-body text-sm font-semibold text-charcoal-700 shadow-[inset_0_0_0_2px_var(--rise-line)] transition-colors hover:bg-surface-sunk disabled:cursor-not-allowed disabled:opacity-60";
 
+const MAX_UPLOAD_DIMENSION = 2000;
+
+/**
+ * Resizes large images in the browser before upload so phone photos (often
+ * 4–12 MB) fit under the upload cap and load fast on the public site. Returns
+ * the original file untouched if it is already small or the browser cannot
+ * process it.
+ */
+async function downscaleImage(file: File): Promise<File> {
+  if (!file.type.startsWith("image/")) return file;
+  try {
+    const bitmap = await createImageBitmap(file);
+    const { width, height } = bitmap;
+    const scale = Math.min(1, MAX_UPLOAD_DIMENSION / Math.max(width, height));
+    if (scale === 1 && file.size <= 1_500_000) {
+      bitmap.close();
+      return file;
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(width * scale);
+    canvas.height = Math.round(height * scale);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    const type = file.type === "image/png" ? "image/png" : "image/jpeg";
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, type, 0.85),
+    );
+    if (!blob) return file;
+    const name = file.name.replace(
+      /\.[^.]+$/,
+      type === "image/png" ? ".png" : ".jpg",
+    );
+    return new File([blob], name, { type });
+  } catch {
+    return file;
+  }
+}
+
 function ToolbarButton({
   onClick,
   active,
@@ -227,7 +267,7 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
     setUploadingCover(true);
     setError(null);
     const fd = new FormData();
-    fd.set("file", file);
+    fd.set("file", await downscaleImage(file));
     const result = await uploadBlogImage(null, fd);
     setUploadingCover(false);
     if (result.ok) {
@@ -240,7 +280,7 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
 
   async function handleInlineImage(file: File) {
     const fd = new FormData();
-    fd.set("file", file);
+    fd.set("file", await downscaleImage(file));
     const result = await uploadBlogImage(null, fd);
     if (!result.ok) {
       setError(result.error);

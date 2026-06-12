@@ -41,6 +41,12 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // Image uploads run through a Server Action; the default 1 MB body cap is
+  // below our 8 MB image limit. Allow headroom for multipart overhead (the
+  // storage adapter still enforces the real 8 MB image cap).
+  experimental: {
+    serverActions: { bodySizeLimit: "12mb" },
+  },
   images: {
     remotePatterns: [
       {
