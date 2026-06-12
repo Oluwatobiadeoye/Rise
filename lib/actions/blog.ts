@@ -14,7 +14,6 @@ import type { AdminPost, PostCover, PostInput } from "@/lib/content/types";
 
 const TITLE_MAX = 200;
 const EXCERPT_MAX = 300;
-const AUTHOR_MAX = 120;
 const BODY_MAX = 200_000;
 
 /** Typed result consumed by the editor via useActionState. */
@@ -70,6 +69,7 @@ function parseCover(
 function buildInput(
   form: FormData,
   existing: AdminPost | null,
+  authorName: string,
 ): { input: PostInput } | BlogActionResult {
   const title = str(form, "title");
   if (!title) return fieldError("title", "A title is required.");
@@ -80,10 +80,9 @@ function buildInput(
     return fieldError("excerpt", "Excerpt is too long.");
   }
 
-  const author = str(form, "author") || "RISE Initiative";
-  if (author.length > AUTHOR_MAX) {
-    return fieldError("author", "Author name is too long.");
-  }
+  // The author is the post's creator, captured from the session — never a form
+  // field. An existing post keeps its original author when edited by someone else.
+  const author = existing ? existing.author : authorName;
 
   // Slug: locked to the stored value once first published; otherwise taken from
   // the form (or derived from the title) and validated.
@@ -139,9 +138,12 @@ async function loadExisting(form: FormData): Promise<AdminPost | null> {
   return blogStore.getById(id);
 }
 
-async function upsert(form: FormData): Promise<{ post: AdminPost } | BlogActionResult> {
+async function upsert(
+  form: FormData,
+  authorName: string,
+): Promise<{ post: AdminPost } | BlogActionResult> {
   const existing = await loadExisting(form);
-  const built = buildInput(form, existing);
+  const built = buildInput(form, existing, authorName);
   if ("ok" in built) return built;
 
   try {
@@ -163,8 +165,8 @@ export async function saveBlogPost(
   _prev: BlogActionResult | null,
   form: FormData,
 ): Promise<BlogActionResult> {
-  await requireCan("manage-blog");
-  const result = await upsert(form);
+  const admin = await requireCan("manage-blog");
+  const result = await upsert(form, admin.name);
   if ("ok" in result) return result;
   const { post } = result;
   revalidatePost(post.slug, post.id);
@@ -176,9 +178,9 @@ export async function publishBlogPost(
   _prev: BlogActionResult | null,
   form: FormData,
 ): Promise<BlogActionResult> {
-  await requireCan("manage-blog");
+  const admin = await requireCan("manage-blog");
 
-  const result = await upsert(form);
+  const result = await upsert(form, admin.name);
   if ("ok" in result) return result;
   const { post } = result;
 

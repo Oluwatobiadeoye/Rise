@@ -55,7 +55,7 @@ function form(fields: Record<string, string>): FormData {
 
 beforeEach(() => {
   vi.clearAllMocks();
-  requireCan.mockResolvedValue({ id: "admin1", role: "owner" });
+  requireCan.mockResolvedValue({ id: "admin1", role: "owner", name: "Test Admin" });
   checkRateLimit.mockReturnValue(true);
   store.create.mockResolvedValue(adminPost());
   store.update.mockResolvedValue(adminPost());
@@ -110,6 +110,24 @@ describe("saveBlogPost", () => {
       }),
     );
     expect(result).toMatchObject({ ok: true });
+  });
+
+  it("sets the author to the signed-in admin on create", async () => {
+    store.create.mockResolvedValue(adminPost());
+    await saveBlogPost(null, form({ title: "My post" }));
+    expect(store.create).toHaveBeenCalledWith(
+      expect.objectContaining({ author: "Test Admin" }),
+    );
+  });
+
+  it("preserves the original author when another admin edits", async () => {
+    store.getById.mockResolvedValue(adminPost({ author: "Original Writer" }));
+    store.update.mockResolvedValue(adminPost({ author: "Original Writer" }));
+    await saveBlogPost(null, form({ id: "p1", title: "Edited" }));
+    expect(store.update).toHaveBeenCalledWith(
+      "p1",
+      expect.objectContaining({ author: "Original Writer" }),
+    );
   });
 
   it("locks the slug to the stored value once first published", async () => {

@@ -69,7 +69,6 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
   const [id, setId] = useState(post?.id ?? null);
   const [title, setTitle] = useState(post?.title ?? "");
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
-  const [author, setAuthor] = useState(post?.author ?? "RISE Initiative");
   const [cover, setCover] = useState<PostCover | null>(post?.cover ?? null);
   const [status, setStatus] = useState(post?.status ?? "draft");
   // Tracks whether the post has ever been published, in state so an in-session
@@ -77,18 +76,12 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
   const [firstPublished, setFirstPublished] = useState(
     Boolean(post?.firstPublishedAt),
   );
-  // The URL slug is always derived from the title — never an input the author
-  // fills. It tracks the title until first publish, then stays fixed (locked)
-  // so links that have been shared never break.
+  // Author, slug, and publish date are all derived/automatic and never shown as
+  // inputs: the author is the signed-in admin (set server-side), and the slug is
+  // derived from the title (tracking it until first publish, then locked so
+  // shared links never break).
   const slugLocked = firstPublished;
   const derivedSlug = slugLocked ? (post?.slug ?? "") : slugify(title);
-  const publishedDate = post?.publishedAt
-    ? new Date(post.publishedAt).toLocaleDateString("en-GB", {
-        year: "numeric",
-        month: "short",
-        day: "numeric",
-      })
-    : null;
 
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -144,7 +137,6 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
     fd.set("title", title);
     fd.set("slug", derivedSlug);
     fd.set("excerpt", excerpt);
-    fd.set("author", author);
     fd.set("bodyHtml", editor?.getHTML() ?? "");
     if (cover) {
       fd.set("coverSrc", cover.src);
@@ -153,7 +145,7 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
       fd.set("coverHeight", String(cover.height));
     }
     return fd;
-  }, [id, title, derivedSlug, excerpt, author, cover, editor]);
+  }, [id, title, derivedSlug, excerpt, cover, editor]);
 
   const applyResult = useCallback(
     (result: BlogActionResult, publishedNow?: boolean) => {
@@ -305,28 +297,6 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
           {fieldErr("title")}
         </div>
 
-        <div>
-          <p className={labelClass}>
-            Post URL {slugLocked ? "(locked)" : ""}
-          </p>
-          <p className="mt-1 rounded-lg border border-line bg-surface-sunk px-3 py-2 font-body text-sm text-muted">
-            /blog/{derivedSlug || "…"}
-          </p>
-          <p className="mt-1 font-body text-xs text-muted">
-            {slugLocked
-              ? "Set from the title when first published; fixed now so shared links keep working."
-              : "Created automatically from the title."}
-          </p>
-          {fieldErr("slug")}
-        </div>
-
-        <div>
-          <p className={labelClass}>Date shown on the post</p>
-          <p className="mt-1 rounded-lg border border-line bg-surface-sunk px-3 py-2 font-body text-sm text-muted">
-            {publishedDate ?? "Set automatically when you publish."}
-          </p>
-        </div>
-
         <div className="sm:col-span-2">
           <label className={labelClass} htmlFor="excerpt">Excerpt</label>
           <textarea
@@ -340,18 +310,6 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
             className={inputClass}
           />
           {fieldErr("excerpt")}
-        </div>
-
-        <div>
-          <label className={labelClass} htmlFor="author">Author</label>
-          <input
-            id="author"
-            value={author}
-            onChange={(e) => { setAuthor(e.target.value); dirtyRef.current = true; }}
-            onBlur={autoSaveDraft}
-            maxLength={120}
-            className={inputClass}
-          />
         </div>
       </div>
 
