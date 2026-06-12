@@ -110,7 +110,11 @@ export default async function AdminSubmissionDetailPage({
 
       <section className="rounded-lg border border-line bg-surface p-6">
         <h2 className="font-display text-lg font-semibold text-ink">Review</h2>
-        {reviewedBy === null ? (
+        {reviewedBy === null && finalized ? (
+          <p className="mt-4 font-body text-sm text-muted">
+            This submission is finalized and is no longer open for review.
+          </p>
+        ) : reviewedBy === null ? (
           <div className="mt-4">
             <p className="font-body text-sm text-muted">
               This submission is not under review. Start a review to claim it

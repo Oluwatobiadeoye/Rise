@@ -1,9 +1,11 @@
 "use client";
 
-import { useRef, useState, useTransition } from "react";
+import { useState } from "react";
 import { saveSubmissionNotes, saveSubmissionReview } from "@/lib/actions/admin";
 import { STATUS_LABELS } from "@/lib/status";
 import type { SubmissionStatus, SubmissionType } from "@/lib/types";
+
+type NotesState = "idle" | "saving" | "saved" | "error";
 
 /**
  * The reviewer's editing surface: a status select and a notes field saved by a
@@ -24,22 +26,40 @@ export function ReviewEditor({
   notes: string;
   statuses: readonly SubmissionStatus[];
 }) {
-  const formRef = useRef<HTMLFormElement>(null);
+  // Tracks the last value confirmed saved so an unchanged blur is a no-op and a
+  // failed save can be reported without falsely claiming the notes persisted.
   const [savedNotes, setSavedNotes] = useState(notes);
-  const [autoSaving, startAutoSave] = useTransition();
+  const [notesState, setNotesState] = useState<NotesState>("idle");
 
-  function handleNotesBlur(value: string) {
-    if (value === savedNotes) return;
-    setSavedNotes(value);
+  async function handleNotesBlur(value: string) {
+    if (value === savedNotes || notesState === "saving") return;
+    setNotesState("saving");
     const data = new FormData();
     data.set("type", type);
     data.set("id", id);
     data.set("notes", value);
-    startAutoSave(() => saveSubmissionNotes(data));
+    try {
+      await saveSubmissionNotes(data);
+      setSavedNotes(value);
+      setNotesState("saved");
+    } catch {
+      // Leave savedNotes unchanged so the reviewer isn't told a failed write
+      // succeeded; the message prompts them to use Save.
+      setNotesState("error");
+    }
   }
 
+  const notesStatusMessage =
+    notesState === "saving"
+      ? "Saving notes…"
+      : notesState === "saved"
+        ? "Notes saved."
+        : notesState === "error"
+          ? "Could not auto-save notes. Press Save to try again."
+          : "Notes save automatically.";
+
   return (
-    <form action={saveSubmissionReview} ref={formRef} className="mt-4 space-y-5">
+    <form action={saveSubmissionReview} className="mt-4 space-y-5">
       <input type="hidden" name="type" value={type} />
       <input type="hidden" name="id" value={id} />
 
@@ -81,14 +101,20 @@ export function ReviewEditor({
           placeholder="Internal review notes (not shared with the applicant)."
           className="mt-1.5 w-full rounded-md border border-line bg-surface px-3 py-2.5 font-body text-sm text-ink outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary-tint"
         />
-        <p className="mt-1.5 font-body text-xs text-muted" aria-live="polite">
-          {autoSaving ? "Saving notes…" : "Notes save automatically."}
+        <p
+          className={`mt-1.5 font-body text-xs ${
+            notesState === "error" ? "text-danger" : "text-muted"
+          }`}
+          aria-live="polite"
+        >
+          {notesStatusMessage}
         </p>
       </div>
 
       <button
         type="submit"
-        className="inline-flex min-h-11 items-center rounded-pill bg-primary px-5 py-2.5 font-body text-sm font-semibold text-white transition-colors hover:bg-primary-hover"
+        disabled={notesState === "saving"}
+        className="inline-flex min-h-11 items-center rounded-pill bg-primary px-5 py-2.5 font-body text-sm font-semibold text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60"
       >
         Save
       </button>
