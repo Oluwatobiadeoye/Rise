@@ -1,8 +1,21 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, useTransition } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
 import { useRouter } from "next/navigation";
-import { useEditor, EditorContent } from "@tiptap/react";
+import {
+  useEditor,
+  EditorContent,
+  NodeViewWrapper,
+  ReactNodeViewRenderer,
+  type NodeViewProps,
+} from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
 import Image from "@tiptap/extension-image";
@@ -16,6 +29,7 @@ import {
   Quote,
   Link2,
   ImagePlus,
+  Image as ImageIcon,
 } from "lucide-react";
 import {
   publishBlogPost,
@@ -25,6 +39,8 @@ import {
   uploadBlogImage,
   type BlogActionResult,
 } from "@/lib/actions/blog";
+import { sanitizePostHtml } from "@/lib/blog/sanitize";
+import { readingMinutesFromHtml } from "@/lib/blog/reading-time";
 import { slugify } from "@/lib/blog/slugify";
 import type { AdminPost, PostCover } from "@/lib/content/types";
 
@@ -78,6 +94,97 @@ async function downscaleImage(file: File): Promise<File> {
   }
 }
 
+/**
+ * In-editor view for an image: a lightweight chip (icon + alt/filename) instead
+ * of the rendered picture, so the editing surface stays fast and uncluttered.
+ * The image still serializes to a real <img> in getHTML(); the live preview pane
+ * shows the actual picture.
+ */
+function ImageChip({ node }: NodeViewProps) {
+  const src = (node.attrs.src as string | undefined) ?? "";
+  const filename = (() => {
+    try {
+      return decodeURIComponent(src.split("/").pop() || "image");
+    } catch {
+      return "image";
+    }
+  })();
+  const label = node.attrs.alt?.trim() || filename;
+  return (
+    <NodeViewWrapper
+      className="my-2"
+      contentEditable={false}
+      data-drag-handle
+    >
+      <span className="inline-flex items-center gap-2 rounded-md border border-line bg-surface-sunk px-3 py-1.5 font-body text-sm text-muted">
+        <ImageIcon className="size-4 shrink-0" />
+        <span className="truncate">{label}</span>
+      </span>
+    </NodeViewWrapper>
+  );
+}
+
+// Image extension that renders the chip in the editor but serializes the real
+// <img> (default renderHTML is inherited, so getHTML output is unchanged).
+const ImagePlaceholder = Image.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer(ImageChip);
+  },
+});
+
+/** Live, read-only render of the post as it will appear on the public site. */
+function PreviewPane({
+  title,
+  cover,
+  bodyHtml,
+}: {
+  title: string;
+  cover: PostCover | null;
+  bodyHtml: string;
+}) {
+  const html = useMemo(() => sanitizePostHtml(bodyHtml), [bodyHtml]);
+  const minutes = useMemo(() => readingMinutesFromHtml(bodyHtml), [bodyHtml]);
+  const empty = !title.trim() && !html.trim() && !cover;
+
+  return (
+    <aside className="lg:sticky lg:top-6 lg:self-start">
+      <p className="mb-2 font-body text-xs font-semibold uppercase tracking-wide text-muted">
+        Preview
+      </p>
+      <div className="rounded-lg border border-line bg-surface p-6">
+        {empty ? (
+          <p className="font-body text-sm text-muted">
+            Your post will preview here as you write.
+          </p>
+        ) : (
+          <>
+            {cover ? (
+              // Admin-only preview of an already-sized asset; next/image adds no
+              // value here.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={cover.src}
+                alt={cover.alt}
+                className="mb-6 w-full rounded-lg object-cover"
+              />
+            ) : null}
+            <h1 className="font-display text-2xl font-bold text-ink">
+              {title || "Untitled"}
+            </h1>
+            <p className="mt-2 font-body text-sm text-muted">
+              {minutes} min read
+            </p>
+            <div
+              className="post-body mt-6"
+              dangerouslySetInnerHTML={{ __html: html }}
+            />
+          </>
+        )}
+      </div>
+    </aside>
+  );
+}
+
 function ToolbarButton({
   onClick,
   active,
@@ -128,7 +235,11 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
   const [fieldError, setFieldError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const [uploadingCover, setUploadingCover] = useState(false);
+  // The body HTML driving the live preview pane, updated (debounced) as the
+  // author types so the preview stays responsive without re-rendering per key.
+  const [previewHtml, setPreviewHtml] = useState(post?.bodyHtml ?? "");
   const dirtyRef = useRef(false);
+  const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const editor = useEditor({
     immediatelyRender: false,
@@ -140,17 +251,19 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
         protocols: ["http", "https", "mailto"],
         HTMLAttributes: { rel: "noopener noreferrer nofollow" },
       }),
-      Image.configure({ inline: false }),
+      ImagePlaceholder.configure({ inline: false }),
     ],
     content: post?.bodyHtml ?? "",
     editorProps: {
       attributes: {
         class:
-          "post-body min-h-72 max-w-none rounded-b-lg border border-t-0 border-line bg-surface px-4 py-4 font-body text-ink outline-none",
+          "min-h-72 max-w-none rounded-b-lg border border-t-0 border-line bg-surface px-4 py-4 font-body text-ink outline-none",
       },
     },
-    onUpdate: () => {
+    onUpdate: ({ editor }) => {
       dirtyRef.current = true;
+      if (previewTimer.current) clearTimeout(previewTimer.current);
+      previewTimer.current = setTimeout(() => setPreviewHtml(editor.getHTML()), 300);
     },
   });
 
@@ -170,6 +283,14 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
   }, []);
+
+  // Stop the pending preview update if the editor unmounts.
+  useEffect(
+    () => () => {
+      if (previewTimer.current) clearTimeout(previewTimer.current);
+    },
+    [],
+  );
 
   const buildFormData = useCallback((): FormData => {
     const fd = new FormData();
@@ -323,8 +444,10 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
         </p>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="sm:col-span-2">
+      <div className="grid gap-8 lg:grid-cols-2 lg:items-start">
+        <div className="space-y-6">
+          <div className="grid gap-4">
+            <div>
           <label className={labelClass} htmlFor="title">Title</label>
           <input
             id="title"
@@ -337,7 +460,7 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
           {fieldErr("title")}
         </div>
 
-        <div className="sm:col-span-2">
+            <div>
           <label className={labelClass} htmlFor="excerpt">Excerpt</label>
           <textarea
             id="excerpt"
@@ -426,6 +549,10 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
         ) : (
           <p className="mt-2 font-body text-sm text-muted">Loading editor…</p>
         )}
+      </div>
+        </div>
+
+        <PreviewPane title={title} cover={cover} bodyHtml={previewHtml} />
       </div>
 
       {/* Actions */}
