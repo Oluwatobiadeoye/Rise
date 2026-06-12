@@ -27,6 +27,8 @@ function stripHash(record: AdminRecord): Admin {
     email: record.email,
     name: record.name,
     role: record.role,
+    // Records written before the active flag existed are treated as active.
+    active: record.active ?? true,
     createdAt: record.createdAt,
     updatedAt: record.updatedAt,
   };
@@ -335,6 +337,7 @@ export function createFsSubmissionStore(root?: string): SubmissionStore {
         email,
         name: input.name.trim(),
         role: input.role,
+        active: true,
         passwordHash: input.passwordHash,
         createdAt: now,
         updatedAt: now,
@@ -350,11 +353,11 @@ export function createFsSubmissionStore(root?: string): SubmissionStore {
       if (!trimmed) return null;
       const lowered = trimmed.toLowerCase();
       const records = await listAdminRecords();
-      return (
-        records.find(
-          (a) => a.username === trimmed || a.email.toLowerCase() === lowered,
-        ) ?? null
+      const found = records.find(
+        (a) => a.username === trimmed || a.email.toLowerCase() === lowered,
       );
+      // Normalize the active flag for records written before it existed.
+      return found ? { ...found, active: found.active ?? true } : null;
     },
 
     async getAdminById(id: string): Promise<Admin | null> {
@@ -380,6 +383,18 @@ export function createFsSubmissionStore(root?: string): SubmissionStore {
         ...(patch.passwordHash !== undefined
           ? { passwordHash: patch.passwordHash }
           : {}),
+        updatedAt: new Date().toISOString(),
+      };
+      await writeJsonAtomic(adminFile(id), updated);
+      return stripHash(updated);
+    },
+
+    async setAdminActive(id: string, active: boolean): Promise<Admin> {
+      const existing = await readJsonIfExists<AdminRecord>(adminFile(id));
+      if (!existing) throw new Error(`Admin not found: ${id}`);
+      const updated: AdminRecord = {
+        ...existing,
+        active,
         updatedAt: new Date().toISOString(),
       };
       await writeJsonAtomic(adminFile(id), updated);

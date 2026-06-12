@@ -78,12 +78,6 @@ function CycleStatusRow({
   );
 }
 
-const ROLE_LABELS: Record<string, string> = {
-  superadmin: "Super admin",
-  owner: "Owner",
-  reviewer: "Reviewer",
-};
-
 export default async function AdminDashboardPage() {
   const admin = await requireAdmin();
   const showCycles = can(admin.role, "manage-cycles");
@@ -107,9 +101,6 @@ export default async function AdminDashboardPage() {
       <div>
         <h1 className="font-display text-2xl font-bold text-ink">Dashboard</h1>
         <p className="mt-2 font-body text-sm text-muted">
-          Signed in as {admin.name} ({ROLE_LABELS[admin.role] ?? admin.role}).
-        </p>
-        <p className="mt-1 font-body text-sm text-muted">
           {submissions.length} submission{submissions.length === 1 ? "" : "s"} in
           total.
         </p>

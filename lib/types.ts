@@ -43,6 +43,11 @@ export type Admin = {
   email: string;
   name: string;
   role: AdminRole;
+  /**
+   * Whether the account may sign in. A deactivated admin is rejected at login
+   * and any existing session stops resolving on the next request.
+   */
+  active: boolean;
   /** ISO 8601 timestamp. */
   createdAt: string;
   /** ISO 8601 timestamp. */

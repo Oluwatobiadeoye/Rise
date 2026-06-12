@@ -4,7 +4,12 @@ import { SubmissionTable } from "@/components/admin/SubmissionTable";
 import { isSubmissionType } from "@/lib/admin/ref";
 import { cn } from "@/lib/cn";
 import { db } from "@/lib/db";
-import { ALL_STATUSES, STATUS_LABELS } from "@/lib/status";
+import {
+  ALL_STATUSES,
+  STATUS_LABELS,
+  isStatusForType,
+  statusesForType,
+} from "@/lib/status";
 import type { SubmissionStatus, SubmissionType } from "@/lib/types";
 
 export const dynamic = "force-dynamic";
@@ -15,12 +20,11 @@ const TYPES: readonly SubmissionType[] = [
   "mentee",
   "volunteer",
 ];
-const STATUSES = ALL_STATUSES;
 
 function isStatus(value: string | undefined): value is SubmissionStatus {
   return (
     typeof value === "string" &&
-    (STATUSES as readonly string[]).includes(value)
+    (ALL_STATUSES as readonly string[]).includes(value)
   );
 }
 
@@ -68,7 +72,21 @@ export default async function AdminSubmissionsPage({
 
   const { type: rawType, status: rawStatus } = await searchParams;
   const type = isSubmissionType(rawType) ? rawType : undefined;
-  const status = isStatus(rawStatus) ? rawStatus : undefined;
+  // A status is honoured only when it is valid for the selected type; an
+  // impossible pairing (e.g. type=contact&status=accepted) is treated as no
+  // status filter so the table is never filtered by a status the type can't hold.
+  const status =
+    type !== undefined
+      ? isStatusForType(type, rawStatus)
+        ? rawStatus
+        : undefined
+      : isStatus(rawStatus)
+        ? rawStatus
+        : undefined;
+
+  // The status pills offer only the statuses possible for the selected type;
+  // with no type selected they offer every status.
+  const statusOptions = type ? statusesForType(type) : ALL_STATUSES;
 
   const submissions = await db.listSubmissions({ type, status });
   const admins = await db.listAdmins();
@@ -112,7 +130,7 @@ export default async function AdminSubmissionsPage({
             Status
           </span>
           <Pill href={buildHref({ type })} label="All" active={!status} />
-          {STATUSES.map((value) => (
+          {statusOptions.map((value) => (
             <Pill
               key={value}
               href={buildHref({ type, status: value })}

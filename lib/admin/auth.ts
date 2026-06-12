@@ -111,7 +111,11 @@ export async function getCurrentAdmin(): Promise<Admin | null> {
   if (typeof token !== "string") return null;
   const adminId = verifySessionToken(token);
   if (!adminId) return null;
-  return db.getAdminById(adminId);
+  const admin = await db.getAdminById(adminId);
+  // A deactivated account is treated as signed out, so revoking access takes
+  // effect on the very next request rather than at the next login.
+  if (!admin || !admin.active) return null;
+  return admin;
 }
 
 /**

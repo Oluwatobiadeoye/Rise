@@ -15,6 +15,13 @@
       "when": 1781234187013,
       "tag": "0001_wild_killmonger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1781255359838,
+      "tag": "0002_flashy_susan_delgado",
+      "breakpoints": true
     }
   ]
 }

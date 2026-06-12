@@ -103,6 +103,13 @@ export interface SubmissionStore {
     patch: { name?: string; role?: AdminRole; passwordHash?: string },
   ): Promise<Admin>;
 
+  /**
+   * Sets an admin's active flag and bumps `updatedAt`. Throws if the admin is
+   * missing. Deactivating invalidates the account's existing sessions, since
+   * {@link getCurrentAdmin} rejects an inactive admin on the next request.
+   */
+  setAdminActive(id: string, active: boolean): Promise<Admin>;
+
   /** Removes an admin. A missing admin is a no-op. */
   deleteAdmin(id: string): Promise<void>;
 

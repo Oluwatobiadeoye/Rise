@@ -46,18 +46,19 @@ function detailPath(type: SubmissionType, id: string): string {
 const DUMMY_PASSWORD_HASH = hashPassword("timing-equalizer-not-a-real-password");
 
 /**
- * Throws if the given admin is the last remaining superadmin, so a demotion or
- * deletion can never leave zero superadmins (which would lock everyone out of
- * account management through the UI).
+ * Throws if removing the given admin from the pool of active superadmins would
+ * leave zero of them, so a demotion, deletion, or deactivation can never lock
+ * everyone out of account management through the UI. Only active superadmins
+ * count: an account that can no longer sign in is not a usable superadmin.
  */
-async function assertNotLastSuperadmin(id: string): Promise<void> {
+async function assertNotLastActiveSuperadmin(id: string): Promise<void> {
   const target = await db.getAdminById(id);
-  if (target?.role !== "superadmin") return;
-  const superadmins = (await db.listAdmins()).filter(
-    (a) => a.role === "superadmin",
+  if (target?.role !== "superadmin" || !target.active) return;
+  const activeSuperadmins = (await db.listAdmins()).filter(
+    (a) => a.role === "superadmin" && a.active,
   );
-  if (superadmins.length <= 1) {
-    throw new Error("Cannot remove the last superadmin");
+  if (activeSuperadmins.length <= 1) {
+    throw new Error("Cannot remove the last active superadmin");
   }
 }
 
@@ -102,7 +103,11 @@ export async function loginAdmin(formData: FormData): Promise<void> {
     verifyPassword(password as string, DUMMY_PASSWORD_HASH);
     redirect("/admin/login?error=1");
   }
-  if (!verifyPassword(password as string, record.passwordHash)) {
+  const passwordOk = verifyPassword(password as string, record.passwordHash);
+  // Verify the password even for a deactivated account, then fail through the
+  // same generic path: a deactivated account must not be distinguishable from a
+  // wrong password (no enumeration), and the work keeps the timing even.
+  if (!passwordOk || !record.active) {
     redirect("/admin/login?error=1");
   }
 
@@ -387,9 +392,9 @@ export async function updateAdminAccount(formData: FormData): Promise<void> {
     patch.passwordHash = hashPassword(password);
   }
 
-  // Never demote the last superadmin out of the role.
+  // Never demote the last active superadmin out of the role.
   if (patch.role && patch.role !== "superadmin") {
-    await assertNotLastSuperadmin(id);
+    await assertNotLastActiveSuperadmin(id);
   }
 
   await db.updateAdmin(id, patch);
@@ -405,9 +410,34 @@ export async function deleteAdminAccount(formData: FormData): Promise<void> {
   // A superadmin cannot delete their own account, which would risk locking the
   // last administrator out of account management.
   if (id === admin.id) throw new Error("You cannot delete your own account");
-  await assertNotLastSuperadmin(id);
+  await assertNotLastActiveSuperadmin(id);
 
   await db.deleteAdmin(id);
+
+  revalidateAdmins();
+}
+
+export async function setAdminActive(formData: FormData): Promise<void> {
+  const admin = await requireCan("manage-admins");
+
+  const id = formData.get("id");
+  if (typeof id !== "string" || !id) throw new Error("Invalid admin id");
+
+  const activeRaw = formData.get("active");
+  if (activeRaw !== "true" && activeRaw !== "false") {
+    throw new Error("Invalid active flag");
+  }
+  const active = activeRaw === "true";
+
+  // You cannot deactivate your own account (mirrors the self-delete guard); it
+  // would risk locking the last administrator out of account management.
+  if (!active && id === admin.id) {
+    throw new Error("You cannot deactivate your own account");
+  }
+  // Deactivating must not remove the last active superadmin.
+  if (!active) await assertNotLastActiveSuperadmin(id);
+
+  await db.setAdminActive(id, active);
 
   revalidateAdmins();
 }

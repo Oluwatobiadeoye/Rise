@@ -305,7 +305,38 @@ describe("createFsSubmissionStore", () => {
       expect(admin.id).toMatch(/^[0-9a-f-]{36}$/);
       expect(admin.email).toBe("ada@example.com");
       expect(admin.role).toBe("superadmin");
+      expect(admin.active).toBe(true);
       expect("passwordHash" in admin).toBe(false);
+    });
+
+    it("exposes the active flag through getAdminById and listAdmins", async () => {
+      const created = await store.createAdmin(adminInput);
+      expect((await store.getAdminById(created.id))?.active).toBe(true);
+      const [listed] = await store.listAdmins();
+      expect(listed.active).toBe(true);
+    });
+
+    it("setAdminActive toggles the flag, bumps updatedAt, and persists", async () => {
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date("2026-06-01T10:00:00Z"));
+      const created = await store.createAdmin(adminInput);
+
+      vi.setSystemTime(new Date("2026-06-01T10:30:00Z"));
+      const deactivated = await store.setAdminActive(created.id, false);
+      expect(deactivated.active).toBe(false);
+      expect(deactivated.updatedAt > created.updatedAt).toBe(true);
+      expect((await store.getAdminById(created.id))?.active).toBe(false);
+      // The login-path lookup also reflects the deactivation.
+      expect((await store.getAdminByIdentifier("ada"))?.active).toBe(false);
+
+      const reactivated = await store.setAdminActive(created.id, true);
+      expect(reactivated.active).toBe(true);
+    });
+
+    it("setAdminActive throws when the admin is missing", async () => {
+      await expect(store.setAdminActive("missing", false)).rejects.toThrow(
+        /not found/i,
+      );
     });
 
     it("rejects a duplicate username or email", async () => {

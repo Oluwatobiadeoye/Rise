@@ -1,5 +1,6 @@
 import { sql } from "drizzle-orm";
 import {
+  boolean,
   check,
   date,
   index,
@@ -54,6 +55,10 @@ export const admins = pgTable(
     email: text("email").notNull().unique(),
     name: text("name").notNull(),
     role: adminRole("role").notNull().default("reviewer"),
+    // A deactivated admin keeps their row (for audit and reactivation) but
+    // cannot sign in, and any existing session is invalidated on the next
+    // request. New rows default active so existing accounts stay enabled.
+    active: boolean("active").notNull().default(true),
     passwordHash: text("password_hash").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
       .notNull()

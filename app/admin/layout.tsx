@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { logoutAdmin } from "@/lib/actions/admin";
 import { getCurrentAdmin } from "@/lib/admin/auth";
 import { can } from "@/lib/admin/permissions";
+import { AccountMenu } from "@/components/admin/AccountMenu";
 import { Container } from "@/components/shared/Container";
 import { Logo } from "@/components/shared/Logo";
 
@@ -51,14 +51,15 @@ export default async function AdminLayout({ children }: { children: ReactNode })
               </Link>
             ) : null}
           </nav>
-          <form action={logoutAdmin} className="ms-auto">
-            <button
-              type="submit"
-              className="inline-flex min-h-11 items-center rounded-pill px-4 py-2 font-body text-sm font-semibold text-charcoal-700 shadow-[inset_0_0_0_2px_var(--rise-line)] transition-colors hover:bg-surface-sunk"
-            >
-              Log out
-            </button>
-          </form>
+          {admin ? (
+            <div className="ms-auto">
+              <AccountMenu
+                name={admin.name}
+                role={admin.role}
+                canManageAdmins={can(admin.role, "manage-admins")}
+              />
+            </div>
+          ) : null}
         </Container>
       </header>
       <main className="py-10">

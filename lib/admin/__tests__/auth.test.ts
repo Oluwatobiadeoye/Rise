@@ -23,18 +23,43 @@ vi.mock("@/lib/db", () => ({
   db: { getAdminById: vi.fn() },
 }));
 
+import { cookies } from "next/headers";
+import { db } from "@/lib/db";
 import {
+  ADMIN_SESSION_COOKIE,
   createSessionToken,
+  getCurrentAdmin,
   isAdminConfigured,
   verifySessionToken,
 } from "../auth";
+import type { Admin } from "@/lib/types";
 
 const SECRET = "a-very-high-entropy-session-secret-value";
 const ADMIN_ID = "0a1b2c3d-4e5f-4a7b-8c9d-0e1f2a3b4c5d";
 
 afterEach(() => {
   vi.unstubAllEnvs();
+  vi.clearAllMocks();
 });
+
+const baseAdmin: Admin = {
+  id: ADMIN_ID,
+  username: "ada",
+  email: "ada@example.com",
+  name: "Ada Lovelace",
+  role: "superadmin",
+  active: true,
+  createdAt: "2026-06-01T00:00:00.000Z",
+  updatedAt: "2026-06-01T00:00:00.000Z",
+};
+
+function stubSession(): void {
+  const token = createSessionToken(ADMIN_ID);
+  vi.mocked(cookies).mockResolvedValue({
+    get: (name: string) =>
+      name === ADMIN_SESSION_COOKIE ? { value: token } : undefined,
+  } as unknown as Awaited<ReturnType<typeof cookies>>);
+}
 
 describe("isAdminConfigured", () => {
   it("is false when ADMIN_SESSION_SECRET is unset", () => {
@@ -132,5 +157,32 @@ describe("session token", () => {
     const token = createSessionToken(ADMIN_ID, now);
     vi.stubEnv("ADMIN_SESSION_SECRET", "");
     expect(verifySessionToken(token, now)).toBeNull();
+  });
+});
+
+describe("getCurrentAdmin", () => {
+  it("resolves the bound admin for a valid session of an active account", async () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", SECRET);
+    stubSession();
+    vi.mocked(db.getAdminById).mockResolvedValue(baseAdmin);
+    expect(await getCurrentAdmin()).toEqual(baseAdmin);
+  });
+
+  it("returns null when the resolved admin is inactive", async () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", SECRET);
+    stubSession();
+    vi.mocked(db.getAdminById).mockResolvedValue({
+      ...baseAdmin,
+      active: false,
+    });
+    // A deactivated account invalidates its existing session immediately.
+    expect(await getCurrentAdmin()).toBeNull();
+  });
+
+  it("returns null when the bound admin no longer exists", async () => {
+    vi.stubEnv("ADMIN_SESSION_SECRET", SECRET);
+    stubSession();
+    vi.mocked(db.getAdminById).mockResolvedValue(null);
+    expect(await getCurrentAdmin()).toBeNull();
   });
 });

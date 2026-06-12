@@ -4,6 +4,7 @@ import { can } from "@/lib/admin/permissions";
 import {
   createAdminAccount,
   deleteAdminAccount,
+  setAdminActive,
   updateAdminAccount,
 } from "@/lib/actions/admin";
 import { db } from "@/lib/db";
@@ -39,7 +40,11 @@ function formatDate(iso: string): string {
 
 function AdminRow({ admin, isSelf }: { admin: Admin; isSelf: boolean }) {
   return (
-    <li className="rounded-lg border border-line bg-surface p-5">
+    <li
+      className={`rounded-lg border border-line bg-surface p-5 ${
+        admin.active ? "" : "opacity-60"
+      }`}
+    >
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="font-display text-base font-semibold text-ink">
@@ -54,9 +59,20 @@ function AdminRow({ admin, isSelf }: { admin: Admin; isSelf: boolean }) {
             {admin.username} · {admin.email} · added {formatDate(admin.createdAt)}
           </p>
         </div>
-        <span className="inline-flex items-center rounded-pill bg-evergreen-50 px-3 py-1 font-body text-xs font-semibold text-evergreen-700">
-          {ROLE_LABELS[admin.role]}
-        </span>
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={`inline-flex items-center rounded-pill px-3 py-1 font-body text-xs font-semibold ${
+              admin.active
+                ? "bg-success-tint text-success"
+                : "bg-charcoal-50 text-charcoal-700"
+            }`}
+          >
+            {admin.active ? "Active" : "Inactive"}
+          </span>
+          <span className="inline-flex items-center rounded-pill bg-evergreen-50 px-3 py-1 font-body text-xs font-semibold text-evergreen-700">
+            {ROLE_LABELS[admin.role]}
+          </span>
+        </div>
       </div>
 
       <form
@@ -88,15 +104,28 @@ function AdminRow({ admin, isSelf }: { admin: Admin; isSelf: boolean }) {
 
       {isSelf ? (
         <p className="mt-3 font-body text-sm text-muted">
-          You cannot delete your own account.
+          You cannot deactivate or delete your own account.
         </p>
       ) : (
-        <form action={deleteAdminAccount} className="mt-3">
-          <input type="hidden" name="id" value={admin.id} />
-          <button type="submit" className={ghostButtonClass}>
-            Delete admin
-          </button>
-        </form>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <form action={setAdminActive}>
+            <input type="hidden" name="id" value={admin.id} />
+            <input
+              type="hidden"
+              name="active"
+              value={admin.active ? "false" : "true"}
+            />
+            <button type="submit" className={ghostButtonClass}>
+              {admin.active ? "Deactivate" : "Activate"}
+            </button>
+          </form>
+          <form action={deleteAdminAccount}>
+            <input type="hidden" name="id" value={admin.id} />
+            <button type="submit" className={ghostButtonClass}>
+              Delete admin
+            </button>
+          </form>
+        </div>
       )}
     </li>
   );

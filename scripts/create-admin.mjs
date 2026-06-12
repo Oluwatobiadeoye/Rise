@@ -75,6 +75,7 @@ async function main() {
       email,
       name,
       role,
+      active: true,
       passwordHash,
       createdAt: now,
       updatedAt: now,

@@ -43,6 +43,7 @@ function rowToAdmin(row: AdminRow): Admin {
     email: row.email,
     name: row.name,
     role: row.role as AdminRole,
+    active: row.active,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
   };
@@ -474,6 +475,17 @@ export function createDrizzleSubmissionStore(): SubmissionStore {
       const rows = await db
         .update(admins)
         .set(update)
+        .where(eq(admins.id, id))
+        .returning();
+      if (rows.length === 0) throw new Error(`Admin not found: ${id}`);
+      return rowToAdmin(rows[0]);
+    },
+
+    async setAdminActive(id: string, active: boolean): Promise<Admin> {
+      const db = getDb();
+      const rows = await db
+        .update(admins)
+        .set({ active, updatedAt: new Date().toISOString() })
         .where(eq(admins.id, id))
         .returning();
       if (rows.length === 0) throw new Error(`Admin not found: ${id}`);
