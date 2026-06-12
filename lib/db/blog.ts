@@ -30,8 +30,6 @@ export interface BlogStore {
   listAll(): Promise<AdminPostSummary[]>;
   /** Full admin post by id, or null. */
   getById(id: string): Promise<AdminPost | null>;
-  /** Full admin post by slug, or null (for preview and uniqueness checks). */
-  getBySlug(slug: string): Promise<AdminPost | null>;
 
   /** Creates a draft, returning the stored record. */
   create(input: PostInput): Promise<AdminPost>;
@@ -167,16 +165,6 @@ function createDrizzleBlogStore(): BlogStore {
       return row ? rowToAdminPost(row) : null;
     },
 
-    async getBySlug(slug: string): Promise<AdminPost | null> {
-      const db = getDb();
-      const [row] = await db
-        .select()
-        .from(posts)
-        .where(eq(posts.slug, slug))
-        .limit(1);
-      return row ? rowToAdminPost(row) : null;
-    },
-
     async create(input: PostInput): Promise<AdminPost> {
       const db = getDb();
       try {
@@ -247,6 +235,9 @@ function createDrizzleBlogStore(): BlogStore {
 
     async unpublish(id: string): Promise<AdminPost> {
       const db = getDb();
+      // publishedAt and firstPublishedAt are intentionally retained so the
+      // original publish date and the slug lock survive a re-publish. The
+      // public list excludes the row by status, not by date.
       const rows = await db
         .update(posts)
         .set({ status: "draft", updatedAt: new Date().toISOString() })
@@ -291,9 +282,6 @@ function createUnconfiguredBlogStore(): BlogStore {
       return [];
     },
     async getById() {
-      return null;
-    },
-    async getBySlug() {
       return null;
     },
     create: noWrite,

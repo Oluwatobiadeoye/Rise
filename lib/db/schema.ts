@@ -274,6 +274,8 @@ export const posts = pgTable(
       .defaultNow(),
   },
   (table) => [
+    // Keep this pattern in sync with SLUG_PATTERN in lib/blog/slugify.ts (the
+    // application-side source of truth for slug shape).
     check("posts_slug_kebab", sql`${table.slug} ~ '^[a-z0-9]+(-[a-z0-9]+)*$'`),
     check(
       "posts_cover_complete",

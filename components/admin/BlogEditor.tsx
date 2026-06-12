@@ -71,12 +71,21 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
   const [slug, setSlug] = useState(post?.slug ?? "");
   const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
   const [author, setAuthor] = useState(post?.author ?? "RISE Initiative");
-  const [date, setDate] = useState(
-    (post?.publishedAt ?? "").slice(0, 10),
-  );
   const [cover, setCover] = useState<PostCover | null>(post?.cover ?? null);
   const [status, setStatus] = useState(post?.status ?? "draft");
-  const slugLocked = Boolean(post?.firstPublishedAt);
+  // Tracks whether the post has ever been published, in state so an in-session
+  // publish locks the slug immediately (the prop alone would be stale).
+  const [firstPublished, setFirstPublished] = useState(
+    Boolean(post?.firstPublishedAt),
+  );
+  const slugLocked = firstPublished;
+  const publishedDate = post?.publishedAt
+    ? new Date(post.publishedAt).toLocaleDateString("en-GB", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : null;
 
   const [saveState, setSaveState] = useState<SaveState>("idle");
   const [error, setError] = useState<string | null>(null);
@@ -154,7 +163,10 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
         setFieldError(null);
         setSaveState("saved");
         dirtyRef.current = false;
-        if (publishedNow) setStatus("published");
+        if (publishedNow) {
+          setStatus("published");
+          setFirstPublished(true);
+        }
         if (!id) {
           setId(result.id);
           // Move to the post's own URL so subsequent saves update in place.
@@ -239,13 +251,19 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
     const fd = new FormData();
     fd.set("file", file);
     const result = await uploadBlogImage(null, fd);
-    if (result.ok && editor) {
-      const alt = window.prompt("Describe this image (alt text):") ?? "";
-      editor.chain().focus().setImage({ src: result.url, alt }).run();
-      dirtyRef.current = true;
-    } else if (!result.ok) {
+    if (!result.ok) {
       setError(result.error);
+      return;
     }
+    if (!editor) return;
+    // Require alt text so inline images match the cover's accessibility bar.
+    const alt = window.prompt("Describe this image (alt text):")?.trim() ?? "";
+    if (!alt) {
+      setError("An image needs alt text. Nothing was inserted.");
+      return;
+    }
+    editor.chain().focus().setImage({ src: result.url, alt }).run();
+    dirtyRef.current = true;
   }
 
   const saveMessage =
@@ -255,9 +273,11 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
         ? "Saved."
         : saveState === "error"
           ? (error ?? "Could not save.")
-          : status === "draft"
-            ? "Draft — changes save automatically."
-            : "";
+          : status !== "draft"
+            ? ""
+            : id
+              ? "Draft — changes save automatically."
+              : "Save to create this draft.";
 
   const fieldErr = (name: string) =>
     fieldError === name ? (
@@ -303,16 +323,9 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
         </div>
 
         <div>
-          <label className={labelClass} htmlFor="date">Date shown on the post</label>
-          <input
-            id="date"
-            type="date"
-            value={date}
-            onChange={(e) => { setDate(e.target.value); dirtyRef.current = true; }}
-            className={inputClass}
-          />
-          <p className="mt-1 font-body text-xs text-muted">
-            Set automatically when first published.
+          <p className={labelClass}>Date shown on the post</p>
+          <p className="mt-1 rounded-lg border border-line bg-surface-sunk px-3 py-2 font-body text-sm text-muted">
+            {publishedDate ?? "Set automatically when you publish."}
           </p>
         </div>
 
@@ -349,6 +362,9 @@ export function BlogEditor({ post }: { post: AdminPost | null }) {
         <p className={labelClass}>Cover image</p>
         {cover ? (
           <div className="mt-2 space-y-2">
+            {/* A plain img: this is an admin-only preview of a freshly uploaded
+                asset, not a public LCP image, so next/image's optimization and
+                remote-pattern constraints add no value here. */}
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src={cover.src} alt={cover.alt} className="max-h-48 rounded-lg border border-line" />
             <div>

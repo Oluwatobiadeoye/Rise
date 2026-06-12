@@ -41,6 +41,15 @@ function parseCover(
 ): { cover: PostCover | null } | BlogActionResult {
   const src = str(form, "coverSrc");
   if (!src) return { cover: null };
+  // Only accept a site-relative path or an image from our own storage origin,
+  // so a stored cover URL can never point at an arbitrary external origin.
+  const storageOrigin = process.env.SUPABASE_URL;
+  const trusted =
+    src.startsWith("/") ||
+    (storageOrigin ? src.startsWith(`${storageOrigin}/storage/`) : false);
+  if (!trusted) {
+    return fieldError("cover", "The cover image has an unexpected source.");
+  }
   const alt = str(form, "coverAlt");
   if (!alt) {
     return fieldError("coverAlt", "Add alt text describing the cover image.");

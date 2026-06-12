@@ -80,6 +80,38 @@ describe("saveBlogPost", () => {
     expect(result).toEqual({ ok: true, id: "p1", slug: "my-post" });
   });
 
+  it("rejects a cover image from an untrusted origin", async () => {
+    const result = await saveBlogPost(
+      null,
+      form({
+        title: "My post",
+        slug: "my-post",
+        coverSrc: "https://evil.example/x.png",
+        coverAlt: "x",
+        coverWidth: "800",
+        coverHeight: "600",
+      }),
+    );
+    expect(result).toMatchObject({ ok: false, field: "cover" });
+    expect(store.create).not.toHaveBeenCalled();
+  });
+
+  it("accepts a site-relative cover image", async () => {
+    store.create.mockResolvedValue(adminPost());
+    const result = await saveBlogPost(
+      null,
+      form({
+        title: "My post",
+        slug: "my-post",
+        coverSrc: "/blog/x.png",
+        coverAlt: "x",
+        coverWidth: "800",
+        coverHeight: "600",
+      }),
+    );
+    expect(result).toMatchObject({ ok: true });
+  });
+
   it("locks the slug to the stored value once first published", async () => {
     store.getById.mockResolvedValue(
       adminPost({ slug: "original-slug", firstPublishedAt: "2026-01-01T00:00:00Z" }),
