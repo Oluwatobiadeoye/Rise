@@ -4,8 +4,12 @@ import type { Metadata } from "next";
 import { getCurrentAdmin } from "@/lib/admin/auth";
 import { can } from "@/lib/admin/permissions";
 import { AccountMenu } from "@/components/admin/AccountMenu";
-import { Container } from "@/components/shared/Container";
 import { Logo } from "@/components/shared/Logo";
+
+// The admin is a back-office tool: it uses much more of the screen than the
+// public site's reading-width Container (tables and the two-pane blog editor
+// benefit). Header and content share this width so their edges align.
+const adminWidth = "mx-auto w-full max-w-[1600px] px-7";
 
 export const metadata: Metadata = {
   title: "RISE admin",
@@ -26,7 +30,7 @@ export default async function AdminLayout({ children }: { children: ReactNode })
   return (
     <div className="min-h-dvh bg-bg">
       <header className="border-b border-line bg-surface">
-        <Container className="flex flex-wrap items-center gap-x-6 gap-y-3 py-4">
+        <div className={`${adminWidth} flex flex-wrap items-center gap-x-6 gap-y-3 py-4`}>
           <Link
             href="/admin"
             className="flex items-center gap-2.5 font-display text-lg font-bold text-ink"
@@ -66,10 +70,10 @@ export default async function AdminLayout({ children }: { children: ReactNode })
               />
             </div>
           ) : null}
-        </Container>
+        </div>
       </header>
       <main className="py-10">
-        <Container>{children}</Container>
+        <div className={adminWidth}>{children}</div>
       </main>
     </div>
   );
