@@ -2,9 +2,17 @@ import type { NextConfig } from "next";
 
 // The Supabase project origin that serves public blog images. Derived from the
 // configured URL at build time, with the known project host as a fallback.
-const supabaseOrigin = new URL(
-  process.env.SUPABASE_URL ?? "https://wzzlsexsvohrptvekcqz.supabase.co",
-).origin;
+// `||` (not `??`) so an empty-string env var — as can happen during CI builds —
+// also falls back rather than producing `new URL("")`.
+const DEFAULT_SUPABASE_ORIGIN = "https://wzzlsexsvohrptvekcqz.supabase.co";
+function resolveSupabaseOrigin(): string {
+  try {
+    return new URL(process.env.SUPABASE_URL || DEFAULT_SUPABASE_ORIGIN).origin;
+  } catch {
+    return DEFAULT_SUPABASE_ORIGIN;
+  }
+}
+const supabaseOrigin = resolveSupabaseOrigin();
 
 const isDev = process.env.NODE_ENV !== "production";
 
