@@ -11,8 +11,8 @@ export const siteConfig = {
   tagline: "...above limitations",
   description:
     "Empowering the next generation of leaders. Leadership development, mentorship, and real opportunities for young people.",
-  // The Vercel URL until the real domain lands; override via env at launch.
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://rise-ruby-three.vercel.app",
+  // The production domain; overridable per environment via NEXT_PUBLIC_SITE_URL.
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://risedevinitiative.org",
 } as const;
 
 /** Route paths. Some pages are not built yet (they 404 for now). */

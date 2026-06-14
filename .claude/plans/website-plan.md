@@ -191,7 +191,7 @@ a lightweight pipeline:
    - [x] Sora + Plus Jakarta Sans self-hosted via `next/font/google`
    - [x] Shared UI: Nav (sticky/blur, mobile menu), Footer, Button, Container, Eyebrow, Logo, ImagePlaceholder
    - [x] Unit tests (Vitest + RTL) and a GitHub Actions CI (lint · typecheck · test · build)
-   - [x] Deployed to Vercel — live at https://rise-ruby-three.vercel.app/ (production)
+   - [x] Deployed to Vercel — live at https://risedevinitiative.org/ (production)
 - [x] **2. Core pages** — Home, About, Team, Projects, Get Involved, Contact, FAQ with
    real content, **SEO baked in** (per-page metadata, OG, `sitemap.xml`, `robots.txt`).
    - [x] **Home** — real content, per-page metadata + OpenGraph, on-brand 404, real hero photo
