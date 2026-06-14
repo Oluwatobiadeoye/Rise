@@ -1,15 +1,17 @@
 import type { NextConfig } from "next";
 
-// The Supabase project origin that serves public blog images. Derived from the
-// configured URL at build time, with the known project host as a fallback.
-// `||` (not `??`) so an empty-string env var — as can happen during CI builds —
-// also falls back rather than producing `new URL("")`.
-const DEFAULT_SUPABASE_ORIGIN = "https://wzzlsexsvohrptvekcqz.supabase.co";
-function resolveSupabaseOrigin(): string {
+// Supabase Storage origin for public blog images, read from the environment:
+// `.env.local` for local dev, a GitHub Actions variable for CI builds, and the
+// Vercel project at deploy/runtime. Nothing project-specific is baked into the
+// source — if the variable is absent the config degrades gracefully (the
+// Supabase origin is simply omitted from the image allowlist and CSP).
+function resolveSupabaseOrigin(): string | null {
+  const raw = process.env.SUPABASE_URL;
+  if (!raw) return null;
   try {
-    return new URL(process.env.SUPABASE_URL || DEFAULT_SUPABASE_ORIGIN).origin;
+    return new URL(raw).origin;
   } catch {
-    return DEFAULT_SUPABASE_ORIGIN;
+    return null;
   }
 }
 const supabaseOrigin = resolveSupabaseOrigin();
@@ -22,13 +24,20 @@ const isDev = process.env.NODE_ENV !== "production";
 // `unsafe-inline` is required for Next's inline bootstrap and injected styles;
 // a nonce-based tightening is a possible follow-on. Dev adds eval + websockets
 // for hot-module reloading.
+const imgSrc = ["'self'", "data:", "blob:", supabaseOrigin]
+  .filter(Boolean)
+  .join(" ");
+const connectSrc = ["'self'", supabaseOrigin, isDev ? "ws:" : ""]
+  .filter(Boolean)
+  .join(" ");
+
 const csp = [
   `default-src 'self'`,
   `script-src 'self' 'unsafe-inline'${isDev ? " 'unsafe-eval'" : ""}`,
   `style-src 'self' 'unsafe-inline'`,
-  `img-src 'self' data: blob: ${supabaseOrigin}`,
+  `img-src ${imgSrc}`,
   `font-src 'self'`,
-  `connect-src 'self' ${supabaseOrigin}${isDev ? " ws:" : ""}`,
+  `connect-src ${connectSrc}`,
   `frame-ancestors 'none'`,
   `base-uri 'self'`,
   `form-action 'self'`,
@@ -56,13 +65,15 @@ const nextConfig: NextConfig = {
     serverActions: { bodySizeLimit: "12mb" },
   },
   images: {
-    remotePatterns: [
-      {
-        protocol: "https",
-        hostname: new URL(supabaseOrigin).hostname,
-        pathname: "/storage/v1/object/public/blog/**",
-      },
-    ],
+    remotePatterns: supabaseOrigin
+      ? [
+          {
+            protocol: "https",
+            hostname: new URL(supabaseOrigin).hostname,
+            pathname: "/storage/v1/object/public/blog/**",
+          },
+        ]
+      : [],
   },
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
