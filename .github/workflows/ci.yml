@@ -15,10 +15,11 @@ jobs:
   verify:
     name: Lint, typecheck, test, build
     runs-on: ubuntu-latest
-    # next.config reads SUPABASE_URL to build the image allowlist and CSP; supply
-    # it (a public project URL, not a secret) so the build matches production.
+    # Build-time public config (not secrets): SUPABASE_URL drives the image
+    # allowlist/CSP; NEXT_PUBLIC_SITE_URL is the canonical/sitemap/OG base URL.
     env:
       SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -53,8 +54,10 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
       VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
-      # Available to `vercel build` → next build for the image allowlist and CSP.
+      # Available to `vercel build` → next build for the image allowlist/CSP and
+      # the canonical/sitemap/OpenGraph base URL.
       SUPABASE_URL: ${{ vars.SUPABASE_URL }}
+      NEXT_PUBLIC_SITE_URL: ${{ vars.NEXT_PUBLIC_SITE_URL }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
