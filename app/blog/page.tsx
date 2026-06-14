@@ -7,6 +7,11 @@ import { PostCard } from "@/components/blog/PostCard";
 import { content } from "@/lib/content";
 import { routes } from "@/lib/site";
 
+// Render at request time from the database. The blog list is data-driven and
+// the CI build has no database access, so prerendering it at build would bake
+// an empty list; at runtime the database is always available.
+export const dynamic = "force-dynamic";
+
 const description =
   "News, stories, and updates from RISE Initiative: programme milestones, mentorship insights, and the journeys of the young people we work with.";
 
