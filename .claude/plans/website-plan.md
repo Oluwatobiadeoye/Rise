@@ -246,8 +246,9 @@ a lightweight pipeline:
    no-overlap exclusion constraint; the public forms switch between live and "notify me" off
    the active cycle. Notifications are a durable, queryable record. Row Level Security is
    enabled on every table (the service path uses a direct connection that bypasses it). The
-   whole layer sits behind an env-gated seam: `DATABASE_URL` selects Drizzle, otherwise a
-   filesystem fallback keeps local dev and tests running with no database.
+   data layer is Drizzle-only: `DATABASE_URL` is required at runtime (the connection opens
+   lazily, so the build never touches the database), and tests mock the stores rather than
+   hitting a real one.
 - [x] **9. In-house blog authoring** — the team writes and publishes posts from `/admin/blog`
    with one login, no Git, no hosted CMS. A `posts` table backs a database `ContentSource`
    swapped in behind the same `DATABASE_URL` gate (falling back to the filesystem markdown if

@@ -10,7 +10,7 @@ import type {
   PostMeta,
   PostStatus,
 } from "@/lib/content/types";
-import { getDb, isDatabaseConfigured } from "./client";
+import { getDb } from "./client";
 import { posts } from "./schema";
 
 type PostRow = typeof posts.$inferSelect;
@@ -261,39 +261,5 @@ function createDrizzleBlogStore(): BlogStore {
   };
 }
 
-const UNCONFIGURED = "Blog authoring requires a configured database.";
-
-/**
- * A stub used when no database is configured (local dev without keys, tests):
- * reads are empty, writes refuse. The public site falls back to the filesystem
- * content source separately, so this only affects the admin authoring path.
- */
-function createUnconfiguredBlogStore(): BlogStore {
-  const noWrite = (): never => {
-    throw new Error(UNCONFIGURED);
-  };
-  return {
-    async listPublished() {
-      return [];
-    },
-    async getPublishedBySlug() {
-      return null;
-    },
-    async listAll() {
-      return [];
-    },
-    async getById() {
-      return null;
-    },
-    create: noWrite,
-    update: noWrite,
-    publish: noWrite,
-    unpublish: noWrite,
-    archive: noWrite,
-  };
-}
-
-/** The single blog store the app depends on, gated on database configuration. */
-export const blogStore: BlogStore = isDatabaseConfigured()
-  ? createDrizzleBlogStore()
-  : createUnconfiguredBlogStore();
+/** The single blog store the app depends on (Drizzle over Postgres). */
+export const blogStore: BlogStore = createDrizzleBlogStore();

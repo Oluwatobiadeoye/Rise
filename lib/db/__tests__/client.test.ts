@@ -5,9 +5,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 // client module can be loaded in Node.
 vi.mock("server-only", () => ({}));
 
-import { isDatabaseConfigured } from "../client";
+import { getDb } from "../client";
 
-describe("isDatabaseConfigured", () => {
+describe("getDb", () => {
   const original = process.env.DATABASE_URL;
 
   beforeEach(() => {
@@ -19,17 +19,7 @@ describe("isDatabaseConfigured", () => {
     else process.env.DATABASE_URL = original;
   });
 
-  it("is false when DATABASE_URL is unset", () => {
-    expect(isDatabaseConfigured()).toBe(false);
-  });
-
-  it("is false when DATABASE_URL is an empty string", () => {
-    process.env.DATABASE_URL = "";
-    expect(isDatabaseConfigured()).toBe(false);
-  });
-
-  it("is true when DATABASE_URL is set", () => {
-    process.env.DATABASE_URL = "postgresql://localhost:6543/postgres";
-    expect(isDatabaseConfigured()).toBe(true);
+  it("throws a clear error when DATABASE_URL is unset", () => {
+    expect(() => getDb()).toThrow(/DATABASE_URL/);
   });
 });

@@ -1,12 +1,13 @@
 # Supabase setup
 
-The app uses a direct Postgres connection (via Drizzle ORM) for the submission
-store **only when `DATABASE_URL` is set**; without it the app falls back to the
-local filesystem store. Adding Supabase is a provisioning + configuration step
-plus running the Drizzle migration once.
+The app uses a direct Postgres connection (via Drizzle ORM) for submissions,
+blog posts, and the notifications audit log. **`DATABASE_URL` is required** —
+there is no filesystem fallback; the connection opens lazily, so the build never
+touches the database, and tests mock the stores.
 
 The app connects straight to Postgres over Supabase's connection pooler, so the
-Supabase Data API (PostgREST) and the service-role key are no longer used.
+Supabase Data API (PostgREST) is not used. The **service-role key** is used by
+one path only: server-side blog image uploads to Supabase Storage.
 
 ## What you need
 

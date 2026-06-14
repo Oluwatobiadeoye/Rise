@@ -8,10 +8,8 @@ import { content } from "@/lib/content";
 
 type PageParams = { slug: string };
 
-export async function generateStaticParams(): Promise<PageParams[]> {
-  const posts = await content.listPosts();
-  return posts.map((post) => ({ slug: post.slug }));
-}
+// Rendered at request time from the database (the build has no DB connection).
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,

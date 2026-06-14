@@ -4,6 +4,10 @@ import { content } from "@/lib/content";
 import { projects } from "@/lib/projects";
 import { routes, siteConfig } from "@/lib/site";
 
+// Generated at request time: it enumerates blog posts from the database, which
+// is only available at runtime (the build opens no connection).
+export const dynamic = "force-dynamic";
+
 type EntryDescriptor = {
   path: string;
   changeFrequency: MetadataRoute.Sitemap[number]["changeFrequency"];
