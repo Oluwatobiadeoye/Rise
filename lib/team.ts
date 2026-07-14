@@ -8,8 +8,8 @@
 import type { StaticImageData } from "next/image";
 import fareePhoto from "@/public/team/faree.png";
 import daraPhoto from "@/public/team/dara.png";
-import tobiPhoto from "@/public/team/tobi.jpeg";
-import quadriPhoto from "@/public/team/quadri.jpeg";
+import tobiPhoto from "@/public/team/tobi.png";
+import quadriPhoto from "@/public/team/quadri.png";
 import ayoPhoto from "@/public/team/ayo.png";
 import kunlePhoto from "@/public/team/kunle.png";
 
