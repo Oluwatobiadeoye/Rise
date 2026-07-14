@@ -1,0 +1,94 @@
+"use client";
+
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { StatusBadge } from "./StatusBadge";
+import type { SubmissionSummary } from "@/lib/types";
+
+function formatDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return iso;
+  return date.toLocaleDateString("en-GB", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+}
+
+/**
+ * Read-only list of submissions, each row linking to its detail page. The
+ * `reviewerNames` map resolves the `reviewedBy` admin id to a display name; an
+ * id with no entry (e.g. a deleted admin) falls back to a dash.
+ */
+export function SubmissionTable({
+  submissions,
+  reviewerNames = {},
+}: {
+  submissions: SubmissionSummary[];
+  reviewerNames?: Record<string, string>;
+}) {
+  const router = useRouter();
+  if (submissions.length === 0) {
+    return (
+      <p className="rounded-md border border-line bg-surface px-5 py-6 font-body text-sm text-muted">
+        No submissions match these filters yet.
+      </p>
+    );
+  }
+
+  return (
+    <div className="overflow-x-auto rounded-lg border border-line">
+      <table className="w-full border-collapse text-left font-body text-sm">
+        <thead>
+          <tr className="border-b border-line bg-surface-sunk text-xs uppercase tracking-wide text-muted">
+            <th className="px-4 py-3 font-semibold">Received</th>
+            <th className="px-4 py-3 font-semibold">Type</th>
+            <th className="px-4 py-3 font-semibold">Name</th>
+            <th className="px-4 py-3 font-semibold">Email</th>
+            <th className="px-4 py-3 font-semibold">Status</th>
+            <th className="px-4 py-3 font-semibold">Reviewer</th>
+          </tr>
+        </thead>
+        <tbody>
+          {submissions.map((submission) => {
+            const href = `/admin/submissions/${submission.type}/${submission.id}`;
+            return (
+            <tr
+              key={`${submission.type}/${submission.id}`}
+              onClick={() => router.push(href)}
+              className="cursor-pointer border-b border-line last:border-0 hover:bg-surface-sunk"
+            >
+              <td className="px-4 py-3 text-muted">
+                {formatDate(submission.createdAt)}
+              </td>
+              <td className="px-4 py-3 capitalize text-ink">
+                {submission.type}
+              </td>
+              <td className="px-4 py-3 text-ink">
+                <Link
+                  href={href}
+                  onClick={(e) => e.stopPropagation()}
+                  className="font-semibold text-primary hover:text-primary-press"
+                >
+                  {submission.fullName || "(no name)"}
+                </Link>
+              </td>
+              <td className="px-4 py-3 text-muted">
+                {submission.email || "—"}
+              </td>
+              <td className="px-4 py-3">
+                <StatusBadge status={submission.status} />
+              </td>
+              <td className="px-4 py-3 text-muted">
+                {submission.reviewedBy
+                  ? (reviewerNames[submission.reviewedBy] ?? "—")
+                  : "—"}
+              </td>
+            </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}

@@ -191,38 +191,92 @@ a lightweight pipeline:
    - [x] Sora + Plus Jakarta Sans self-hosted via `next/font/google`
    - [x] Shared UI: Nav (sticky/blur, mobile menu), Footer, Button, Container, Eyebrow, Logo, ImagePlaceholder
    - [x] Unit tests (Vitest + RTL) and a GitHub Actions CI (lint · typecheck · test · build)
-   - [x] Deployed to Vercel — live at https://rise-ruby-three.vercel.app/ (production)
-- [ ] **2. Core pages** — Home, About, Team, Projects, Get Involved, Contact, FAQ with
+   - [x] Deployed to Vercel — live at https://risedevinitiative.org/ (production)
+- [x] **2. Core pages** — Home, About, Team, Projects, Get Involved, Contact, FAQ with
    real content, **SEO baked in** (per-page metadata, OG, `sitemap.xml`, `robots.txt`).
    - [x] **Home** — real content, per-page metadata + OpenGraph, on-brand 404, real hero photo
    - [x] **About** — real content, per-page metadata (story, vision, objectives, values, name & identity)
    - [x] **Team** — full bios for all six members from `lib/team.ts`, per-page metadata
    - [x] **Projects** — index + `[slug]` detail from `lib/projects.ts` (The Oyo Project tiers; Foundations of Impact with the curated 2019 gallery + lightbox); Home/Footer deep-link to tier anchors
-   - [ ] Get Involved · Contact · FAQ
-   - [ ] `sitemap.xml` + `robots.txt`
-- [ ] **3. Media** — Sanity-powered Blog and Gallery (with designed empty states).
-- [ ] **4. Forms** — native forms → Supabase (server-side + RLS), spam protection, cycle
-   open/close, notifications to Tobi's email. (Provision Supabase / Resend / Sanity /
-   Turnstile keys before this week.)
-- [ ] **5. Privacy & polish** — privacy policy + consent, accessibility, cookieless
-   analytics, error/empty states, mobile/low-bandwidth performance.
-- [ ] **6. Full-launch prep** — real domain + branded inboxes + email auth (when ready).
-- [ ] **7. Branded `/admin`** — *last; only as time allows.* Until then, review in the
-   Supabase dashboard.
+   - [x] **Get Involved** — hub (mentor, mentee, volunteer, support-a-student) + mentor/mentee application pages; forms are UI-only (submission deferred to Milestone 4)
+   - [x] **Contact** — details (emails + socials) + contact form UI (submission deferred); **FAQ** — `<details>` accordion + FAQ structured data
+   - [x] `sitemap.xml` + `robots.txt` (driven by `siteConfig.url`)
+- [x] **3. Media** — Blog on a filesystem content layer (`lib/content`, swap seam for
+   Sanity): markdown posts (each may carry a cover plus any number of inline images),
+   validated at build, with a designed empty state, per-post metadata/OpenGraph, and
+   sitemap entries. The standalone gallery was dropped: programme updates are blog posts
+   with their own photos, so a separate gallery was redundant.
+- [x] **4. Forms** — native forms wired through server actions to a filesystem-backed
+   store (`lib/db`, swap seam for Supabase) with validation, honeypot + rate-limit spam
+   protection, cycle open/close (mentor/mentee pages go live or show "notify me"), and
+   notifications recorded via `lib/notify` (swap seam for Resend → Tobi's email).
+   Supabase / Resend / Turnstile swap in later behind `lib/db/index.ts` and
+   `lib/notify/index.ts`.
+- [x] **5. Privacy & polish** — privacy policy page (incl. the minor-applicant data
+   disclosure under the Nigeria Data Protection Act 2023), required consent checkboxes on
+   the data-collecting forms (validated server-side as a gate, not stored), cookieless
+   Vercel Analytics, global error boundary, and baseline security headers. Consent on
+   notify-me is a privacy-policy link rather than a checkbox.
+- [x] **6. Full-launch prep (code-side)** — `siteConfig.url` is env-driven
+   (`NEXT_PUBLIC_SITE_URL`) so the domain switch is one variable, and `docs/launch-checklist.md`
+   captures every external step + one-line swap. Domain, branded inboxes, and email auth
+   remain external steps (see the checklist; durable Supabase storage is the top blocker
+   before forms are publicly linked).
+- [x] **7. Branded `/admin`** — per-admin accounts (login with username **or** email,
+   scrypt password hashing, no plaintext) gated by an HMAC-signed session cookie keyed by
+   `ADMIN_SESSION_SECRET`; the area 404s entirely when unconfigured. Three roles via a
+   `can(role, action)` matrix — **superadmin** (manage admin accounts; reserved for the
+   owner), **owner** (manage cycles + review), **reviewer** (review only) — plus
+   active/inactive accounts and an account menu. Review panel over the submission store: a
+   filterable, type-aware list and a detail page with a single Save (status + notes; notes
+   auto-save on blur) and accept/decline decision emails. **Exclusive review claim-lock:**
+   claiming a submission sets `reviewedBy`, releasing clears it, and a finalized submission
+   (accepted/declined/closed/archived) stays attributed to its handler and can no longer be
+   released or taken over; any admin can force-release an in-progress claim. All type/id input
+   is validated against the union + a UUID pattern before any store access. The first
+   superadmin is created from the command line (`npm run create-admin`); further admins are
+   created in the UI.
+- [x] **8. Production data layer (Supabase + Drizzle)** — a normalized Class Table
+   Inheritance schema (a `submissions` supertype + per-type detail tables) modelled in code
+   as a discriminated union; writes go through real Drizzle transactions over a direct
+   Postgres connection (the Supabase transaction pooler), with no database function. Per-type
+   status lifecycles are enforced by a CHECK constraint (applications: pending → in_review →
+   accepted/declined → archived; enquiries: pending → in_review → closed → archived).
+   **Cycles** are scheduled open/close windows (time-derived "open", no manual toggle) with a
+   no-overlap exclusion constraint; the public forms switch between live and "notify me" off
+   the active cycle. Notifications are a durable, queryable record. Row Level Security is
+   enabled on every table (the service path uses a direct connection that bypasses it). The
+   data layer is Drizzle-only: `DATABASE_URL` is required at runtime (the connection opens
+   lazily, so the build never touches the database), and tests mock the stores rather than
+   hitting a real one.
+- [x] **9. In-house blog authoring** — the team writes and publishes posts from `/admin/blog`
+   with one login, no Git, no hosted CMS. A `posts` table backs a database `ContentSource`
+   swapped in behind the same `DATABASE_URL` gate (falling back to the filesystem markdown if
+   the table is missing, so a deploy before migration cannot break `/blog`). A TipTap editor
+   (headings, lists, quote, link, inline images) saves through `manage-blog`-guarded server
+   actions that return typed inline errors, sanitize HTML on write **and** on read (DOMPurify
+   allowlist: http/https/mailto only, no `data:` URLs, forced `rel`), recompute reading time,
+   and lock the slug once first published. Drafts auto-save; a published post updates live only
+   on explicit Save. Images upload to a Supabase Storage bucket validated by magic bytes; a CSP
+   and a scoped `next/image` pattern bound the new external origin. Publishing calls
+   `revalidatePath` so posts go live with no redeploy. `npm run seed-blog` imported the
+   existing 2019 post; `npm run setup-blog-bucket` provisions the bucket.
 
 ---
 
 ## Verification
 
 - Click through every page; confirm it looks right on mobile and desktop.
-- Open/close a cycle and confirm the form switches between live and "notify me".
-- Submit each form → confirm it's stored (Supabase) and a notification reaches
-  Tobi's personal email.
-- Review a submission in the **Supabase dashboard** (the v1 review path); confirm RLS
-  blocks client/anon reads of the applications table.
-- Publish a test blog post and gallery photo from `/studio` → appears live with no redeploy.
-- *(When/if built)* in `/admin`: review an applicant, change status, send a decision
-  email; confirm non-signed-in users are blocked.
+- Open/close a cycle (set its open/close window) and confirm the form switches between
+  live and "notify me".
+- Submit each form → confirm a row is stored in Supabase and a notification record is
+  written (email delivery is stubbed until Resend lands).
+- In `/admin`: sign in, claim and review a submission, change its status, add notes, and
+  send a decision email; confirm a signed-out visitor is blocked and the area 404s when
+  `ADMIN_SESSION_SECRET` is unset.
+- Confirm Row Level Security blocks anon/client reads of the submission tables directly.
+- In `/admin/blog`: write a post, upload a cover, Preview it, Publish → it appears on `/blog`
+  with no redeploy; edit the title of a published post and confirm the slug stays locked.
 
 ---
 

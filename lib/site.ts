@@ -11,8 +11,8 @@ export const siteConfig = {
   tagline: "...above limitations",
   description:
     "Empowering the next generation of leaders. Leadership development, mentorship, and real opportunities for young people.",
-  // Temporary; replaced with the real domain at full launch.
-  url: "https://rise-initiative.vercel.app",
+  // The production domain; overridable per environment via NEXT_PUBLIC_SITE_URL.
+  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://risedevinitiative.org",
 } as const;
 
 /** Route paths. Some pages are not built yet (they 404 for now). */
@@ -26,17 +26,15 @@ export const routes = {
   riseFoundations: "/projects/the-oyo-project#rise-foundations",
   riseHorizons: "/projects/the-oyo-project#rise-horizons",
   riseImpactNetwork: "/projects/the-oyo-project#rise-impact-network",
-  media: "/blog",
   blog: "/blog",
-  gallery: "/gallery",
   getInvolved: "/get-involved",
   mentee: "/get-involved/mentee",
   mentor: "/get-involved/mentor",
-  impactNetwork: "/get-involved/impact-network",
   volunteer: "/get-involved#volunteer",
   supportAStudent: "/get-involved#support-a-student",
   contact: "/contact",
   faq: "/faq",
+  privacy: "/privacy",
 } as const;
 
 /** Primary navigation. */
@@ -45,7 +43,8 @@ export const navLinks: ReadonlyArray<{ label: string; href: string }> = [
   { label: "About", href: routes.about },
   { label: "Team", href: routes.team },
   { label: "Projects", href: routes.projects },
-  { label: "Get Involved", href: routes.getInvolved },
+  { label: "Blog", href: routes.blog },
+  { label: "Get involved", href: routes.getInvolved },
   { label: "Contact", href: routes.contact },
 ];
 

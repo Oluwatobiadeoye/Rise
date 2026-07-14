@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 import { Container } from "@/components/shared/Container";
 import { Button } from "@/components/shared/Button";
+import { Eyebrow } from "@/components/shared/Eyebrow";
 import type { Tier } from "@/lib/projects";
 
 type TierSectionProps = {
@@ -23,6 +24,7 @@ export function TierSection({ tier, tinted = false }: TierSectionProps) {
       <Container>
         <div className="grid gap-10 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] lg:gap-16">
           <div>
+            <Eyebrow>{tier.subtitle}</Eyebrow>
             <h3
               id={headingId}
               className="mt-3 font-display text-3xl font-bold text-ink sm:text-4xl"
@@ -55,7 +57,7 @@ export function TierSection({ tier, tinted = false }: TierSectionProps) {
           </div>
 
           <div className="lg:pt-9">
-            <p className="font-body text-[13px] font-bold uppercase tracking-[0.16em] text-mist">
+            <p className="font-body text-[13px] font-bold uppercase tracking-[0.16em] text-slate">
               Key focus areas
             </p>
             <ul className="mt-4 flex flex-col gap-3">

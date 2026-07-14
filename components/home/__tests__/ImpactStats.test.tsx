@@ -7,7 +7,7 @@ describe("ImpactStats", () => {
     render(<ImpactStats />);
     expect(screen.getByText("10,000")).toBeInTheDocument();
     expect(screen.getByText("3 tiers")).toBeInTheDocument();
-    expect(screen.getByText("Oyo")).toBeInTheDocument();
+    expect(screen.getByText("Since 2017")).toBeInTheDocument();
   });
 
   it("frames 10,000 honestly as a five-year goal", () => {

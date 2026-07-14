@@ -6,11 +6,11 @@ describe("Objectives", () => {
   it("renders all five objective titles", () => {
     render(<Objectives />);
     for (const title of [
-      "Leadership Development",
-      "Mentorship and Opportunity Access",
-      "Education and Talent Development",
-      "Community Engagement and Service",
-      "Sustainable Community Transformation",
+      "Leadership development",
+      "Mentorship and opportunity access",
+      "Education and talent development",
+      "Community engagement and service",
+      "Sustainable community transformation",
     ]) {
       expect(screen.getByRole("heading", { name: title })).toBeInTheDocument();
     }

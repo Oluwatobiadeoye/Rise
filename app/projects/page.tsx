@@ -1,15 +1,15 @@
-import type { Metadata } from "next";
+import { pageMetadata } from "@/lib/metadata";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { Container } from "@/components/shared/Container";
 import { ProjectIndexRow } from "@/components/projects/ProjectIndexRow";
 import { projects } from "@/lib/projects";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
   title: "Our projects",
   description:
     "The work of RISE Initiative, from The Oyo Project (TOP), our flagship leadership and mentorship programme, to the 2019 bootcamps that reached more than 600 students in Oyo.",
-  alternates: { canonical: "/projects" },
-};
+  path: "/projects",
+});
 
 export default function ProjectsPage() {
   return (

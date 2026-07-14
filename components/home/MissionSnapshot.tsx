@@ -7,14 +7,11 @@ import { routes } from "@/lib/site";
 /** Short mission paragraph + link to Our Story. */
 export function MissionSnapshot() {
   return (
-    <section className="py-16 sm:py-20" aria-labelledby="mission-heading">
+    <section className="py-16 sm:py-20" aria-label="Our mission">
       <Container>
         <div className="mx-auto max-w-3xl text-center">
           <Eyebrow>Our mission</Eyebrow>
-          <p
-            id="mission-heading"
-            className="mt-5 font-display text-2xl font-semibold leading-snug text-ink sm:text-3xl"
-          >
+          <p className="mt-5 font-display text-2xl font-semibold leading-snug text-ink sm:text-3xl">
             RISE Initiative exists to identify, develop, connect, and inspire
             individuals through mentorship, leadership development, and
             community-driven initiatives that unlock human potential and

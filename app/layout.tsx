@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Sora, Plus_Jakarta_Sans } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
-import { Nav } from "@/components/shared/Nav";
-import { Footer } from "@/components/shared/Footer";
+import { SiteChrome } from "@/components/shared/SiteChrome";
 import { siteConfig } from "@/lib/site";
 
 // Display / headings. Variable font — full weight axis (400–800) self-hosted
@@ -56,17 +56,9 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="flex min-h-dvh flex-col antialiased">
-        <a
-          href="#main"
-          className="sr-only rounded-md bg-primary px-4 py-2 font-semibold text-white focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-[100]"
-        >
-          Skip to content
-        </a>
-        <Nav />
-        <main id="main" className="flex-1">
-          {children}
-        </main>
-        <Footer />
+        <SiteChrome>{children}</SiteChrome>
+        {/* Cookieless, privacy friendly analytics: no consent banner needed. */}
+        <Analytics />
       </body>
     </html>
   );

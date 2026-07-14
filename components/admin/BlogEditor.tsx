@@ -1,0 +1,604 @@
+"use client";
+
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useTransition,
+} from "react";
+import { useRouter } from "next/navigation";
+import {
+  useEditor,
+  EditorContent,
+  NodeViewWrapper,
+  ReactNodeViewRenderer,
+  type NodeViewProps,
+} from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Link from "@tiptap/extension-link";
+import Image from "@tiptap/extension-image";
+import {
+  Bold,
+  Italic,
+  Heading2,
+  Heading3,
+  List,
+  ListOrdered,
+  Quote,
+  Link2,
+  ImagePlus,
+  Image as ImageIcon,
+} from "lucide-react";
+import {
+  publishBlogPost,
+  saveBlogPost,
+  unpublishBlogPost,
+  archiveBlogPost,
+  uploadBlogImage,
+  type BlogActionResult,
+} from "@/lib/actions/blog";
+import { sanitizePostHtml } from "@/lib/blog/sanitize";
+import { readingMinutesFromHtml } from "@/lib/blog/reading-time";
+import { slugify } from "@/lib/blog/slugify";
+import type { AdminPost, PostCover } from "@/lib/content/types";
+
+type SaveState = "idle" | "saving" | "saved" | "error";
+
+const inputClass =
+  "mt-1 block w-full rounded-lg border border-line bg-surface px-3 py-2 font-body text-sm text-ink outline-none focus-visible:border-primary";
+const labelClass = "block font-body text-sm font-semibold text-ink";
+const primaryBtn =
+  "inline-flex min-h-11 items-center justify-center rounded-pill bg-primary px-5 py-2 font-body text-sm font-semibold text-white transition-colors hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-60";
+const ghostBtn =
+  "inline-flex min-h-11 items-center justify-center rounded-pill px-4 py-2 font-body text-sm font-semibold text-charcoal-700 shadow-[inset_0_0_0_2px_var(--rise-line)] transition-colors hover:bg-surface-sunk disabled:cursor-not-allowed disabled:opacity-60";
+
+const MAX_UPLOAD_DIMENSION = 2000;
+
+/**
+ * Resizes large images in the browser before upload so phone photos (often
+ * 4–12 MB) fit under the upload cap and load fast on the public site. Returns
+ * the original file untouched if it is already small or the browser cannot
+ * process it.
+ */
+async function downscaleImage(file: File): Promise<File> {
+  if (!file.type.startsWith("image/")) return file;
+  try {
+    const bitmap = await createImageBitmap(file);
+    const { width, height } = bitmap;
+    const scale = Math.min(1, MAX_UPLOAD_DIMENSION / Math.max(width, height));
+    if (scale === 1 && file.size <= 1_500_000) {
+      bitmap.close();
+      return file;
+    }
+    const canvas = document.createElement("canvas");
+    canvas.width = Math.round(width * scale);
+    canvas.height = Math.round(height * scale);
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return file;
+    ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+    bitmap.close();
+    const type = file.type === "image/png" ? "image/png" : "image/jpeg";
+    const blob = await new Promise<Blob | null>((resolve) =>
+      canvas.toBlob(resolve, type, 0.85),
+    );
+    if (!blob) return file;
+    const name = file.name.replace(
+      /\.[^.]+$/,
+      type === "image/png" ? ".png" : ".jpg",
+    );
+    return new File([blob], name, { type });
+  } catch {
+    return file;
+  }
+}
+
+/**
+ * In-editor view for an image: a lightweight chip (icon + alt/filename) instead
+ * of the rendered picture, so the editing surface stays fast and uncluttered.
+ * The image still serializes to a real <img> in getHTML(); the live preview pane
+ * shows the actual picture.
+ */
+function ImageChip({ node }: NodeViewProps) {
+  const src = (node.attrs.src as string | undefined) ?? "";
+  const filename = (() => {
+    try {
+      return decodeURIComponent(src.split("/").pop() || "image");
+    } catch {
+      return "image";
+    }
+  })();
+  const label = node.attrs.alt?.trim() || filename;
+  return (
+    <NodeViewWrapper
+      className="my-2"
+      contentEditable={false}
+      data-drag-handle
+    >
+      <span className="inline-flex items-center gap-2 rounded-md border border-line bg-surface-sunk px-3 py-1.5 font-body text-sm text-muted">
+        <ImageIcon className="size-4 shrink-0" />
+        <span className="truncate">{label}</span>
+      </span>
+    </NodeViewWrapper>
+  );
+}
+
+// Image extension that renders the chip in the editor but serializes the real
+// <img> (default renderHTML is inherited, so getHTML output is unchanged).
+const ImagePlaceholder = Image.extend({
+  addNodeView() {
+    return ReactNodeViewRenderer(ImageChip);
+  },
+});
+
+/** Live, read-only render of the post as it will appear on the public site. */
+function PreviewPane({
+  title,
+  cover,
+  bodyHtml,
+}: {
+  title: string;
+  cover: PostCover | null;
+  bodyHtml: string;
+}) {
+  const html = useMemo(() => sanitizePostHtml(bodyHtml), [bodyHtml]);
+  const minutes = useMemo(() => readingMinutesFromHtml(bodyHtml), [bodyHtml]);
+  const empty = !title.trim() && !html.trim() && !cover;
+
+  return (
+    <aside className="lg:sticky lg:top-6 lg:self-start">
+      <p className="mb-2 font-body text-xs font-semibold uppercase tracking-wide text-muted">
+        Preview
+      </p>
+      <div className="rounded-lg border border-line bg-surface p-6">
+        {empty ? (
+          <p className="font-body text-sm text-muted">
+            Your post will preview here as you write.
+          </p>
+        ) : (
+          <>
+            {cover ? (
+              // Admin-only preview of an already-sized asset; next/image adds no
+              // value here.
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={cover.src}
+                alt={cover.alt}
+                className="mb-6 w-full rounded-lg object-cover"
+              />
+            ) : null}
+            <h1 className="font-display text-2xl font-bold text-ink">
+              {title || "Untitled"}
+            </h1>
+            <p className="mt-2 font-body text-sm text-muted">
+              {minutes} min read
+            </p>
+            <div
+              className="post-body mt-6"
+              dangerouslySetInnerHTML={{ __html: html }}
+            />
+          </>
+        )}
+      </div>
+    </aside>
+  );
+}
+
+function ToolbarButton({
+  onClick,
+  active,
+  label,
+  children,
+}: {
+  onClick: () => void;
+  active?: boolean;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={label}
+      aria-pressed={active}
+      className={`inline-flex size-9 items-center justify-center rounded-md transition-colors ${
+        active ? "bg-evergreen-50 text-evergreen-700" : "text-muted hover:bg-surface-sunk"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+export function BlogEditor({ post }: { post: AdminPost | null }) {
+  const router = useRouter();
+  const [id, setId] = useState(post?.id ?? null);
+  const [title, setTitle] = useState(post?.title ?? "");
+  const [excerpt, setExcerpt] = useState(post?.excerpt ?? "");
+  const [cover, setCover] = useState<PostCover | null>(post?.cover ?? null);
+  const [status, setStatus] = useState(post?.status ?? "draft");
+  // Tracks whether the post has ever been published, in state so an in-session
+  // publish locks the slug immediately (the prop alone would be stale).
+  const [firstPublished, setFirstPublished] = useState(
+    Boolean(post?.firstPublishedAt),
+  );
+  // Author, slug, and publish date are all derived/automatic and never shown as
+  // inputs: the author is the signed-in admin (set server-side), and the slug is
+  // derived from the title (tracking it until first publish, then locked so
+  // shared links never break).
+  const slugLocked = firstPublished;
+  const derivedSlug = slugLocked ? (post?.slug ?? "") : slugify(title);
+
+  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [error, setError] = useState<string | null>(null);
+  const [fieldError, setFieldError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const [uploadingCover, setUploadingCover] = useState(false);
+  // The body HTML driving the live preview pane, updated (debounced) as the
+  // author types so the preview stays responsive without re-rendering per key.
+  const [previewHtml, setPreviewHtml] = useState(post?.bodyHtml ?? "");
+  const dirtyRef = useRef(false);
+  const previewTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const editor = useEditor({
+    immediatelyRender: false,
+    extensions: [
+      StarterKit.configure({ heading: { levels: [2, 3, 4] } }),
+      Link.configure({
+        openOnClick: false,
+        autolink: false,
+        protocols: ["http", "https", "mailto"],
+        HTMLAttributes: { rel: "noopener noreferrer nofollow" },
+      }),
+      ImagePlaceholder.configure({ inline: false }),
+    ],
+    content: post?.bodyHtml ?? "",
+    editorProps: {
+      attributes: {
+        class:
+          "min-h-72 max-w-none rounded-b-lg border border-t-0 border-line bg-surface px-4 py-4 font-body text-ink outline-none",
+      },
+    },
+    onUpdate: ({ editor }) => {
+      dirtyRef.current = true;
+      if (previewTimer.current) clearTimeout(previewTimer.current);
+      previewTimer.current = setTimeout(() => setPreviewHtml(editor.getHTML()), 300);
+    },
+  });
+
+  function handleTitleChange(value: string) {
+    setTitle(value);
+    dirtyRef.current = true;
+  }
+
+  // Warn before leaving with unsaved changes.
+  useEffect(() => {
+    const handler = (e: BeforeUnloadEvent) => {
+      if (dirtyRef.current) {
+        e.preventDefault();
+        e.returnValue = "";
+      }
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, []);
+
+  // Stop the pending preview update if the editor unmounts.
+  useEffect(
+    () => () => {
+      if (previewTimer.current) clearTimeout(previewTimer.current);
+    },
+    [],
+  );
+
+  const buildFormData = useCallback((): FormData => {
+    const fd = new FormData();
+    if (id) fd.set("id", id);
+    fd.set("title", title);
+    fd.set("slug", derivedSlug);
+    fd.set("excerpt", excerpt);
+    fd.set("bodyHtml", editor?.getHTML() ?? "");
+    if (cover) {
+      fd.set("coverSrc", cover.src);
+      fd.set("coverAlt", cover.alt);
+      fd.set("coverWidth", String(cover.width));
+      fd.set("coverHeight", String(cover.height));
+    }
+    return fd;
+  }, [id, title, derivedSlug, excerpt, cover, editor]);
+
+  const applyResult = useCallback(
+    (result: BlogActionResult, publishedNow?: boolean) => {
+      if (result.ok) {
+        setError(null);
+        setFieldError(null);
+        setSaveState("saved");
+        dirtyRef.current = false;
+        if (publishedNow) {
+          setStatus("published");
+          setFirstPublished(true);
+        }
+        if (!id) {
+          setId(result.id);
+          // Move to the post's own URL so subsequent saves update in place.
+          router.replace(`/admin/blog/${result.id}`);
+        }
+        router.refresh();
+      } else {
+        setSaveState("error");
+        setError(result.error);
+        setFieldError(result.field ?? null);
+      }
+    },
+    [id, router],
+  );
+
+  const runSave = useCallback(() => {
+    if (!title.trim()) {
+      setSaveState("error");
+      setFieldError("title");
+      setError("A title is required.");
+      return;
+    }
+    setSaveState("saving");
+    startTransition(async () => {
+      const result = await saveBlogPost(null, buildFormData());
+      applyResult(result);
+    });
+  }, [title, buildFormData, applyResult]);
+
+  const runPublish = useCallback(() => {
+    setSaveState("saving");
+    startTransition(async () => {
+      const result = await publishBlogPost(null, buildFormData());
+      applyResult(result, true);
+    });
+  }, [buildFormData, applyResult]);
+
+  const runStatusAction = useCallback(
+    (
+      action: typeof unpublishBlogPost | typeof archiveBlogPost,
+      nextStatus: AdminPost["status"],
+    ) => {
+      if (!id) return;
+      const fd = new FormData();
+      fd.set("id", id);
+      startTransition(async () => {
+        const result = await action(null, fd);
+        if (result.ok) {
+          setStatus(nextStatus);
+          router.refresh();
+        } else {
+          setError(result.error);
+        }
+      });
+    },
+    [id, router],
+  );
+
+  // Auto-save drafts on blur (never a published post — those update only on an
+  // explicit Save, so half-finished edits never reach the public site).
+  const autoSaveDraft = useCallback(() => {
+    if (status !== "draft" || !id || !dirtyRef.current || isPending) return;
+    runSave();
+  }, [status, id, isPending, runSave]);
+
+  async function handleCoverUpload(file: File) {
+    setUploadingCover(true);
+    setError(null);
+    const fd = new FormData();
+    fd.set("file", await downscaleImage(file));
+    const result = await uploadBlogImage(null, fd);
+    setUploadingCover(false);
+    if (result.ok) {
+      setCover({ src: result.url, alt: cover?.alt ?? "", width: result.width, height: result.height });
+      dirtyRef.current = true;
+    } else {
+      setError(result.error);
+    }
+  }
+
+  async function handleInlineImage(file: File) {
+    const fd = new FormData();
+    fd.set("file", await downscaleImage(file));
+    const result = await uploadBlogImage(null, fd);
+    if (!result.ok) {
+      setError(result.error);
+      return;
+    }
+    if (!editor) return;
+    // Require alt text so inline images match the cover's accessibility bar.
+    const alt = window.prompt("Describe this image (alt text):")?.trim() ?? "";
+    if (!alt) {
+      setError("An image needs alt text. Nothing was inserted.");
+      return;
+    }
+    editor.chain().focus().setImage({ src: result.url, alt }).run();
+    dirtyRef.current = true;
+  }
+
+  const saveMessage =
+    saveState === "saving"
+      ? "Saving…"
+      : saveState === "saved"
+        ? "Saved."
+        : saveState === "error"
+          ? (error ?? "Could not save.")
+          : status !== "draft"
+            ? ""
+            : id
+              ? "Draft — changes save automatically."
+              : "Save to create this draft.";
+
+  const fieldErr = (name: string) =>
+    fieldError === name ? (
+      <p className="mt-1 font-body text-xs text-danger">{error}</p>
+    ) : null;
+
+  return (
+    <div className="space-y-6">
+      {status === "published" ? (
+        <p className="rounded-lg border border-primary/30 bg-primary-tint/40 px-4 py-3 font-body text-sm text-ink">
+          This post is live. Saving updates the public post immediately.
+        </p>
+      ) : null}
+
+      <div className="grid gap-8 lg:grid-cols-2 lg:items-start">
+        <div className="space-y-6">
+          <div className="grid gap-4">
+            <div>
+          <label className={labelClass} htmlFor="title">Title</label>
+          <input
+            id="title"
+            value={title}
+            onChange={(e) => handleTitleChange(e.target.value)}
+            onBlur={autoSaveDraft}
+            maxLength={200}
+            className={inputClass}
+          />
+          {fieldErr("title")}
+        </div>
+
+            <div>
+          <label className={labelClass} htmlFor="excerpt">Excerpt</label>
+          <textarea
+            id="excerpt"
+            value={excerpt}
+            onChange={(e) => { setExcerpt(e.target.value); dirtyRef.current = true; }}
+            onBlur={autoSaveDraft}
+            rows={2}
+            maxLength={300}
+            placeholder="A one or two sentence summary shown in the blog list and link previews."
+            className={inputClass}
+          />
+          {fieldErr("excerpt")}
+        </div>
+      </div>
+
+      {/* Cover image */}
+      <div>
+        <p className={labelClass}>Cover image</p>
+        {cover ? (
+          <div className="mt-2 space-y-2">
+            {/* A plain img: this is an admin-only preview of a freshly uploaded
+                asset, not a public LCP image, so next/image's optimization and
+                remote-pattern constraints add no value here. */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={cover.src} alt={cover.alt} className="max-h-48 rounded-lg border border-line" />
+            <div>
+              <label className="font-body text-xs font-semibold text-muted" htmlFor="coverAlt">
+                Alt text (required)
+              </label>
+              <input
+                id="coverAlt"
+                value={cover.alt}
+                onChange={(e) => { setCover({ ...cover, alt: e.target.value }); dirtyRef.current = true; }}
+                onBlur={autoSaveDraft}
+                placeholder="Describe the cover image for screen readers."
+                className={inputClass}
+              />
+              {fieldErr("coverAlt")}
+            </div>
+            <button type="button" className={ghostBtn} onClick={() => { setCover(null); dirtyRef.current = true; }}>
+              Remove cover
+            </button>
+          </div>
+        ) : (
+          <label className={`${ghostBtn} mt-2 cursor-pointer`}>
+            {uploadingCover ? "Uploading…" : "Upload cover image"}
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="sr-only"
+              onChange={(e) => {
+                const f = e.target.files?.[0];
+                if (f) handleCoverUpload(f);
+              }}
+            />
+          </label>
+        )}
+      </div>
+
+      {/* Body editor */}
+      <div>
+        <p className={labelClass}>Body</p>
+        {editor ? (
+          <>
+            <div className="mt-1 flex flex-wrap items-center gap-1 rounded-t-lg border border-line bg-surface-sunk px-2 py-1.5">
+              <ToolbarButton label="Bold" active={editor.isActive("bold")} onClick={() => editor.chain().focus().toggleBold().run()}><Bold className="size-4" /></ToolbarButton>
+              <ToolbarButton label="Italic" active={editor.isActive("italic")} onClick={() => editor.chain().focus().toggleItalic().run()}><Italic className="size-4" /></ToolbarButton>
+              <ToolbarButton label="Heading 2" active={editor.isActive("heading", { level: 2 })} onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}><Heading2 className="size-4" /></ToolbarButton>
+              <ToolbarButton label="Heading 3" active={editor.isActive("heading", { level: 3 })} onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}><Heading3 className="size-4" /></ToolbarButton>
+              <ToolbarButton label="Bullet list" active={editor.isActive("bulletList")} onClick={() => editor.chain().focus().toggleBulletList().run()}><List className="size-4" /></ToolbarButton>
+              <ToolbarButton label="Numbered list" active={editor.isActive("orderedList")} onClick={() => editor.chain().focus().toggleOrderedList().run()}><ListOrdered className="size-4" /></ToolbarButton>
+              <ToolbarButton label="Quote" active={editor.isActive("blockquote")} onClick={() => editor.chain().focus().toggleBlockquote().run()}><Quote className="size-4" /></ToolbarButton>
+              <ToolbarButton label="Link" active={editor.isActive("link")} onClick={() => {
+                const url = window.prompt("Link URL (https://…):") ?? "";
+                if (!url) { editor.chain().focus().unsetLink().run(); return; }
+                editor.chain().focus().setLink({ href: url }).run();
+              }}><Link2 className="size-4" /></ToolbarButton>
+              <label className="inline-flex size-9 cursor-pointer items-center justify-center rounded-md text-muted hover:bg-surface-sunk" aria-label="Insert image">
+                <ImagePlus className="size-4" />
+                <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={(e) => { const f = e.target.files?.[0]; if (f) handleInlineImage(f); }} />
+              </label>
+            </div>
+            <EditorContent editor={editor} onBlur={autoSaveDraft} />
+            {fieldErr("bodyHtml")}
+          </>
+        ) : (
+          <p className="mt-2 font-body text-sm text-muted">Loading editor…</p>
+        )}
+      </div>
+        </div>
+
+        <PreviewPane title={title} cover={cover} bodyHtml={previewHtml} />
+      </div>
+
+      {/* Actions */}
+      <div className="flex flex-wrap items-center gap-3 border-t border-line pt-5">
+        <button type="button" className={primaryBtn} onClick={runSave} disabled={isPending}>
+          Save
+        </button>
+        {status === "published" ? (
+          <button type="button" className={ghostBtn} disabled={isPending} onClick={() => {
+            if (window.confirm("Remove this post from the public site?")) {
+              runStatusAction(unpublishBlogPost, "draft");
+            }
+          }}>
+            Unpublish
+          </button>
+        ) : (
+          <button type="button" className={primaryBtn} onClick={runPublish} disabled={isPending}>
+            Publish
+          </button>
+        )}
+        {id ? (
+          <a href={`/admin/blog/${id}/preview`} target="_blank" rel="noopener noreferrer" className={ghostBtn}>
+            Preview
+          </a>
+        ) : null}
+        {id && status !== "archived" ? (
+          <button type="button" className={`${ghostBtn} text-danger`} disabled={isPending} onClick={() => {
+            if (window.confirm("Archive this post? It will be removed from the public site (recoverable).")) {
+              runStatusAction(archiveBlogPost, "archived");
+            }
+          }}>
+            Archive
+          </button>
+        ) : null}
+        {status === "published" && post ? (
+          <a href={`/blog/${derivedSlug}`} target="_blank" rel="noopener noreferrer" className="font-body text-sm font-semibold text-primary hover:underline">
+            View live post →
+          </a>
+        ) : null}
+        <span
+          className={`ms-auto font-body text-xs ${saveState === "error" ? "text-danger" : "text-muted"}`}
+          aria-live="polite"
+        >
+          {saveMessage}
+        </span>
+      </div>
+    </div>
+  );
+}

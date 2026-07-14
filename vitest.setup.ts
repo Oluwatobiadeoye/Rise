@@ -7,6 +7,21 @@ afterEach(() => {
   cleanup();
 });
 
+// jsdom doesn't implement matchMedia; components query it for reduced motion.
+// Guarded because filesystem suites opt into the node environment (no window).
+if (typeof window !== "undefined") {
+  window.matchMedia = ((query: string) => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  })) as typeof window.matchMedia;
+}
+
 // Render next/link as a plain anchor in unit tests (no router runtime needed).
 vi.mock("next/link", async () => {
   const { createElement } = await import("react");
@@ -58,6 +73,12 @@ vi.mock("next/image", async () => {
       }),
   };
 });
+
+// Vercel Analytics renders a script tag and pings an endpoint at runtime; it has
+// no place in jsdom unit tests, so render it as nothing.
+vi.mock("@vercel/analytics/next", () => ({
+  Analytics: () => null,
+}));
 
 // Stub the App Router navigation hooks our client components read.
 vi.mock("next/navigation", () => ({

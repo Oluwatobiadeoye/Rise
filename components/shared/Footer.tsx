@@ -30,6 +30,7 @@ const columns: ReadonlyArray<{
     links: [
       { label: "About", href: routes.about },
       { label: "Our team", href: routes.team },
+      { label: "Blog", href: routes.blog },
       { label: "Contact", href: routes.contact },
       { label: "FAQ", href: routes.faq },
     ],
@@ -82,9 +83,17 @@ export function Footer() {
         </div>
 
         <div className="flex flex-col-reverse items-start gap-5 pt-6 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-[13px] text-white/55">
-            © {year} RISE Initiative. ...above limitations.
-          </p>
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-4">
+            <p className="text-[13px] text-white/55">
+              © {year} RISE Initiative. ...above limitations.
+            </p>
+            <Link
+              href={routes.privacy}
+              className="text-[13px] text-white/55 transition-colors hover:text-white"
+            >
+              Privacy policy
+            </Link>
+          </div>
           <ul className="flex gap-2.5">
             {socials.map((s) => {
               const Icon = socialIcons[s.key];

@@ -4,7 +4,7 @@ import { Eyebrow } from "@/components/shared/Eyebrow";
 const stats: ReadonlyArray<{ value: string; label: string }> = [
   { value: "10,000", label: "Young people empowered — our five-year goal" },
   { value: "3 tiers", label: "Secondary, tertiary & professional" },
-  { value: "Oyo", label: "Where our work is rooted" },
+  { value: "Since 2017", label: "Identifying and developing young leaders" },
 ];
 
 /** Ascent-gradient impact band sitting beneath the hero. */

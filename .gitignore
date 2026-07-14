@@ -20,6 +20,9 @@
 # production
 /build
 
+# local form-submission data (filesystem store; never commit submissions)
+/data/
+
 # misc
 .DS_Store
 *.pem

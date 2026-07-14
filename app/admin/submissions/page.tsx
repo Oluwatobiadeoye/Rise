@@ -1,0 +1,150 @@
+import Link from "next/link";
+import { requireAdmin } from "@/lib/admin/auth";
+import { SubmissionTable } from "@/components/admin/SubmissionTable";
+import { isSubmissionType } from "@/lib/admin/ref";
+import { cn } from "@/lib/cn";
+import { db } from "@/lib/db";
+import {
+  ALL_STATUSES,
+  STATUS_LABELS,
+  isStatusForType,
+  statusesForType,
+} from "@/lib/status";
+import type { SubmissionStatus, SubmissionType } from "@/lib/types";
+
+export const dynamic = "force-dynamic";
+
+const TYPES: readonly SubmissionType[] = [
+  "contact",
+  "mentor",
+  "mentee",
+  "volunteer",
+];
+
+function isStatus(value: string | undefined): value is SubmissionStatus {
+  return (
+    typeof value === "string" &&
+    (ALL_STATUSES as readonly string[]).includes(value)
+  );
+}
+
+function buildHref(params: {
+  type?: SubmissionType;
+  status?: SubmissionStatus;
+}): string {
+  const search = new URLSearchParams();
+  if (params.type) search.set("type", params.type);
+  if (params.status) search.set("status", params.status);
+  const query = search.toString();
+  return query ? `/admin/submissions?${query}` : "/admin/submissions";
+}
+
+function Pill({
+  href,
+  label,
+  active,
+}: {
+  href: string;
+  label: string;
+  active: boolean;
+}) {
+  return (
+    <Link
+      href={href}
+      className={cn(
+        "inline-flex items-center rounded-pill px-3 py-1.5 font-body text-sm font-semibold transition-colors",
+        active
+          ? "bg-primary text-white"
+          : "bg-surface text-charcoal-700 shadow-[inset_0_0_0_1px_var(--rise-line)] hover:bg-surface-sunk",
+      )}
+    >
+      {label}
+    </Link>
+  );
+}
+
+export default async function AdminSubmissionsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ type?: string; status?: string }>;
+}) {
+  await requireAdmin();
+
+  const { type: rawType, status: rawStatus } = await searchParams;
+  const type = isSubmissionType(rawType) ? rawType : undefined;
+  // A status is honoured only when it is valid for the selected type; an
+  // impossible pairing (e.g. type=contact&status=accepted) is treated as no
+  // status filter so the table is never filtered by a status the type can't hold.
+  const status =
+    type !== undefined
+      ? isStatusForType(type, rawStatus)
+        ? rawStatus
+        : undefined
+      : isStatus(rawStatus)
+        ? rawStatus
+        : undefined;
+
+  // The status pills offer only the statuses possible for the selected type;
+  // with no type selected they offer every status.
+  const statusOptions = type ? statusesForType(type) : ALL_STATUSES;
+
+  const submissions = await db.listSubmissions({ type, status });
+  const admins = await db.listAdmins();
+  const reviewerNames: Record<string, string> = Object.fromEntries(
+    admins.map((a) => [a.id, a.name]),
+  );
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <h1 className="font-display text-2xl font-bold text-ink">
+          Submissions
+        </h1>
+        <p className="mt-2 font-body text-sm text-muted">
+          {submissions.length} result{submissions.length === 1 ? "" : "s"}.
+        </p>
+      </div>
+
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-body text-xs font-semibold uppercase tracking-wide text-muted">
+            Type
+          </span>
+          <Pill
+            href={buildHref({ status })}
+            label="All"
+            active={!type}
+          />
+          {TYPES.map((value) => (
+            <Pill
+              key={value}
+              href={buildHref({ type: value, status })}
+              label={value.charAt(0).toUpperCase() + value.slice(1)}
+              active={type === value}
+            />
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="font-body text-xs font-semibold uppercase tracking-wide text-muted">
+            Status
+          </span>
+          <Pill href={buildHref({ type })} label="All" active={!status} />
+          {statusOptions.map((value) => (
+            <Pill
+              key={value}
+              href={buildHref({ type, status: value })}
+              label={STATUS_LABELS[value]}
+              active={status === value}
+            />
+          ))}
+        </div>
+      </div>
+
+      <SubmissionTable
+        submissions={submissions}
+        reviewerNames={reviewerNames}
+      />
+    </div>
+  );
+}

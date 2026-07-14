@@ -3,7 +3,7 @@
 Public marketing website for **RISE Initiative** ("Rising Above Limitations"), a
 youth-leadership NGO rooted in Oyo, Nigeria. Goal: production site by **end of June 2026**.
 
-- **Production:** https://rise-ruby-three.vercel.app/
+- **Production:** https://risedevinitiative.org/
 - **Plan & milestones:** `.claude/plans/website-plan.md` — the source of truth. Keep its checkboxes current as work lands.
 - **Design system:** `design-system/` — vendored "Evergreen & Gold" kit (tokens, fonts, logo, UI patterns). Reference only; it is not part of the app build and is eslint-ignored.
 - **Content source:** the canonical content draft (Google Drive file id `1oyXhmnr6nsm-hMxmmlApM8VmDhz5IWVQ`). Page copy is baked into code from there.

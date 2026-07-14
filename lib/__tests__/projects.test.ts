@@ -23,13 +23,13 @@ describe("projects roster", () => {
     ]);
   });
 
-  it("points the Impact Network CTA at a deliberate dead path", () => {
+  it("points the Impact Network CTA at the Get Involved hub", () => {
     const network = getProject("the-oyo-project")?.tiers?.find(
       (t) => t.slug === "rise-impact-network",
     );
     expect(network?.cta?.[0]).toEqual({
       label: "Join the community",
-      href: "/get-involved/impact-network",
+      href: "/get-involved",
     });
   });
 

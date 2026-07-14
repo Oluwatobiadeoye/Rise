@@ -316,3 +316,114 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ============================================================
+   Blog post body (rendered markdown)
+   ============================================================ */
+.post-body {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  color: var(--text);
+}
+
+.post-body h2,
+.post-body h3,
+.post-body h4 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--rise-ink);
+  margin-top: 2.25em;
+  margin-bottom: 0.6em;
+  line-height: 1.2;
+}
+
+.post-body h2 {
+  font-size: 1.625rem;
+}
+
+.post-body h3 {
+  font-size: 1.3125rem;
+}
+
+.post-body h4 {
+  font-size: 1.125rem;
+}
+
+.post-body p {
+  margin-block: 1.1em;
+}
+
+.post-body a {
+  color: var(--primary);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+.post-body a:hover {
+  color: var(--rise-evergreen-700);
+}
+
+.post-body ul,
+.post-body ol {
+  margin-block: 1.1em;
+  padding-inline-start: 1.5em;
+}
+
+.post-body ul {
+  list-style: disc;
+}
+
+.post-body ol {
+  list-style: decimal;
+}
+
+.post-body li {
+  margin-block: 0.4em;
+}
+
+.post-body li::marker {
+  color: var(--primary);
+}
+
+.post-body blockquote {
+  margin-block: 1.5em;
+  border-inline-start: 3px solid var(--primary);
+  padding-inline-start: 1.25em;
+  color: var(--rise-slate);
+  font-style: italic;
+}
+
+.post-body hr {
+  margin-block: 2.5em;
+  border: 0;
+  border-top: 1px solid var(--rise-line);
+}
+
+.post-body img {
+  border-radius: 12px;
+  margin-block: 1.5em;
+}
+
+.post-body code {
+  font-size: 0.9em;
+  background: var(--rise-evergreen-50);
+  border-radius: 4px;
+  padding: 0.15em 0.4em;
+}
+
+.post-body pre {
+  margin-block: 1.5em;
+  overflow-x: auto;
+  border-radius: 12px;
+  background: var(--rise-charcoal-900);
+  color: #fff;
+  padding: 1.25em 1.5em;
+}
+
+.post-body pre code {
+  background: transparent;
+  padding: 0;
+}
