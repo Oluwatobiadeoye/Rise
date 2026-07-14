@@ -6,6 +6,7 @@
  */
 
 import type { StaticImageData } from "next/image";
+import fareePhoto from "@/public/team/faree.png";
 import daraPhoto from "@/public/team/dara.png";
 import tobiPhoto from "@/public/team/tobi.jpeg";
 import quadriPhoto from "@/public/team/quadri.jpeg";
@@ -37,6 +38,7 @@ export const team: ReadonlyArray<TeamMember> = [
     role: "Director, Programmes and Operations",
     profession: "Banking Professional",
     location: "Lagos, Nigeria",
+    photo: fareePhoto,
     bio: [
       "Fareedah is a financial services professional with over seven years of experience across operational leadership, financial governance, business strategy, and public policy research. She currently serves as an Operations Manager at Access Bank Plc, where she leads operational execution, strengthens risk and regulatory compliance frameworks, and optimises banking processes across critical functions.",
       "A former Global Schools Advocate with the United Nations Sustainable Development Solutions Network, Fareedah advances youth leadership and capacity-building initiatives across diverse communities. Her work through RISE Initiative is anchored in the conviction that sustainable societal progress depends on empowering young people with the confidence, skills, and support systems needed to lead and drive positive change.",
