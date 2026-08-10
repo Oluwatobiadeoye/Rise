@@ -4,7 +4,7 @@ import { Container } from "@/components/shared/Container";
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { Button } from "@/components/shared/Button";
 import { routes } from "@/lib/site";
-import heroPhoto from "@/public/photo-hero.jpg";
+import heroPhoto from "@/public/projects/foundations-2019/best-legacy/best-legacy-13.jpg";
 
 /** Home hero — headline, subhead, and the two primary calls to action. */
 export function Hero() {
