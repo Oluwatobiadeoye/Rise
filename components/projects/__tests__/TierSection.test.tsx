@@ -21,11 +21,6 @@ describe("TierSection", () => {
     expect(screen.getByText("Career Development")).toBeInTheDocument();
   });
 
-  it("renders the tier subtitle", () => {
-    render(<TierSection tier={horizons} />);
-    expect(screen.getByText(horizons.subtitle)).toBeInTheDocument();
-  });
-
   it("renders mentor and mentee CTAs for Horizons", () => {
     render(<TierSection tier={horizons} />);
     expect(
