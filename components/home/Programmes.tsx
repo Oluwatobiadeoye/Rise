@@ -5,7 +5,7 @@ import { Container } from "@/components/shared/Container";
 import { routes } from "@/lib/site";
 
 import foundationsImg from "@/public/projects/foundations-2019/sped/sped-09.jpg";
-import horizonsImg from "@/public/projects/foundations-2019/aatan/aatan-11.jpg";
+import horizonsImg from "@/public/projects/foundations-2019/best-legacy/best-legacy-14.jpg";
 import impactImg from "@/public/projects/foundations-2019/aatan/aatan-13.jpg";
 
 const programmes: ReadonlyArray<{
@@ -15,6 +15,7 @@ const programmes: ReadonlyArray<{
   href: string;
   image: StaticImageData;
   imageAlt: string;
+  imagePosition?: string;
 }> = [
   {
     name: "RISE Foundations",
@@ -33,6 +34,7 @@ const programmes: ReadonlyArray<{
     image: horizonsImg,
     imageAlt:
       "Students seated and engaged during a RISE Initiative career and leadership session.",
+    imagePosition: "object-[50%_85%]",
   },
   {
     name: "RISE Impact Network",
@@ -72,7 +74,7 @@ export function Programmes() {
                   fill
                   sizes="(min-width: 768px) 33vw, 100vw"
                   placeholder="blur"
-                  className="object-cover object-top"
+                  className={`object-cover ${programme.imagePosition ?? "object-top"}`}
                 />
               </div>
               <div className="flex flex-1 flex-col p-6">
