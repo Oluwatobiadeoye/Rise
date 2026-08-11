@@ -35,7 +35,7 @@ const testimonials: ReadonlyArray<{
   },
   {
     quote:
-      "I recall being part of this enlightenment program, by the RISE Initiative that spoke to us about life, purpose, and intentional living. The details of that day may have faded, but the impression it left has not. It planted a seed, the understanding that success is not accidental, that clarity of purpose is something you pursue deliberately. I can trace a straight line between that early nudge toward purpose and the intentional choices I have made since then.",
+      "I remember being part of a career bootcamp by RISE Initiative that spoke to us about life, purpose, and intentional living. The details of that day may have faded, but the impression it left has not. It planted a seed: the understanding that success is not accidental, and that a life of purpose is something you pursue deliberately. Looking back, I can trace a straight line from that early nudge toward intentional living to the choices I have made since then.",
     name: "Worship Adeife Adebayo",
     title: "Education & History Student, Obafemi Awolowo University",
     school: "Aatan Baptist Comprehensive High School, Oyo",
