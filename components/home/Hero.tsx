@@ -19,8 +19,10 @@ export function Hero() {
         <div>
           <Eyebrow>Identify · Develop · Connect</Eyebrow>
           <h1 className="text-display mt-4 text-ink">
-            Empowering the next generation of{" "}
-            <span className="text-primary">leaders.</span>
+            Empowering the next generation{" "}
+            <span className="whitespace-nowrap">
+              of <span className="text-primary">leaders in Oyo.</span>
+            </span>
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate sm:text-xl">
             We connect young people from secondary school through their early

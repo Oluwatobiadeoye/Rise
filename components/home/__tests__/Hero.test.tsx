@@ -3,11 +3,12 @@ import { render, screen } from "@testing-library/react";
 import { Hero } from "../Hero";
 
 describe("Hero", () => {
-  it("renders the broad headline with no Oyo framing", () => {
+  it("renders the Oyo-focused headline", () => {
     render(<Hero />);
     const h1 = screen.getByRole("heading", { level: 1 });
-    expect(h1).toHaveTextContent(/Empowering the next generation of\s+leaders/i);
-    expect(h1).not.toHaveTextContent(/Oyo/i);
+    expect(h1).toHaveTextContent(
+      /Empowering the next generation of\s+leaders in Oyo\./i,
+    );
   });
 
   it("uses learn-first CTAs to the right routes", () => {
