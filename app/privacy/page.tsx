@@ -2,7 +2,7 @@ import Link from "next/link";
 import { pageMetadata } from "@/lib/metadata";
 import { Container } from "@/components/shared/Container";
 import { PageHeader } from "@/components/shared/PageHeader";
-import { contactEmails, routes } from "@/lib/site";
+import { contactEmail, routes } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "Privacy policy",
@@ -223,10 +223,10 @@ export default function PrivacyPage() {
               To ask a question about this policy, to make a data request, or to
               ask us to delete your information, email us at{" "}
               <a
-                href={`mailto:${contactEmails.general}`}
+                href={`mailto:${contactEmail}`}
                 className="font-semibold text-primary transition-colors hover:text-primary-press"
               >
-                {contactEmails.general}
+                {contactEmail}
               </a>{" "}
               or use our{" "}
               <Link

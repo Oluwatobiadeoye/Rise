@@ -63,7 +63,7 @@ describe("RoleSection", () => {
         disabledCta
         disabledLabel="Donate"
         ctaNote="Online donations are coming soon."
-        ctaHref="mailto:hello@rise.org"
+        ctaHref="mailto:hello@risedevinitiative.org"
         fallbackLabel="Email us to give"
       />,
     );
@@ -74,6 +74,6 @@ describe("RoleSection", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("link", { name: "Email us to give" }),
-    ).toHaveAttribute("href", "mailto:hello@rise.org");
+    ).toHaveAttribute("href", "mailto:hello@risedevinitiative.org");
   });
 });

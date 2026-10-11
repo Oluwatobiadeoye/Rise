@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { routes, contactEmails } from "@/lib/site";
+import { routes, contactEmail } from "@/lib/site";
 
 const linkClass =
   "font-semibold text-primary underline-offset-2 transition-colors hover:text-primary-press hover:underline";
@@ -44,15 +44,15 @@ export const faqs: ReadonlyArray<Faq> = [
       <>
         We welcome partnerships with secondary schools through RISE Foundations
         (leadership clubs, mentorship, and educational support). To explore
-        working together, reach out to our{" "}
-        <a href={`mailto:${contactEmails.partnerships}`} className={linkClass}>
-          partnerships team
+        working together, email us at{" "}
+        <a href={`mailto:${contactEmail}`} className={linkClass}>
+          {contactEmail}
         </a>
         .
       </>
     ),
     plainText:
-      "We welcome partnerships with secondary schools through RISE Foundations (leadership clubs, mentorship, and educational support). To explore working together, reach out to our partnerships team.",
+      "We welcome partnerships with secondary schools through RISE Foundations (leadership clubs, mentorship, and educational support). To explore working together, email us at hello@risedevinitiative.org.",
   },
   {
     question:

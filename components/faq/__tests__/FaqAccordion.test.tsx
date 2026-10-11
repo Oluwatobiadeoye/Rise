@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { FaqAccordion } from "../FaqAccordion";
-import { routes, contactEmails } from "@/lib/site";
+import { routes, contactEmail } from "@/lib/site";
 
 describe("FaqAccordion", () => {
   it("renders the four verbatim questions", () => {
@@ -33,13 +33,13 @@ describe("FaqAccordion", () => {
     expect(container.querySelectorAll("details")).toHaveLength(4);
   });
 
-  it("links the mentee application and the partnerships email from site config", () => {
+  it("links the mentee application and the contact email from site config", () => {
     render(<FaqAccordion />);
     expect(
       screen.getByRole("link", { name: /apply to be a mentee/i }),
     ).toHaveAttribute("href", routes.mentee);
     expect(
-      screen.getByRole("link", { name: /partnerships team/i }),
-    ).toHaveAttribute("href", `mailto:${contactEmails.partnerships}`);
+      screen.getByRole("link", { name: contactEmail }),
+    ).toHaveAttribute("href", `mailto:${contactEmail}`);
   });
 });

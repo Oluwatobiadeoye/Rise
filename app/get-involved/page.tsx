@@ -2,7 +2,7 @@ import { pageMetadata } from "@/lib/metadata";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { RoleSection } from "@/components/get-involved/RoleSection";
 import { VolunteerForm } from "@/components/get-involved/VolunteerForm";
-import { routes, contactEmails } from "@/lib/site";
+import { routes, contactEmail } from "@/lib/site";
 
 export const metadata = pageMetadata({
   title: "Get involved",
@@ -68,7 +68,7 @@ export default function GetInvolvedPage() {
         disabledCta
         disabledLabel="Donate"
         ctaNote="Online donations are coming soon."
-        ctaHref={`mailto:${contactEmails.general}`}
+        ctaHref={`mailto:${contactEmail}`}
         fallbackLabel="Email us to give"
       />
     </>

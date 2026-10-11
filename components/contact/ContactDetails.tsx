@@ -1,13 +1,6 @@
 import { Eyebrow } from "@/components/shared/Eyebrow";
 import { socialIcons } from "@/components/shared/icons";
-import { contactEmails, socials } from "@/lib/site";
-
-const methods: ReadonlyArray<{ label: string; email: string }> = [
-  { label: "General enquiries", email: contactEmails.general },
-  { label: "Partnerships and sponsorship", email: contactEmails.partnerships },
-  { label: "Mentorship programme", email: contactEmails.mentorship },
-  { label: "Media and press", email: contactEmails.media },
-];
+import { contactEmail, socials } from "@/lib/site";
 
 /** Static contact directory: email methods and social channels. */
 export function ContactDetails() {
@@ -21,25 +14,20 @@ export function ContactDetails() {
         Contact details.
       </h2>
 
-      <dl className="mt-8 flex flex-col gap-5">
-        {methods.map((method) => (
-          <div
-            key={method.label}
-            className="rounded-lg border border-line/60 bg-surface p-5 shadow-md"
+      <dl className="mt-8 rounded-lg border border-line/60 bg-surface p-5 shadow-md">
+        <dt className="font-display text-sm font-semibold text-ink">Email us</dt>
+        <dd className="mt-1">
+          <a
+            href={`mailto:${contactEmail}`}
+            className="text-slate transition-colors hover:text-primary focus-visible:text-primary"
           >
-            <dt className="font-display text-sm font-semibold text-ink">
-              {method.label}
-            </dt>
-            <dd className="mt-1">
-              <a
-                href={`mailto:${method.email}`}
-                className="text-slate transition-colors hover:text-primary focus-visible:text-primary"
-              >
-                {method.email}
-              </a>
-            </dd>
-          </div>
-        ))}
+            {contactEmail}
+          </a>
+        </dd>
+        <dd className="mt-2 text-sm text-slate">
+          For general enquiries, partnerships and sponsorship, mentorship, and
+          media.
+        </dd>
       </dl>
 
       <h3 className="mt-10 font-display text-sm font-semibold text-ink">

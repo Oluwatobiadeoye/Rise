@@ -1,8 +1,7 @@
 /**
  * Site-wide navigation, routes, socials, and contact details.
  *
- * NOTE: email addresses and social URLs are placeholders, to be confirmed
- * before full launch.
+ * NOTE: social URLs are placeholders, to be confirmed before full launch.
  */
 
 export const siteConfig = {
@@ -83,10 +82,5 @@ export const socials: ReadonlyArray<{
   },
 ];
 
-/** Contact emails (placeholders). */
-export const contactEmails = {
-  general: "hello@rise.org",
-  partnerships: "partnerships@rise.org",
-  mentorship: "mentorship@rise.org",
-  media: "media@rise.org",
-} as const;
+/** The single public inbox; it forwards to the core team. */
+export const contactEmail = "hello@risedevinitiative.org";
