@@ -68,8 +68,3 @@ npm run build      # next build (the deploy gate)
 - **Production deploys are gated on CI.** The `deploy` job has `needs: verify` and runs only on push to `main`, deploying to Vercel via the CLI (`vercel pull` → `vercel build --prod` → `vercel deploy --prebuilt --prod`). A red pipeline means no deploy.
 - **Vercel's automatic deploy on `main` is disabled** (`vercel.json` → `git.deploymentEnabled.main = false`) so the pipeline is the only path to production. Branch/PR previews still auto-deploy.
 - Required GitHub repo secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`. Do not deploy to production outside the pipeline.
-
-## Product notes
-
-- The **home page hero names Oyo** ("Empowering the next generation of leaders in Oyo."); the rest of the home page stays broad, with detailed Oyo framing on the Projects / TOP page. CTAs are learn-first ("Explore our programmes", "Get involved").
-- Photography is placeholder until real RISE photos are supplied.
