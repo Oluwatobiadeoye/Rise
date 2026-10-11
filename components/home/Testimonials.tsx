@@ -1,9 +1,20 @@
 "use client";
 
 import { useState, useEffect, useSyncExternalStore } from "react";
-import { Quote, ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import {
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  Pause,
+  Play,
+  Quote,
+} from "lucide-react";
 import { Container } from "@/components/shared/Container";
 import { Eyebrow } from "@/components/shared/Eyebrow";
+import { routes } from "@/lib/site";
+import { excerptOf, featuredTestimonials } from "@/lib/testimonials";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 
@@ -13,34 +24,7 @@ function subscribeToReducedMotion(onChange: () => void) {
   return () => mql.removeEventListener("change", onChange);
 }
 
-const testimonials: ReadonlyArray<{
-  quote: string;
-  name: string;
-  title: string;
-  school: string;
-}> = [
-  {
-    quote:
-      "My passion for community impact began when RISE Initiative visited my secondary school to teach us about leadership, the Sustainable Development Goals (SDGs), and how young people can create positive change. That experience planted a seed that has continued to shape my journey. I am grateful to RISE Initiative.",
-    name: "Timilehin Ayoola",
-    title: "Co-Founder, Career Forge Africa",
-    school: "Aatan Baptist Comprehensive High School, Oyo",
-  },
-  {
-    quote:
-      "Back in secondary school, the programme opened my eyes to the power of community impact and taught me what it means to take responsibility. Today, I realize how deeply important that early foundation was. The bootcamp gave me the early confidence to serve others and lead with purpose and values that continue to drive my work as a youth leader today.",
-    name: "Paul Adedeji",
-    title: "Millennium Fellowship Scholar & SDG Advocate",
-    school: "Aatan Baptist Comprehensive High School, Oyo",
-  },
-  {
-    quote:
-      "I remember being part of a career bootcamp by RISE Initiative that spoke to us about life, purpose, and intentional living. The details of that day may have faded, but the impression it left has not. It planted a seed: the understanding that success is not accidental, and that a life of purpose is something you pursue deliberately. Looking back, I can trace a straight line from that early nudge toward intentional living to the choices I have made since then.",
-    name: "Worship Adeife Adebayo",
-    title: "Education & History Student, Obafemi Awolowo University",
-    school: "Aatan Baptist Comprehensive High School, Oyo",
-  },
-];
+const testimonials = featuredTestimonials;
 
 export function Testimonials() {
   const [current, setCurrent] = useState(0);
@@ -115,29 +99,59 @@ export function Testimonials() {
           >
             {testimonials.map((t, i) => (
               <li
-                key={t.name}
+                key={t.slug}
                 className="w-full flex-shrink-0 px-1"
                 role="group"
                 aria-roledescription="slide"
                 aria-label={`Testimonial ${i + 1} of ${testimonials.length}`}
                 aria-hidden={i !== current}
+                inert={i !== current}
               >
-                <figure className="flex flex-col rounded-lg border border-line/60 bg-bg p-8 sm:p-10">
+                <figure className="flex h-full flex-col rounded-lg border border-line/60 bg-bg p-8 sm:p-10">
                   <Quote
                     className="size-8 text-gold"
                     aria-hidden="true"
                     fill="currentColor"
                   />
-                  <blockquote className="mt-4 flex-1 text-lg leading-relaxed text-ink">
-                    {t.quote}
+                  <blockquote className="mt-4 flex-1">
+                    <p className="font-display text-xl font-bold leading-snug text-ink sm:text-2xl">
+                      &ldquo;{t.headline}&rdquo;
+                    </p>
+                    <p className="mt-4 text-lg leading-relaxed text-slate">
+                      {excerptOf(t)}
+                    </p>
                   </blockquote>
-                  <figcaption className="mt-6">
-                    <span className="block text-sm font-medium text-ink">
-                      <span className="font-display font-bold">{t.name}</span>
-                      <span className="text-slate"> · {t.title}</span>
-                    </span>
-                    <span className="mt-0.5 block text-sm text-slate">{t.school}</span>
-                  </figcaption>
+                  <div className="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 sm:flex-nowrap">
+                    <figcaption className="flex min-w-0 items-center gap-4">
+                      <Image
+                        src={t.photo}
+                        alt={`Portrait of ${t.name}`}
+                        width={56}
+                        height={56}
+                        sizes="56px"
+                        className="size-14 shrink-0 rounded-full object-cover"
+                      />
+                      <span className="text-sm">
+                        <span className="block font-display font-bold text-ink">
+                          {t.name}
+                        </span>
+                        {t.roles.map((role) => (
+                          <span key={role} className="block text-slate">
+                            {role}
+                          </span>
+                        ))}
+                        <span className="mt-0.5 block text-slate">{t.school}</span>
+                      </span>
+                    </figcaption>
+                    <Link
+                      href={`${routes.testimonials}#${t.slug}`}
+                      className="inline-flex shrink-0 items-center gap-1.5 font-semibold text-primary transition-colors hover:text-primary-press"
+                    >
+                      Read full story
+                      <span className="sr-only"> from {t.name}</span>
+                      <ArrowRight className="size-4" aria-hidden="true" />
+                    </Link>
+                  </div>
                 </figure>
               </li>
             ))}
@@ -189,6 +203,14 @@ export function Testimonials() {
           </div>
         </div>
         </div>
+
+        <Link
+          href={routes.testimonials}
+          className="mt-8 inline-flex items-center gap-1.5 font-semibold text-primary transition-colors hover:text-primary-press"
+        >
+          More voices of RISE
+          <ArrowRight className="size-4" aria-hidden="true" />
+        </Link>
       </Container>
     </section>
   );

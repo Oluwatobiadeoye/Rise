@@ -43,7 +43,7 @@ export function Hero() {
         <div className="relative h-[300px] w-full overflow-hidden rounded-lg shadow-lg lg:h-[440px]">
           <Image
             src={heroPhoto}
-            alt="Four young people smiling with arms raised in celebration, holding folders"
+            alt="A secondary school student speaking into a microphone during a RISE Initiative session, with classmates listening."
             fill
             priority
             sizes="(min-width: 1024px) 45vw, 100vw"

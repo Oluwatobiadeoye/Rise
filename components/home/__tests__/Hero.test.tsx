@@ -24,7 +24,7 @@ describe("Hero", () => {
   it("shows the hero image with descriptive alt text", () => {
     render(<Hero />);
     expect(
-      screen.getByRole("img", { name: /young people/i }),
+      screen.getByRole("img", { name: /student speaking into a microphone/i }),
     ).toBeInTheDocument();
   });
 });
