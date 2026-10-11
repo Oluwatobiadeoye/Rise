@@ -71,5 +71,5 @@ npm run build      # next build (the deploy gate)
 
 ## Product notes
 
-- The **home page stays broad** — no Oyo-specific framing (that lives on the Projects / TOP page). CTAs are learn-first ("Explore our programmes", "Get involved").
+- The **home page hero names Oyo** ("Empowering the next generation of leaders in Oyo."); the rest of the home page stays broad, with detailed Oyo framing on the Projects / TOP page. CTAs are learn-first ("Explore our programmes", "Get involved").
 - Photography is placeholder until real RISE photos are supplied.
