@@ -31,19 +31,19 @@ const programmes: ReadonlyArray<{
     audience: "Tertiary students",
     body: "Career guidance, scholarship awareness, and mentorship that prepare tertiary students for life after school.",
     href: routes.riseHorizons,
-    image: horizonsImg,
+    image: impactImg,
     imageAlt:
-      "RISE Initiative team members in RISE T-shirts posing in front of a Career and Leadership Boot Camp banner.",
+      "A smiling RISE Initiative volunteer giving a thumbs-up in front of the boot camp banner.",
+    imagePosition: "object-[50%_85%]",
   },
   {
     name: "RISE Impact Network",
     audience: "Early-career professionals",
     body: "A professional community sharing mentorship, networking, and the chance to lead and give back.",
     href: routes.riseImpactNetwork,
-    image: impactImg,
+    image: horizonsImg,
     imageAlt:
-      "A smiling RISE Initiative volunteer giving a thumbs-up in front of the boot camp banner.",
-    imagePosition: "object-[50%_85%]",
+      "RISE Initiative team members in RISE T-shirts posing in front of a Career and Leadership Boot Camp banner.",
   },
 ];
 

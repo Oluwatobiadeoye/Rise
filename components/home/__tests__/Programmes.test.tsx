@@ -26,6 +26,20 @@ describe("Programmes", () => {
     ).toBeInTheDocument();
   });
 
+  it("shows the volunteer image for Horizons and the group image for Impact Network", () => {
+    render(<Programmes />);
+    expect(
+      screen.getByRole("img", {
+        name: /volunteer giving a thumbs-up/i,
+      }),
+    ).toHaveAttribute("src", expect.stringContaining("best-legacy-14.jpg"));
+    expect(
+      screen.getByRole("img", {
+        name: /team members in RISE T-shirts/i,
+      }),
+    ).toHaveAttribute("src", expect.stringContaining("aatan-13.jpg"));
+  });
+
   it("deep-links each programme to its tier on the TOP page", () => {
     render(<Programmes />);
     const links = screen.getAllByRole("link", { name: /Explore RISE/i });
