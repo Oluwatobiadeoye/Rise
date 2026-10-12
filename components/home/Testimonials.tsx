@@ -26,7 +26,17 @@ function subscribeToReducedMotion(onChange: () => void) {
 
 const testimonials = featuredTestimonials;
 
-export function Testimonials() {
+type TestimonialsProps = {
+  eyebrow?: string;
+  title?: string;
+  intro?: string;
+};
+
+export function Testimonials({
+  eyebrow = "Voices",
+  title = "Testimonials from previous bootcamps",
+  intro,
+}: TestimonialsProps = {}) {
   const [current, setCurrent] = useState(0);
   const [override, setOverride] = useState<boolean | null>(null);
   const [hovered, setHovered] = useState(false);
@@ -73,13 +83,16 @@ export function Testimonials() {
     >
       <Container>
         <div className="max-w-2xl">
-          <Eyebrow>Voices</Eyebrow>
+          <Eyebrow>{eyebrow}</Eyebrow>
           <h2
             id="testimonials-heading"
             className="text-section-title mt-3 text-ink"
           >
-            Testimonials from previous bootcamps
+            {title}
           </h2>
+          {intro ? (
+            <p className="mt-4 text-lg leading-relaxed text-slate">{intro}</p>
+          ) : null}
         </div>
 
         <div

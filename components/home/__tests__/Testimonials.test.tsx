@@ -4,6 +4,23 @@ import { Testimonials } from "../Testimonials";
 import { excerptOf, featuredTestimonials } from "@/lib/testimonials";
 
 describe("Testimonials", () => {
+  it("supports project-specific introductory copy", () => {
+    render(
+      <Testimonials
+        eyebrow="Testimonials from the bootcamp"
+        title="The impact, in their own words"
+        intro="Former participants reflect on what they carried forward."
+      />,
+    );
+    expect(screen.getByText("Testimonials from the bootcamp")).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: "The impact, in their own words" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByText("Former participants reflect on what they carried forward."),
+    ).toBeInTheDocument();
+  });
+
   it("renders the five featured participants in order", () => {
     render(<Testimonials />);
     expect(featuredTestimonials.map((t) => t.name)).toEqual([

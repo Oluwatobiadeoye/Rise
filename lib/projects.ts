@@ -88,6 +88,11 @@ export type Project = {
   tiers?: Tier[];
   highlights?: string[];
   gallery?: GallerySchool[];
+  testimonialSection?: {
+    eyebrow: string;
+    title: string;
+    intro: string;
+  };
 };
 
 const theOyoProject: Project = {
@@ -186,6 +191,12 @@ const foundationsOfImpact: Project = {
     "Multiple secondary schools participated across Oyo",
     "Focus areas included leadership development, career awareness, self-development, sustainable development, and community building",
   ],
+  testimonialSection: {
+    eyebrow: "Testimonials from the bootcamp",
+    title: "The impact, in their own words",
+    intro:
+      "Years after the 2019 bootcamps, former participants reflect on the ideas, confidence, and sense of purpose they carried forward.",
+  },
   gallery: [
     {
       school: "Aatan Baptist Comprehensive High School",

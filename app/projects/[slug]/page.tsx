@@ -5,6 +5,7 @@ import { ProjectIntro } from "@/components/projects/ProjectIntro";
 import { TierSection } from "@/components/projects/TierSection";
 import { ImpactHighlights } from "@/components/projects/ImpactHighlights";
 import { ProjectGallery } from "@/components/projects/ProjectGallery";
+import { Testimonials } from "@/components/home/Testimonials";
 import { getProject, projects } from "@/lib/projects";
 import { pageMetadata } from "@/lib/metadata";
 
@@ -62,6 +63,10 @@ export default async function ProjectDetailPage({
       ) : null}
 
       {project.gallery ? <ProjectGallery schools={project.gallery} /> : null}
+
+      {project.testimonialSection ? (
+        <Testimonials {...project.testimonialSection} />
+      ) : null}
     </>
   );
 }
