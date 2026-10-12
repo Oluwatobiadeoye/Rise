@@ -23,8 +23,8 @@ describe("testimonials data", () => {
     }
   });
 
-  it("features exactly three testimonials drawn from the full list", () => {
-    expect(featuredTestimonials).toHaveLength(3);
+  it("features exactly five testimonials drawn from the full list", () => {
+    expect(featuredTestimonials).toHaveLength(5);
     for (const t of featuredTestimonials) expect(testimonials).toContain(t);
   });
 

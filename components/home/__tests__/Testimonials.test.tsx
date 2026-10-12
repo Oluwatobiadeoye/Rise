@@ -4,12 +4,14 @@ import { Testimonials } from "../Testimonials";
 import { excerptOf, featuredTestimonials } from "@/lib/testimonials";
 
 describe("Testimonials", () => {
-  it("renders the three featured participants in order", () => {
+  it("renders the five featured participants in order", () => {
     render(<Testimonials />);
     expect(featuredTestimonials.map((t) => t.name)).toEqual([
       "Oluwatofunmi Olabode",
       "Timilehin Ayoola",
       "Maryam Thabit",
+      "Adetoro Moses",
+      "Hawau A. Ojerinde",
     ]);
     for (const t of featuredTestimonials) {
       expect(screen.getByText(t.name)).toBeInTheDocument();
@@ -19,7 +21,7 @@ describe("Testimonials", () => {
   it("shows each headline and excerpt inside a blockquote", () => {
     const { container } = render(<Testimonials />);
     const quotes = container.querySelectorAll("blockquote");
-    expect(quotes).toHaveLength(3);
+    expect(quotes).toHaveLength(5);
     featuredTestimonials.forEach((t, i) => {
       expect(quotes[i]).toHaveTextContent(t.headline);
       expect(quotes[i]).toHaveTextContent(excerptOf(t));

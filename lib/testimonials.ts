@@ -160,6 +160,8 @@ const featuredSlugs = [
   "olabode-tofunmi",
   "timilehin-ayoola",
   "maryam-thabit",
+  "adetoro-moses",
+  "hawau-ojerinde",
 ];
 
 /** The testimonials shown on the home page, in display order. */
