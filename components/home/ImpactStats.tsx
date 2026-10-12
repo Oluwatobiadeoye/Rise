@@ -21,9 +21,9 @@ export function ImpactStats() {
             <Eyebrow tone="gold">Our impact</Eyebrow>
             <h2
               id="impact-heading"
-              className="text-section-title mt-3 max-w-2xl text-white"
+              className="text-section-title mt-3 text-white"
             >
-              Building toward lasting impact.
+              Building towards lasting impact.
             </h2>
 
             {/* Horizontal scroll-snap row on narrow screens (visible scrollbar +
