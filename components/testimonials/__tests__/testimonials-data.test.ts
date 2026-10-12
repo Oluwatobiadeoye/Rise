@@ -16,6 +16,16 @@ describe("testimonials data", () => {
     }
   });
 
+  it("uses each school's specific locality", () => {
+    expect(new Set(testimonials.map((t) => t.school))).toEqual(
+      new Set([
+        "Best Legacy International Secondary School, Awe",
+        "SPED International Secondary School, Akinmorin",
+        "Aatan Baptist Comprehensive High School, Koso, Oyo town",
+      ]),
+    );
+  });
+
   it("avoids em dashes in visible copy", () => {
     for (const t of testimonials) {
       const copy = [t.headline, ...t.paragraphs, ...t.roles, t.school].join(" ");

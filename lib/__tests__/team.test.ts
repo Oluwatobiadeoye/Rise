@@ -32,4 +32,15 @@ describe("team roster", () => {
       }
     }
   });
+
+  it("uses specific school localities", () => {
+    expect(new Set(team.map((member) => member.school))).toEqual(
+      new Set([
+        "Federal Government Girls' College, Owinni Hill, Sabo, Oyo town, class of 2013.",
+        "EACOED Model High School, Isokun Area, Oyo town, class of 2013.",
+        "SPED International Secondary School, Akinmorin, class of 2013.",
+        "Nesto College, Erelu, Oyo town, class of 2013.",
+      ]),
+    );
+  });
 });

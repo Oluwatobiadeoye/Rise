@@ -17,7 +17,7 @@ describe("TeamMemberCard", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/Operations Manager at Access Bank/i)).toBeInTheDocument();
     expect(
-      screen.getByText(/Federal Government Girls College Owinni/i),
+      screen.getByText(/Federal Government Girls' College, Owinni Hill, Sabo/i),
     ).toBeInTheDocument();
     expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
   });
