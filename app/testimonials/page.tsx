@@ -20,7 +20,7 @@ export default function TestimonialsPage() {
         lede="Students who took part in our boot camps share how the experience shaped where they are today."
       />
       <Container className="py-16 sm:py-20">
-        <ul className="mx-auto flex max-w-3xl flex-col gap-8">
+        <ul className="mx-auto flex max-w-5xl flex-col gap-8">
           {testimonials.map((testimonial) => (
             <TestimonialCard key={testimonial.slug} testimonial={testimonial} />
           ))}

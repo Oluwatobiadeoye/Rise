@@ -59,7 +59,7 @@ export const testimonials: ReadonlyArray<Testimonial> = [
   },
   {
     slug: "olabode-tofunmi",
-    name: "Olabode Tofunmi",
+    name: "Oluwatofunmi Olabode",
     headline:
       "Learning how science and innovation can improve health outcomes changed the way I saw my own path.",
     paragraphs: [
@@ -156,7 +156,11 @@ export function excerptOf(testimonial: Testimonial): string {
   return testimonial.paragraphs[testimonial.excerptParagraph ?? 0];
 }
 
-const featuredSlugs = ["adetoro-moses", "maryam-thabit", "hawau-ojerinde"];
+const featuredSlugs = [
+  "olabode-tofunmi",
+  "timilehin-ayoola",
+  "maryam-thabit",
+];
 
 /** The testimonials shown on the home page, in display order. */
 export const featuredTestimonials: ReadonlyArray<Testimonial> = featuredSlugs.map(

@@ -7,9 +7,9 @@ describe("Testimonials", () => {
   it("renders the three featured participants in order", () => {
     render(<Testimonials />);
     expect(featuredTestimonials.map((t) => t.name)).toEqual([
-      "Adetoro Moses",
+      "Oluwatofunmi Olabode",
+      "Timilehin Ayoola",
       "Maryam Thabit",
-      "Hawau A. Ojerinde",
     ]);
     for (const t of featuredTestimonials) {
       expect(screen.getByText(t.name)).toBeInTheDocument();
@@ -28,9 +28,14 @@ describe("Testimonials", () => {
 
   it("shows a portrait for each featured participant", () => {
     render(<Testimonials />);
-    expect(
-      screen.getByRole("img", { name: "Portrait of Adetoro Moses", hidden: true }),
-    ).toBeInTheDocument();
+    for (const testimonial of featuredTestimonials) {
+      expect(
+        screen.getByRole("img", {
+          name: `Portrait of ${testimonial.name}`,
+          hidden: true,
+        }),
+      ).toBeInTheDocument();
+    }
   });
 
   it("links each card to that person's full story", () => {

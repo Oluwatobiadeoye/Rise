@@ -107,45 +107,46 @@ export function Testimonials() {
                 aria-hidden={i !== current}
                 inert={i !== current}
               >
-                <figure className="flex h-full flex-col rounded-lg border border-line/60 bg-bg p-8 sm:p-10">
-                  <Quote
-                    className="size-8 text-gold"
-                    aria-hidden="true"
-                    fill="currentColor"
-                  />
-                  <blockquote className="mt-4 flex-1">
-                    <p className="font-display text-xl font-bold leading-snug text-ink sm:text-2xl">
-                      &ldquo;{t.headline}&rdquo;
-                    </p>
-                    <p className="mt-4 text-lg leading-relaxed text-slate">
-                      {excerptOf(t)}
-                    </p>
-                  </blockquote>
-                  <div className="mt-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-4 sm:flex-nowrap">
-                    <figcaption className="flex min-w-0 items-center gap-4">
-                      <Image
-                        src={t.photo}
-                        alt={`Portrait of ${t.name}`}
-                        width={56}
-                        height={56}
-                        sizes="56px"
-                        className="size-14 shrink-0 rounded-full object-cover"
-                      />
-                      <span className="text-sm">
-                        <span className="block font-display font-bold text-ink">
-                          {t.name}
-                        </span>
-                        {t.roles.map((role) => (
-                          <span key={role} className="block text-slate">
-                            {role}
-                          </span>
-                        ))}
-                        <span className="mt-0.5 block text-slate">{t.school}</span>
+                <figure className="grid h-full gap-8 rounded-lg border border-line/60 bg-bg p-6 sm:p-8 md:grid-cols-[220px_minmax(0,1fr)] md:items-center lg:gap-12 lg:p-10">
+                  <figcaption className="flex min-w-0 flex-col items-center text-center sm:flex-row sm:text-left md:flex-col md:text-center">
+                    <Image
+                      src={t.photo}
+                      alt={`Portrait of ${t.name}`}
+                      width={220}
+                      height={220}
+                      sizes="(min-width: 768px) 220px, (min-width: 640px) 176px, 160px"
+                      className="h-40 w-40 shrink-0 rounded-full object-cover ring-8 ring-gold-50 sm:h-44 sm:w-44 md:h-[220px] md:w-[220px]"
+                    />
+                    <span className="mt-5 text-sm sm:ml-6 sm:mt-0 md:ml-0 md:mt-6">
+                      <span className="block font-display text-base font-bold text-ink">
+                        {t.name}
                       </span>
-                    </figcaption>
+                      {t.roles.map((role) => (
+                        <span key={role} className="block text-slate">
+                          {role}
+                        </span>
+                      ))}
+                      <span className="mt-0.5 block text-slate">{t.school}</span>
+                    </span>
+                  </figcaption>
+
+                  <div className="flex min-w-0 flex-col md:self-stretch">
+                    <Quote
+                      className="size-8 text-gold"
+                      aria-hidden="true"
+                      fill="currentColor"
+                    />
+                    <blockquote className="mt-4 flex-1">
+                      <p className="font-display text-xl font-bold leading-snug text-ink sm:text-2xl">
+                        &ldquo;{t.headline}&rdquo;
+                      </p>
+                      <p className="mt-4 text-lg leading-relaxed text-slate">
+                        {excerptOf(t)}
+                      </p>
+                    </blockquote>
                     <Link
                       href={`${routes.testimonials}#${t.slug}`}
-                      className="inline-flex shrink-0 items-center gap-1.5 font-semibold text-primary transition-colors hover:text-primary-press"
+                      className="mt-6 inline-flex w-fit shrink-0 items-center gap-1.5 font-semibold text-primary transition-colors hover:text-primary-press"
                     >
                       Read full story
                       <span className="sr-only"> from {t.name}</span>
