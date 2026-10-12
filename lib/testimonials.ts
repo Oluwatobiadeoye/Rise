@@ -27,7 +27,7 @@ export type Testimonial = {
 export const testimonials: ReadonlyArray<Testimonial> = [
   {
     slug: "adetoro-moses",
-    name: "Adetoro Moses",
+    name: "Moses Adetoro",
     headline:
       "It didn't just introduce me to a goal; it showed me a problem worth dedicating my career to.",
     paragraphs: [
@@ -157,10 +157,10 @@ export function excerptOf(testimonial: Testimonial): string {
 }
 
 const featuredSlugs = [
+  "adetoro-moses",
   "olabode-tofunmi",
   "timilehin-ayoola",
   "maryam-thabit",
-  "adetoro-moses",
   "hawau-ojerinde",
 ];
 

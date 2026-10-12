@@ -24,10 +24,10 @@ describe("Testimonials", () => {
   it("renders the five featured participants in order", () => {
     render(<Testimonials />);
     expect(featuredTestimonials.map((t) => t.name)).toEqual([
+      "Moses Adetoro",
       "Oluwatofunmi Olabode",
       "Timilehin Ayoola",
       "Maryam Thabit",
-      "Adetoro Moses",
       "Hawau A. Ojerinde",
     ]);
     for (const t of featuredTestimonials) {
