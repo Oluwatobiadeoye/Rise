@@ -10,10 +10,10 @@ describe("NameIdentity", () => {
     expect(screen.getByText(/the compound, the family home/i)).toBeInTheDocument();
   });
 
-  it("includes a short explainer of what Oyo is", () => {
+  it("includes a short explainer of what Oyo town is", () => {
     render(<NameIdentity />);
     expect(
-      screen.getByText(/historic town in southwestern Nigeria/i),
+      screen.getByText(/historic community in southwestern Nigeria/i),
     ).toBeInTheDocument();
   });
 });

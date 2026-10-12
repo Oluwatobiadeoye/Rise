@@ -3,8 +3,12 @@ import { Hero } from "@/components/home/Hero";
 import { ImpactStats } from "@/components/home/ImpactStats";
 import { Programmes } from "@/components/home/Programmes";
 import { MissionSnapshot } from "@/components/home/MissionSnapshot";
+import { ProjectVision } from "@/components/projects/ProjectVision";
 import { Testimonials } from "@/components/home/Testimonials";
 import { FooterCtaBand } from "@/components/home/FooterCtaBand";
+import { getProject } from "@/lib/projects";
+
+const homeVision = getProject("the-oyo-project")?.vision;
 
 export const metadata: Metadata = {
   description:
@@ -19,6 +23,7 @@ export default function Home() {
       <ImpactStats />
       <Programmes />
       <MissionSnapshot />
+      {homeVision ? <ProjectVision {...homeVision} /> : null}
       <Testimonials />
       <FooterCtaBand />
     </>

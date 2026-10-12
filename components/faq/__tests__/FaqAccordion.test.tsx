@@ -8,7 +8,7 @@ describe("FaqAccordion", () => {
     render(<FaqAccordion />);
     for (const question of [
       "Who is eligible for the mentorship programme?",
-      "How do I join the Oyo professional community?",
+      "How do I join the professional community in Oyo town?",
       "How can my school partner with RISE Initiative?",
       "Is RISE Initiative a registered non-governmental organisation (NGO)?",
     ]) {

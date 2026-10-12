@@ -7,7 +7,7 @@ import { projects } from "@/lib/projects";
 export const metadata = pageMetadata({
   title: "Our projects",
   description:
-    "The work of RISE Initiative, from The Oyo Project (TOP), our flagship leadership and mentorship programme, to the 2019 bootcamps that reached more than 600 students in Oyo.",
+    "The work of RISE Initiative, from The Oyo Project (TOP), our flagship leadership and mentorship programme, to the 2019 bootcamps that reached more than 600 students in Oyo town.",
   path: "/projects",
 });
 
@@ -17,7 +17,7 @@ export default function ProjectsPage() {
       <PageHeader
         eyebrow="Our work"
         title="Projects."
-        lede="From our flagship programme to the bootcamps that started it all, here is how RISE Initiative invests in young people across Oyo."
+        lede="From our flagship programme to the bootcamps that started it all, here is how RISE Initiative invests in young people across Oyo town."
       />
 
       <section className="py-16 sm:py-20" aria-labelledby="projects-list-heading">

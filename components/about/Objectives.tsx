@@ -61,7 +61,7 @@ export function Objectives() {
 
         <p className="mx-auto mt-10 max-w-3xl text-center leading-relaxed text-slate">
           Alongside these, we celebrate and preserve the cultural heritage,
-          achievements, and identity of the Oyo community, and we advance the
+          achievements, and identity of the community of Oyo town, and we advance the
           United Nations Sustainable Development Goals, particularly Goals 4
           (Quality Education), 10 (Reduced Inequalities), and 11 (Sustainable
           Cities and Communities).

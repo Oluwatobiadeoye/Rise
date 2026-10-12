@@ -9,7 +9,7 @@ import { routes } from "@/lib/site";
 export const metadata = pageMetadata({
   title: "Frequently asked questions",
   description:
-    "Answers to common questions about RISE Initiative: mentorship eligibility, joining the Oyo professional community, school partnerships, and our organisational status.",
+    "Answers to common questions about RISE Initiative: mentorship eligibility, joining the professional community in Oyo town, school partnerships, and our organisational status.",
   path: "/faq",
 });
 

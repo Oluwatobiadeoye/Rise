@@ -82,7 +82,7 @@ export default function PrivacyPage() {
           <Section id="who-we-are" title="Who we are">
             <p>
               RISE Initiative (&ldquo;RISE&rdquo;, &ldquo;we&rdquo;,
-              &ldquo;us&rdquo;) is a youth leadership organisation based in Oyo,
+              &ldquo;us&rdquo;) is a youth leadership organisation based in Oyo town,
               Nigeria. We are responsible for the information you share with us
               through this website. If you have any questions about this policy
               or about your information, you can reach us at the address in the{" "}

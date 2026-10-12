@@ -29,7 +29,7 @@ describe("ProjectGallery", () => {
 
   it("shows a 'being prepared' state for a school without photos", () => {
     const schools: GallerySchool[] = [
-      { school: "Pending School", location: "Oyo", photos: [] },
+      { school: "Pending School", location: "Oyo town", photos: [] },
     ];
     render(<ProjectGallery schools={schools} />);
     expect(screen.getByText(/being prepared/i)).toBeInTheDocument();
@@ -39,7 +39,7 @@ describe("ProjectGallery", () => {
     const schools: GallerySchool[] = [
       {
         school: "Aatan Baptist Comprehensive High School",
-        location: "Oyo",
+        location: "Oyo town",
         photos: [
           { src: img("/a1.jpg"), alt: "Students at the 2019 bootcamp" },
           { src: img("/a2.jpg"), alt: "Facilitator leading a session" },

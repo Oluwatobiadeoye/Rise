@@ -19,8 +19,8 @@ export const faqs: ReadonlyArray<Faq> = [
     answer: (
       <>
         Our structured mentorship runs under RISE Horizons, our tertiary
-        programme for students in tertiary institutions affiliated with Oyo
-        town. It pairs them with experienced professionals for career guidance
+        programme for students in tertiary institutions affiliated with Oyo town.
+        It pairs them with experienced professionals for career guidance
         and personal development.{" "}
         <Link href={routes.mentee} className={linkClass}>
           Apply to be a mentee
@@ -32,11 +32,11 @@ export const faqs: ReadonlyArray<Faq> = [
       "Our structured mentorship runs under RISE Horizons, our tertiary programme for students in tertiary institutions affiliated with Oyo town. It pairs them with experienced professionals for career guidance and personal development.",
   },
   {
-    question: "How do I join the Oyo professional community?",
+    question: "How do I join the professional community in Oyo town?",
     answer:
-      "Early-career and established professionals affiliated with Oyo can join through the RISE Impact Network, our professional community for networking, mentorship, and knowledge sharing.",
+      "Early-career and established professionals affiliated with Oyo town can join through the RISE Impact Network, our professional community for networking, mentorship, and knowledge sharing.",
     plainText:
-      "Early-career and established professionals affiliated with Oyo can join through the RISE Impact Network, our professional community for networking, mentorship, and knowledge sharing.",
+      "Early-career and established professionals affiliated with Oyo town can join through the RISE Impact Network, our professional community for networking, mentorship, and knowledge sharing.",
   },
   {
     question: "How can my school partner with RISE Initiative?",

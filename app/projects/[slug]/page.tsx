@@ -5,6 +5,7 @@ import { ProjectIntro } from "@/components/projects/ProjectIntro";
 import { TierSection } from "@/components/projects/TierSection";
 import { ImpactHighlights } from "@/components/projects/ImpactHighlights";
 import { ProjectGallery } from "@/components/projects/ProjectGallery";
+import { ProjectVision } from "@/components/projects/ProjectVision";
 import { Testimonials } from "@/components/home/Testimonials";
 import { getProject, projects } from "@/lib/projects";
 import { pageMetadata } from "@/lib/metadata";
@@ -53,6 +54,8 @@ export default async function ProjectDetailPage({
         paragraphs={project.intro}
         emphasize={project.tiers ? "Agboole" : undefined}
       />
+
+      {project.vision ? <ProjectVision {...project.vision} /> : null}
 
       {project.tiers?.map((tier, index) => (
         <TierSection key={tier.slug} tier={tier} tinted={index % 2 === 1} />

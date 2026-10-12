@@ -21,7 +21,7 @@ export function Hero() {
           <h1 className="text-display mt-4 text-ink">
             Empowering the next generation{" "}
             <span className="whitespace-nowrap">
-              of <span className="text-primary">leaders in Oyo.</span>
+              of <span className="text-primary">leaders in Oyo town.</span>
             </span>
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate sm:text-xl">

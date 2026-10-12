@@ -54,7 +54,7 @@ export const testimonials: ReadonlyArray<Testimonial> = [
     roles: [
       "Vice President, Nigeria Economics Students' Association, Obafemi Awolowo University",
     ],
-    school: "SPED International Secondary School, Oyo",
+    school: "SPED International Secondary School, Oyo town",
     photo: maryamThabit,
   },
   {
@@ -80,7 +80,7 @@ export const testimonials: ReadonlyArray<Testimonial> = [
       "I am grateful to RISE and everyone who has contributed to my growth. Being part of this initiative was a valuable experience, and I hope to continue giving back to students and communities just as they once invested in me.",
     ],
     roles: ["Co-Founder, Career Forge Africa"],
-    school: "Aatan Baptist Comprehensive High School, Oyo",
+    school: "Aatan Baptist Comprehensive High School, Oyo town",
     photo: timilehinAyoola,
   },
   {
@@ -96,7 +96,7 @@ export const testimonials: ReadonlyArray<Testimonial> = [
       "Medical Student, Ladoke Akintola University of Technology",
       "Founder, Pad a Girl Project",
     ],
-    school: "SPED International Secondary School, Oyo",
+    school: "SPED International Secondary School, Oyo town",
     photo: ayosubomiOkeniyi,
   },
   {
@@ -108,7 +108,7 @@ export const testimonials: ReadonlyArray<Testimonial> = [
       "Back in secondary school, the programme opened my eyes to the power of community impact and taught me what it means to take responsibility. Today, I realize how deeply important that early foundation was. The Boot Camp gave me the early confidence to serve others and lead with purpose, and the values that continue to drive my work as a youth leader today.",
     ],
     roles: ["Millennium Fellowship Scholar & SDG Advocate"],
-    school: "Aatan Baptist Comprehensive High School, Oyo",
+    school: "Aatan Baptist Comprehensive High School, Oyo town",
     photo: paulAdedeji,
   },
   {
@@ -120,7 +120,7 @@ export const testimonials: ReadonlyArray<Testimonial> = [
       "What stayed with me most was the power of community and the conviction that no dream is beyond reach. Today, I'm grateful to be living one of mine.",
     ],
     roles: ["Medical Student, University of Ibadan"],
-    school: "SPED International Secondary School, Oyo",
+    school: "SPED International Secondary School, Oyo town",
     photo: hawauOjerinde,
   },
   {
@@ -134,7 +134,7 @@ export const testimonials: ReadonlyArray<Testimonial> = [
     roles: [
       "Medicine and Surgery Student (400 level), Obafemi Awolowo University",
     ],
-    school: "Aatan Baptist Comprehensive High School, Oyo",
+    school: "Aatan Baptist Comprehensive High School, Oyo town",
     photo: johnFavourOjo,
   },
   {
@@ -146,7 +146,7 @@ export const testimonials: ReadonlyArray<Testimonial> = [
       "I remember being part of a career boot camp by RISE Initiative that spoke to us about life, purpose, and intentional living. The details of that day may have faded, but the impression it left has not. It planted a seed: the understanding that success is not accidental, and that a life of purpose is something you pursue deliberately. Looking back, I can trace a straight line from that early nudge toward intentional living to the choices I have made since then.",
     ],
     roles: ["Education & History Student, Obafemi Awolowo University"],
-    school: "Aatan Baptist Comprehensive High School, Oyo",
+    school: "Aatan Baptist Comprehensive High School, Oyo town",
     photo: worshipAdebayo,
   },
 ];

@@ -7,7 +7,7 @@ import { routes, contactEmail } from "@/lib/site";
 export const metadata = pageMetadata({
   title: "Get involved",
   description:
-    "Mentor a young person, apply for mentorship, volunteer, or support a student in Oyo. Find the role that fits you at RISE Initiative.",
+    "Mentor a young person, apply for mentorship, volunteer, or support a student in Oyo town. Find the role that fits you at RISE Initiative.",
   path: "/get-involved",
 });
 
@@ -21,14 +21,14 @@ export default function GetInvolvedPage() {
       <PageHeader
         eyebrow="Get involved"
         title="Find your role at RISE."
-        lede="RISE Initiative runs on the energy, talent, and generosity of people who care about Oyo's young people. Whether you want to mentor, facilitate, coordinate, or contribute financially, there is a role for you here."
+        lede="RISE Initiative runs on the energy, talent, and generosity of people who care about young people in Oyo town. Whether you want to mentor, facilitate, coordinate, or contribute financially, there is a role for you here."
       />
 
       <RoleSection
         eyebrow="Become a mentor"
         title="Mentor a student or young professional"
         body={[
-          "We are looking for passionate professionals ready to give their time to guide a student or young professional in Oyo. As a mentor you will: meet with your mentee virtually, at least once every two months; offer career direction, academic guidance, and personal development support; submit brief quarterly updates to the RISE team.",
+          "We are looking for passionate professionals ready to give their time to guide a student or young professional in Oyo town. As a mentor you will: meet with your mentee virtually, at least once every two months; offer career direction, academic guidance, and personal development support; submit brief quarterly updates to the RISE team.",
           "Requirements: professional or academic experience in a relevant field, strong interpersonal skills, and willingness to commit to a one-year engagement.",
         ]}
         cta={{ label: "Apply to mentor", href: routes.mentor }}

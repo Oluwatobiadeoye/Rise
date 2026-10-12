@@ -31,7 +31,7 @@ the site is shared publicly.
 - [ ] **Applicant decision-email copy** (`lib/actions/admin.ts`, `DECISION_COPY`):
       review the accept/decline wording before email sending is enabled.
 - [ ] **About page factual claim** (`components/about/OurStory.tsx`): verify
-      "more than 600 students across three secondary schools in Oyo" (2019).
+      "more than 600 students across three secondary schools in Oyo town" (2019).
 - [ ] **Home impact stats** (`components/home/ImpactStats.tsx`): confirm
       "10,000 — five-year goal", "3 tiers", "Since 2017" are accurate to publish.
 - [ ] **Confirm program-design wording**: mentor availability options

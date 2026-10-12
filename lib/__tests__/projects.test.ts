@@ -23,6 +23,12 @@ describe("projects roster", () => {
     ]);
   });
 
+  it("gives The Oyo Project a future-facing vision for Oyo town", () => {
+    const vision = getProject("the-oyo-project")?.vision;
+    expect(vision?.title).toContain("city in full bloom");
+    expect(vision?.body).toContain("Oyo town blossoms");
+  });
+
   it("points the Impact Network CTA at the Get Involved hub", () => {
     const network = getProject("the-oyo-project")?.tiers?.find(
       (t) => t.slug === "rise-impact-network",

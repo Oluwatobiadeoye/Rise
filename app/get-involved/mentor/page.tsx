@@ -14,7 +14,7 @@ import { db } from "@/lib/db";
 export const metadata = pageMetadata({
   title: "Apply to mentor",
   description:
-    "Become a RISE Initiative mentor and guide a student or young professional in Oyo through career, academic, and personal development support.",
+    "Become a RISE Initiative mentor and guide a student or young professional in Oyo town through career, academic, and personal development support.",
   path: "/get-involved/mentor",
 });
 
@@ -100,7 +100,7 @@ export default async function MentorPage({ searchParams }: PageProps) {
       <PageHeader
         eyebrow="Become a mentor"
         title="Apply to mentor."
-        lede="We are looking for passionate professionals ready to give their time to guide a student or young professional in Oyo. Tell us a little about yourself and we will be in touch."
+        lede="We are looking for passionate professionals ready to give their time to guide a student or young professional in Oyo town. Tell us a little about yourself and we will be in touch."
       />
 
       <section className="py-14 sm:py-18" aria-labelledby="mentor-role-heading">

@@ -3,11 +3,11 @@ import { render, screen } from "@testing-library/react";
 import { Hero } from "../Hero";
 
 describe("Hero", () => {
-  it("renders the Oyo-focused headline", () => {
+  it("renders the Oyo town-focused headline", () => {
     render(<Hero />);
     const h1 = screen.getByRole("heading", { level: 1 });
     expect(h1).toHaveTextContent(
-      /Empowering the next generation of\s+leaders in Oyo\./i,
+      /Empowering the next generation of\s+leaders in Oyo town\./i,
     );
   });
 

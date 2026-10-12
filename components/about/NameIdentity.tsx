@@ -12,7 +12,7 @@ export function NameIdentity() {
             id="name-identity-heading"
             className="text-section-title mt-3 text-ink"
           >
-            Rooted in Oyo, rising above limitations.
+            Rooted in Oyo town, rising above limitations.
           </h2>
 
           <p className="mt-6 text-lg leading-relaxed text-slate">
@@ -23,11 +23,12 @@ export function NameIdentity() {
             </span>{" "}
             evokes the compound, the family home, the neighbourhood, the shared
             space where we raise each other. It is a deliberate signal that this
-            work is rooted in Oyo culture and committed to its people.
+            work is rooted in the culture of Oyo town and committed to its
+            people.
           </p>
 
           <p className="mt-4 text-lg leading-relaxed text-slate">
-            Oyo is a historic town in southwestern Nigeria and one of the
+            Oyo town is a historic community in southwestern Nigeria and one of the
             cultural homes of the Yoruba people. It is where RISE Initiative is
             rooted, and where our work begins.
           </p>

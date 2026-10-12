@@ -8,7 +8,7 @@ import { NameIdentity } from "@/components/about/NameIdentity";
 import { TeamIntro } from "@/components/about/TeamIntro";
 
 const description =
-  "RISE Initiative empowers young people in Oyo through leadership development, mentorship, and opportunity. Our story, vision, objectives, and values.";
+  "RISE Initiative empowers young people in Oyo town through leadership development, mentorship, and opportunity. Our story, vision, objectives, and values.";
 
 export const metadata: Metadata = {
   title: "About",

@@ -85,6 +85,11 @@ export type Project = {
   lede: string;
   /** Detail-page intro paragraphs. */
   intro: string[];
+  vision?: {
+    eyebrow: string;
+    title: string;
+    body: string;
+  };
   tiers?: Tier[];
   highlights?: string[];
   gallery?: GallerySchool[];
@@ -108,12 +113,17 @@ const theOyoProject: Project = {
     "Agboole is designed to support individuals at critical stages of their personal, academic, and professional development. Through leadership development, mentorship, educational support, professional exposure, and community engagement, we create opportunities for growth while fostering a culture of excellence, service, and lifelong learning.",
     "By investing in people and connecting them to opportunities, guidance, and meaningful relationships, TOP seeks to develop leaders who are equipped to thrive personally and contribute positively to their communities.",
   ],
+  vision: {
+    eyebrow: "The future we see",
+    title: "Rooted in Oyo town. Growing towards a city in full bloom.",
+    body: "We envision a future where Oyo town blossoms into a thriving city of opportunity—powered by young people who are equipped to learn, lead, build, and belong.",
+  },
   tiers: [
     {
       slug: "rise-foundations",
       name: "RISE Foundations",
       subtitle: "Secondary school programme",
-      audience: "Secondary school students in partner schools in Oyo",
+      audience: "Secondary school students in partner schools in Oyo town",
       body: [
         "RISE Foundations is the entry point into The Oyo Project. The programme is designed to help young people build strong foundations for leadership, academic success, and personal development during their formative years.",
         "Through leadership clubs, mentorship opportunities, educational support initiatives, leadership summits, and recognition programmes, participants are exposed to positive role models, practical learning experiences, and opportunities that broaden their aspirations and strengthen their confidence.",
@@ -131,7 +141,7 @@ const theOyoProject: Project = {
       slug: "rise-horizons",
       name: "RISE Horizons",
       subtitle: "Tertiary programme",
-      audience: "Students in tertiary institutions affiliated with Oyo",
+      audience: "Students in tertiary institutions affiliated with Oyo town",
       body: [
         "RISE Horizons supports students as they navigate higher education and prepare for future opportunities.",
         "Through mentorship, professional development sessions, career guidance, scholarship awareness initiatives, networking opportunities, and exposure to experienced professionals, participants gain valuable insights that support both personal growth and career readiness.",
@@ -153,7 +163,7 @@ const theOyoProject: Project = {
       slug: "rise-impact-network",
       name: "RISE Impact Network",
       subtitle: "Early-career and professional programme",
-      audience: "Early-career and established professionals affiliated with Oyo",
+      audience: "Early-career and established professionals affiliated with Oyo town",
       body: [
         "RISE Impact Network is a growing community of professionals committed to personal growth, professional excellence, and meaningful community impact.",
         "The programme provides opportunities for networking, mentorship, leadership engagement, knowledge sharing, and collaboration among professionals across diverse industries and locations.",
@@ -188,7 +198,7 @@ const foundationsOfImpact: Project = {
   highlights: [
     "More than 600 students reached",
     "Leadership experts and career professionals engaged as facilitators",
-    "Multiple secondary schools participated across Oyo",
+    "Multiple secondary schools participated across Oyo town",
     "Focus areas included leadership development, career awareness, self-development, sustainable development, and community building",
   ],
   testimonialSection: {
