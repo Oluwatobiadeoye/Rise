@@ -9,6 +9,9 @@ describe("Hero", () => {
     expect(h1).toHaveTextContent(
       /Empowering the next generation of\s+leaders in Oyo town\./i,
     );
+    expect(h1.querySelector(".whitespace-nowrap")).toHaveTextContent(
+      "Oyo town.",
+    );
   });
 
   it("uses learn-first CTAs to the right routes", () => {
@@ -19,6 +22,13 @@ describe("Hero", () => {
     expect(
       screen.getByRole("link", { name: /Get involved/i }),
     ).toHaveAttribute("href", "/get-involved");
+    expect(
+      screen.getByRole("link", { name: /Explore our programmes/i }),
+    ).toHaveClass("w-full", "sm:w-auto");
+    expect(screen.getByRole("link", { name: /Get involved/i })).toHaveClass(
+      "w-full",
+      "sm:w-auto",
+    );
   });
 
   it("shows the hero image with descriptive alt text", () => {

@@ -15,13 +15,13 @@ export function Hero() {
         aria-hidden="true"
         className="gold-glow pointer-events-none absolute -right-40 -top-52 size-[620px] rounded-full"
       />
-      <Container className="relative grid items-center gap-12 py-14 sm:py-20 lg:grid-cols-[1.05fr_0.95fr]">
+      <Container className="relative grid items-center gap-10 py-12 sm:gap-12 sm:py-20 lg:grid-cols-[1.05fr_0.95fr]">
         <div>
           <Eyebrow>Identify · Develop · Connect</Eyebrow>
           <h1 className="text-display mt-4 text-ink">
-            Empowering the next generation{" "}
-            <span className="whitespace-nowrap">
-              of <span className="text-primary">leaders in Oyo town.</span>
+            Empowering the next generation of{" "}
+            <span className="text-primary">
+              leaders in <span className="whitespace-nowrap">Oyo town.</span>
             </span>
           </h1>
           <p className="mt-6 max-w-xl text-lg leading-relaxed text-slate sm:text-xl">
@@ -29,12 +29,17 @@ export function Hero() {
             careers, building leaders, creating opportunity, and strengthening
             our community.
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <Button href={routes.projects} size="lg">
+          <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:gap-4">
+            <Button href={routes.projects} size="lg" className="w-full sm:w-auto">
               Explore our programmes
               <ArrowRight className="size-[18px]" aria-hidden="true" />
             </Button>
-            <Button href={routes.getInvolved} size="lg" variant="outline">
+            <Button
+              href={routes.getInvolved}
+              size="lg"
+              variant="outline"
+              className="w-full sm:w-auto"
+            >
               Get involved
             </Button>
           </div>
