@@ -16,6 +16,11 @@ describe("Nav", () => {
     }
   });
 
+  it("places Projects before Team in the primary navigation", () => {
+    const labels = navLinks.map((link) => link.label);
+    expect(labels.indexOf("Projects")).toBeLessThan(labels.indexOf("Team"));
+  });
+
   it("toggles the mobile menu open and closed", () => {
     render(<Nav />);
     const openBtn = screen.getByRole("button", { name: /open menu/i });

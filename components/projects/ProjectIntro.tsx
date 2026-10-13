@@ -5,7 +5,7 @@ type ProjectIntroProps = {
   paragraphs: string[];
   /** Optional kicker above the prose. */
   eyebrow?: ReactNode;
-  /** A term to italicise on each occurrence (e.g. a Yoruba name like "Agboole"). */
+  /** A term to italicise on each occurrence (e.g. a Yoruba name like "Agboolé"). */
   emphasize?: string;
 };
 
@@ -18,7 +18,7 @@ function withEmphasis(text: string, term?: string): ReactNode {
     <span key={index}>
       {part}
       {index < parts.length - 1 ? (
-        <em className="font-medium text-ink">{term}</em>
+        <em lang="yo" className="font-medium text-ink">{term}</em>
       ) : null}
     </span>
   ));

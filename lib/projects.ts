@@ -106,11 +106,11 @@ const theOyoProject: Project = {
   period: "2026–",
   status: "active",
   summary:
-    "Our flagship programme, Agboole, walking young people from secondary school into their professional lives through leadership, mentorship, educational support, and community.",
-  lede: "Agboole: building community, expanding opportunity.",
+    "Our flagship programme, Agboolé, walking young people from secondary school into their professional lives through leadership, mentorship, educational support, and community.",
+  lede: "Agboolé: building community, expanding opportunity.",
   intro: [
-    "The Oyo Project (TOP), known by its Yoruba name Agboole, meaning community, home, and collective progress, is the flagship programme of RISE Initiative.",
-    "Agboole is designed to support individuals at critical stages of their personal, academic, and professional development. Through leadership development, mentorship, educational support, professional exposure, and community engagement, we create opportunities for growth while fostering a culture of excellence, service, and lifelong learning.",
+    "The Oyo Project (TOP), known by its Yoruba name Agboolé, meaning community, home, and collective progress, is the flagship programme of RISE Initiative.",
+    "Agboolé is designed to support individuals at critical stages of their personal, academic, and professional development. Through leadership development, mentorship, educational support, professional exposure, and community engagement, we create opportunities for growth while fostering a culture of excellence, service, and lifelong learning.",
     "By investing in people and connecting them to opportunities, guidance, and meaningful relationships, TOP seeks to develop leaders who are equipped to thrive personally and contribute positively to their communities.",
   ],
   vision: {

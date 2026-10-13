@@ -52,7 +52,7 @@ export default async function ProjectDetailPage({
 
       <ProjectIntro
         paragraphs={project.intro}
-        emphasize={project.tiers ? "Agboole" : undefined}
+        emphasize={project.tiers ? "Agboolé" : undefined}
       />
 
       {project.vision ? <ProjectVision {...project.vision} /> : null}

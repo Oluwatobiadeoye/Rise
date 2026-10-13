@@ -5,6 +5,7 @@ import { Vision } from "@/components/about/Vision";
 import { Objectives } from "@/components/about/Objectives";
 import { Values } from "@/components/about/Values";
 import { NameIdentity } from "@/components/about/NameIdentity";
+import { ProjectsIntro } from "@/components/about/ProjectsIntro";
 import { TeamIntro } from "@/components/about/TeamIntro";
 
 const description =
@@ -34,6 +35,7 @@ export default function AboutPage() {
       <Objectives />
       <Values />
       <NameIdentity />
+      <ProjectsIntro />
       <TeamIntro />
     </>
   );
