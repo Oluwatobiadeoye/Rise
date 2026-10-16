@@ -13,9 +13,9 @@ export default function TeamPage() {
   return (
     <>
       <PageHeader
-        eyebrow="Our team"
+        eyebrow="Founding Executives"
         title="The people behind RISE."
-        lede="RISE Initiative is led by a diverse team of professionals, mentors, and community leaders committed to empowering young people, expanding opportunities, and driving sustainable community development through service, expertise, and collaboration."
+        lede="RISE Initiative is led by its Founding Executives: the professionals, mentors, and community leaders setting the organisation's direction and driving its mission forward."
       />
       <TeamGrid />
     </>

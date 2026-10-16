@@ -29,6 +29,8 @@ export type TeamMember = {
   photo?: StaticImageData;
   /** LinkedIn profile URL. */
   linkedin?: string;
+  /** Marks a founder; renders a chip above the name on the card. */
+  isCoFounder?: boolean;
 };
 
 const schoolAffiliations = {
@@ -44,6 +46,7 @@ export const team: ReadonlyArray<TeamMember> = [
     slug: "fareedah-adedeji",
     name: "Eyitayo Fareedah Adedeji",
     role: "Director, Programmes and Operations",
+    isCoFounder: true,
     profession: "Banking Professional",
     location: "Lagos, Nigeria",
     photo: fareePhoto,
@@ -53,6 +56,21 @@ export const team: ReadonlyArray<TeamMember> = [
     ],
     school: schoolAffiliations.fggc,
     linkedin: "https://www.linkedin.com/in/fareedahadedeji/",
+  },
+  {
+    slug: "oluwadara-adedeji",
+    name: "Oluwadara Adedeji",
+    role: "Director, Media and Strategy",
+    isCoFounder: true,
+    profession: "AI Engineer",
+    location: "Dublin, Ireland",
+    photo: daraPhoto,
+    bio: [
+      "Dara is an AI researcher and engineer specialising in digital mental health and human-centered AI, with over five years of experience. He is currently a PhD candidate at University College Dublin under the Research Ireland Centre for Research Training in Machine Learning (ML-Labs) programme. Having previously served as the Public Relations Officer of the Society of Electrical and Electronic Engineering Students (SEEES UI), he brings substantial experience in media communications and strategic engagement.",
+      "A recipient of multiple awards and scholarships, including the Mastercard Foundation Scholarship, he is committed to empowering young leaders to access global opportunities and drive positive change in their communities. He is passionate about community development, Science, Technology, Engineering, and Mathematics (STEM) education, and mental health.",
+    ],
+    school: schoolAffiliations.sped,
+    linkedin: "https://www.linkedin.com/in/oluwadara-adedeji/",
   },
   {
     slug: "kunle-oguntoye",
@@ -109,20 +127,6 @@ export const team: ReadonlyArray<TeamMember> = [
     ],
     school: schoolAffiliations.nesto,
     linkedin: "https://www.linkedin.com/in/oluwatobi-adeoye/",
-  },
-  {
-    slug: "oluwadara-adedeji",
-    name: "Oluwadara Adedeji",
-    role: "Director, Media and Strategy",
-    profession: "AI Engineer",
-    location: "Dublin, Ireland",
-    photo: daraPhoto,
-    bio: [
-      "Dara is an AI researcher and engineer specialising in digital mental health and human-centered AI, with over five years of experience. He is currently a PhD candidate at University College Dublin under the Research Ireland Centre for Research Training in Machine Learning (ML-Labs) programme. Having previously served as the Public Relations Officer of the Society of Electrical and Electronic Engineering Students (SEEES UI), he brings substantial experience in media communications and strategic engagement.",
-      "A recipient of multiple awards and scholarships, including the Mastercard Foundation Scholarship, he is committed to empowering young leaders to access global opportunities and drive positive change in their communities. He is passionate about community development, Science, Technology, Engineering, and Mathematics (STEM) education, and mental health.",
-    ],
-    school: schoolAffiliations.sped,
-    linkedin: "https://www.linkedin.com/in/oluwadara-adedeji/",
   },
 ];
 

@@ -53,6 +53,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${sora.variable} ${jakarta.variable}`}
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <body className="flex min-h-dvh flex-col antialiased">

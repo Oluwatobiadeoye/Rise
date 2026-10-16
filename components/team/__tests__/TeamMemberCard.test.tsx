@@ -22,6 +22,16 @@ describe("TeamMemberCard", () => {
     expect(screen.queryByText(/coming soon/i)).not.toBeInTheDocument();
   });
 
+  it("marks a co-founder with the Co-Founder chip", () => {
+    render(<TeamMemberCard member={bySlug("fareedah-adedeji")} />);
+    expect(screen.getByText("Co-Founder")).toBeInTheDocument();
+  });
+
+  it("omits the Co-Founder chip for members who are not co-founders", () => {
+    render(<TeamMemberCard member={bySlug("tobi-adeoye")} />);
+    expect(screen.queryByText("Co-Founder")).not.toBeInTheDocument();
+  });
+
   it("renders a coming-soon shell with no bio prose", () => {
     render(
       <TeamMemberCard

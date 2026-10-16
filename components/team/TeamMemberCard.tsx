@@ -37,6 +37,11 @@ export function TeamMemberCard({ member, divider = true }: TeamMemberCardProps) 
 
       {/* The divider lives in the content column, so it never reaches the photo. */}
       <div className="flex flex-col">
+        {member.isCoFounder ? (
+          <span className="mb-2 inline-flex w-fit items-center rounded-full bg-evergreen-50 px-3 py-1 font-body text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
+            Co-Founder
+          </span>
+        ) : null}
         <div className="flex items-center gap-2">
           <h3 className="font-display text-2xl font-bold text-ink sm:text-3xl">
             {member.name}

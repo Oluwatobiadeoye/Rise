@@ -5,11 +5,11 @@ describe("team roster", () => {
   it("lists the full roster in draft order", () => {
     expect(team.map((m) => m.slug)).toEqual([
       "fareedah-adedeji",
+      "oluwadara-adedeji",
       "kunle-oguntoye",
       "ayo-salaudeen",
       "quadri-oseni",
       "tobi-adeoye",
-      "oluwadara-adedeji",
     ]);
   });
 
@@ -23,6 +23,12 @@ describe("team roster", () => {
   it("has a bio for every member", () => {
     const withoutBio = team.filter((m) => !hasBio(m)).map((m) => m.slug);
     expect(withoutBio).toEqual([]);
+  });
+
+  it("flags Fareedah and Oluwadara as the two co-founders", () => {
+    expect(
+      team.filter((m) => m.isCoFounder).map((m) => m.slug),
+    ).toEqual(["fareedah-adedeji", "oluwadara-adedeji"]);
   });
 
   it("gives full-bio members a school affiliation", () => {
