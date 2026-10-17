@@ -45,7 +45,7 @@ export const team: ReadonlyArray<TeamMember> = [
   {
     slug: "fareedah-adedeji",
     name: "Eyitayo Fareedah Adedeji",
-    role: "Director, Programmes and Operations",
+    role: "Head, Programmes and Operations",
     isCoFounder: true,
     profession: "Banking Professional",
     location: "Lagos, Nigeria",
@@ -60,7 +60,7 @@ export const team: ReadonlyArray<TeamMember> = [
   {
     slug: "oluwadara-adedeji",
     name: "Oluwadara Adedeji",
-    role: "Director, Media and Strategy",
+    role: "Head, Media and Strategy",
     isCoFounder: true,
     profession: "AI Engineer",
     location: "Dublin, Ireland",
@@ -75,7 +75,7 @@ export const team: ReadonlyArray<TeamMember> = [
   {
     slug: "kunle-oguntoye",
     name: "Kunle Oguntoye",
-    role: "General Secretary and Director, Partnerships and Collaborations",
+    role: "Head, Partnerships and Collaborations",
     profession: "Data Scientist",
     location: "Iowa, United States of America",
     photo: kunlePhoto,
@@ -89,7 +89,7 @@ export const team: ReadonlyArray<TeamMember> = [
   {
     slug: "ayo-salaudeen",
     name: "Ayo Salaudeen",
-    role: "Chief Human Resource Manager",
+    role: "Head, People and Learning",
     profession: "Researcher",
     location: "Helsinki, Finland",
     photo: ayoPhoto,
@@ -101,23 +101,9 @@ export const team: ReadonlyArray<TeamMember> = [
     linkedin: "https://www.linkedin.com/in/ayo-salaudeen-4626511a4/",
   },
   {
-    slug: "quadri-oseni",
-    name: "Abdul-Quadri Olayinka Oseni",
-    role: "Director, Community Engagement & Field Operations",
-    profession: "Surveyor",
-    location: "Lagos, Nigeria",
-    photo: quadriPhoto,
-    bio: [
-      "Abdul-Quadri is a Surveyor and Geospatial Professional with over six years of experience in field operations, mapping, and community-focused projects. He has contributed to major projects, including the construction of Marina Interchange Hub developed in partnership with the Agence Française de Développement (AFD), and has actively supported youth development through the Young Surveyors Network (YSN) Lagos state by organizing training, mentorship, and capacity-building programs.",
-      "Having held several leadership positions, including Chairman of the O3 Spell Quest Competition and Convention Chairman at the Junior Chamber International Federal School of Surveying, Oyo, he has developed strong skills in team coordination, stakeholder engagement, and project execution. He believes in using knowledge, leadership, and service to inspire others to pursue excellence, embrace continuous learning, and contribute meaningfully to society. Through his work and volunteer engagements, he hopes to empower young people with the skills, confidence, and opportunities needed to create positive change in their communities and beyond.",
-    ],
-    school: schoolAffiliations.sped,
-    linkedin: "https://www.linkedin.com/in/abdul-quadri-oseni-a72b74197/",
-  },
-  {
     slug: "tobi-adeoye",
     name: "Tobi Adeoye",
-    role: "Director, Technology and Innovation",
+    role: "Head, Technology and Innovation",
     profession: "Software Engineer",
     location: "London, United Kingdom",
     photo: tobiPhoto,
@@ -127,6 +113,20 @@ export const team: ReadonlyArray<TeamMember> = [
     ],
     school: schoolAffiliations.nesto,
     linkedin: "https://www.linkedin.com/in/oluwatobi-adeoye/",
+  },
+  {
+    slug: "quadri-oseni",
+    name: "Abdul-Quadri Olayinka Oseni",
+    role: "Head, Community Engagement & Field Operations",
+    profession: "Surveyor",
+    location: "Lagos, Nigeria",
+    photo: quadriPhoto,
+    bio: [
+      "Abdul-Quadri is a Surveyor and Geospatial Professional with over six years of experience in field operations, mapping, and community-focused projects. He has contributed to major projects, including the construction of Marina Interchange Hub developed in partnership with the Agence Française de Développement (AFD), and has actively supported youth development through the Young Surveyors Network (YSN) Lagos state by organizing training, mentorship, and capacity-building programs.",
+      "Having held several leadership positions, including Chairman of the O3 Spell Quest Competition and Convention Chairman at the Junior Chamber International Federal School of Surveying, Oyo, he has developed strong skills in team coordination, stakeholder engagement, and project execution. He believes in using knowledge, leadership, and service to inspire others to pursue excellence, embrace continuous learning, and contribute meaningfully to society. Through his work and volunteer engagements, he hopes to empower young people with the skills, confidence, and opportunities needed to create positive change in their communities and beyond.",
+    ],
+    school: schoolAffiliations.sped,
+    linkedin: "https://www.linkedin.com/in/abdul-quadri-oseni-a72b74197/",
   },
 ];
 

@@ -8,8 +8,8 @@ describe("team roster", () => {
       "oluwadara-adedeji",
       "kunle-oguntoye",
       "ayo-salaudeen",
-      "quadri-oseni",
       "tobi-adeoye",
+      "quadri-oseni",
     ]);
   });
 
